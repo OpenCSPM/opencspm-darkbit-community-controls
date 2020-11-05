@@ -10,6 +10,10 @@ For more complete and in-depth security coverage, please refer to the [OpenCSPM 
 
 This repository is meant to be used in conjunction with an installation of the [OpenCSPM](https://github.com/opencspm/opencspm) solution.
 
+## What is OpenCSPM?
+
+[OpenCSPM](https://github.com/opencspm/opencspm) is an open-source Cloud Security Posture Management solution that continuously collects, parses, and analyzes cloud configuration metadata for security issues in AWS, GCP, and Kubernetes environments.
+
 ## Authorship
 
 This repository was developed and is maintained by [Darkbit, LLC](https://darkbit.io)
