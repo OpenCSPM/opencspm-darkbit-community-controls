@@ -12,7 +12,7 @@ This repository is meant to be used in conjunction with an installation of the [
 
 ## What is OpenCSPM?
 
-[OpenCSPM](https://github.com/opencspm/opencspm) is an open-source Cloud Security Posture Management solution that continuously collects, parses, and analyzes cloud configuration metadata for security issues in AWS, GCP, and Kubernetes environments.
+Open Cloud Security Posture Management, [OpenCSPM](https://github.com/opencspm/opencspm), is an open-source platform for gaining deeper insight into your cloud configuration and metadata to help understand and reduce risk over time.
 
 ## Authorship
 
