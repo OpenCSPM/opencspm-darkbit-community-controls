@@ -1,0 +1,4914 @@
+id: 'opencspm-darkbit-community-controls'
+title: 'Darkbit Community Controls'
+description: 'This checks the majority of the AWS 1.3.0 and GCP CIS 1.1 Benchmark controls'
+controls:
+  - id: darkbit-aws-9
+    title: Users Should Not Have Access Keys Unused for Over 90 Days
+    description:
+      AWS Access Keys that have not been used for over 90 days indicate that
+      they are no longer in regular use and represent an unnecessary exposure of valid
+      credentials.
+    remediation: Review the access keys that have not been used and consider revoking them.
+    validation: |-
+      Run `aws iam get-credential-report --output text | base64 -d | awk -F, 
+      '{print $1 " " $11 " " $16}'` to get a list of `user`, `access_key_1_last_used_date`,
+      and `access_key_2_last_used_date`. Ensure all dates are within 90 days.
+    impact: 5
+    nodes:
+      - AWS_IAM_USER
+    refs:
+      - text: AWS Access Keys
+        url: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-1
+          - aws-cis1.3-1.12
+      - aws-cfg:
+          - aws-cfg-iam-user-unused-credentials-check
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-8.1.4
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-1
+          - nist-csf-pr.ac-4
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-AC-2(1)
+          - nist-800-53-rev4-AC-2(3)
+          - nist-800-53-rev4-AC-2(f)
+          - nist-800-53-rev4-AC-3
+          - nist-800-53-rev4-AC-6
+      - nist-800-171:
+          - nist-800-171-3.1.1
+          - nist-800-171-3.1.2
+          - nist-800-171-3.1.4
+          - nist-800-171-3.1.5
+          - nist-800-171-3.5.6
+      - hipaa:
+          - hipaa-164.308(a)(3)(ii)(B)
+          - hipaa-164.308(a)(4)(ii)(C)
+      - fedramp-moderate:
+          - fedramp-moderate-AC-2(1)
+          - fedramp-moderate-AC-2(3)
+          - fedramp-moderate-AC-2(f)
+          - fedramp-moderate-AC-3
+          - fedramp-moderate-AC-6
+      - fedramp-low:
+          - fedramp-low-AC-2
+      - cmmc-level5:
+          - cmmc-level5-IA.3.086
+      - cmmc-level4:
+          - cmmc-level4-IA.3.086
+      - cmmc-level3:
+          - cmmc-level3-IA.3.086
+      - aws-wa-security:
+          - aws-wa-security-SEC-2
+      - aws
+  - id: darkbit-aws-10
+    title: Users With a Console Password Should Have MFA Enabled
+    description:
+      All AWS Console and API user accounts should have a multi-factor authentication
+      (MFA) device configured to enforce two-factor authentication for access.  This
+      is especially important for user accounts with administrative level access to
+      the account.
+    remediation:
+      'Notify the affected users and have them configure their 2FA device
+      on their own accounts. As new users are configured, ensure they configure 2FA
+      devices and routinely audit for their configuration.  Note: Users will need specific
+      permissions to manage their own MFA device(s).'
+    validation: |-
+      Run `aws iam get-credential-report --output text | base64 -d | awk -F, 
+      '{print $1 " "$4" "$8}' | grep " true "` to get list of `user`,
+      `password_enabled`, `mfa_enabled`.  Ensure all are `true`.
+    impact: 9
+    nodes:
+      - AWS_IAM_USER
+    refs:
+      - text: Self-Manage AWS MFA Permissions
+        url: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_examples_aws_my-sec-creds-self-manage-mfa-only.html
+      - text: AWS MFA
+        url: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa.html
+      - text: AWS MFA Status
+        url: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_checking-status.html
+      - text: AWS MFA Enablement
+        url: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_enable_virtual.html
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-1
+          - aws-cis1.3-1.10
+      - aws-cfg:
+          - aws-cfg-iam-user-mfa-enabled
+          - aws-cfg-mfa-enabled-for-iam-console-access
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-8.3
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-3
+          - nist-csf-pr.ac-7
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-IA-2(1)(2)(11)
+      - nist-800-171:
+          - nist-800-171-3.1.1
+          - nist-800-171-3.1.2
+          - nist-800-171-3.1.14
+          - nist-800-171-3.5.2
+          - nist-800-171-3.5.3
+      - hipaa:
+          - hipaa-164.308(a)(3)(ii)(A)
+          - hipaa-164.312(d)
+      - fedramp-moderate:
+          - fedramp-moderate-IA-2(1)(2)
+      - fedramp-low:
+          - fedramp-low-IA-2
+      - cmmc-level5:
+          - cmmc-level5-AC.1.001
+          - cmmc-level5-AC.1.002
+          - cmmc-level5-IA.1.077
+          - cmmc-level5-MA.2.113
+          - cmmc-level5-IA.3.083
+      - cmmc-level4:
+          - cmmc-level4-AC.1.001
+          - cmmc-level4-AC.1.002
+          - cmmc-level4-IA.1.077
+          - cmmc-level4-MA.2.113
+          - cmmc-level4-IA.3.083
+      - cmmc-level3:
+          - cmmc-level3-AC.1.001
+          - cmmc-level3-AC.1.002
+          - cmmc-level3-IA.1.077
+          - cmmc-level3-MA.2.113
+          - cmmc-level3-IA.3.083
+      - cmmc-level2:
+          - cmmc-level2-AC.1.001
+          - cmmc-level2-AC.1.002
+          - cmmc-level2-IA.1.077
+          - cmmc-level2-MA.2.113
+      - cmmc-level1:
+          - cmmc-level1-AC.1.001
+          - cmmc-level1-AC.1.002
+          - cmmc-level1-IA.1.077
+      - aws-wa-security:
+          - aws-wa-security-SEC-2
+      - aws
+  - id: darkbit-aws-11
+    title:
+      IAM Passwords Should Require Adquate Length, Complexity, Expiration, and
+      Reuse by Policy
+    description:
+      A password policy for AWS passwords should be in place that enforces
+      an adequate length, complexity, expiration, and reuse policy to prevent users
+      from using weak or guessable credentials.
+    remediation:
+      As the <root> AWS user, configure the minimum password length to 14
+      characters, require one or more of each character type for complexity, allow users
+      to change their own passwords, expire passwords after 180 days, prevent password
+      reuse for the past 5 or more, and require users to contact their administrator
+      if their passwords expire.
+    validation:
+      Run `aws iam get-account-password-policy` and verify that `MinimumPasswordLength`
+      is `>= 14`, `RequireSymbols` is `true`, `RequireNumbers` is `true`, `RequireUppercaseCharacters`
+      is `true`, `RequireLowercaseCharacters` is `true`, `ExpirePasswords` is `true`,
+      `MaxPasswordAge` is `<= 90`, and `PasswordReusePrevention` is `>= 5`.
+    impact: 5
+    nodes:
+      - AWS_IAM_PASSWORD_POLICY
+    refs:
+      - text: AWS IAM Account Password Policy
+        url: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_passwords_account-policy.html
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-1
+          - aws-cis1.3-1.8
+          - aws-cis1.3-1.9
+      - aws-cfg:
+          - aws-cfg-iam-password-policy
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-8.2.3
+          - pci-dss-3.2.1-8.2.4
+          - pci-dss-3.2.1-8.2.5
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-1
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-AC-2(1)
+          - nist-800-53-rev4-AC-2(f)
+          - nist-800-53-rev4-AC-2(j)
+          - nist-800-53-rev4-IA-2
+          - nist-800-53-rev4-IA-5(1)(a)(d)(e)
+          - nist-800-53-rev4-IA-5(4)
+      - nist-800-171:
+          - nist-800-171-3.5.5
+          - nist-800-171-3.5.6
+          - nist-800-171-3.5.7
+          - nist-800-171-3.5.8
+      - hipaa:
+          - hipaa-164.308(a)(4)(ii)(C)
+          - hipaa-164.312(d)
+      - fedramp-moderate:
+          - fedramp-moderate-AC-2(1)
+          - fedramp-moderate-AC-2(f)
+          - fedramp-moderate-AC-2(j)
+          - fedramp-moderate-IA-2
+          - fedramp-moderate-IA-5(1)(a)(d)(e)
+          - fedramp-moderate-IA-5(4)
+      - fedramp-low:
+          - fedramp-low-AC-2
+      - cmmc-level5:
+          - cmmc-level5-AC.1.001
+          - cmmc-level5-AC.1.002
+          - cmmc-level5-IA.1.077
+          - cmmc-level5-IA.2.078
+          - cmmc-level5-IA.2.079
+          - cmmc-level5-IA.3.085
+          - cmmc-level5-IA.3.086
+      - cmmc-level4:
+          - cmmc-level4-AC.1.001
+          - cmmc-level4-AC.1.002
+          - cmmc-level4-IA.1.077
+          - cmmc-level4-IA.2.078
+          - cmmc-level4-IA.2.079
+          - cmmc-level4-IA.3.085
+          - cmmc-level4-IA.3.086
+      - cmmc-level3:
+          - cmmc-level3-AC.1.001
+          - cmmc-level3-AC.1.002
+          - cmmc-level3-IA.1.077
+          - cmmc-level3-IA.2.078
+          - cmmc-level3-IA.2.079
+          - cmmc-level3-IA.3.085
+          - cmmc-level3-IA.3.086
+      - cmmc-level2:
+          - cmmc-level2-AC.1.001
+          - cmmc-level2-AC.1.002
+          - cmmc-level2-IA.1.077
+          - cmmc-level2-IA.2.078
+          - cmmc-level2-IA.2.079
+      - cmmc-level1:
+          - cmmc-level1-AC.1.001
+          - cmmc-level1-AC.1.002
+          - cmmc-level1-IA.1.077
+      - aws-wa-security:
+          - aws-wa-security-SEC-2
+      - aws
+  - id: darkbit-aws-12
+    title: The <Root> AWS Account Should Not Have Access Keys Generated
+    description:
+      The <root> AWS access account should not be used to access the AWS
+      APIs via access keys.  Instead, the <root> account should only be used to create
+      other named accounts with the appropriate permissions and each account should
+      generate their own access keys as necessary.
+    remediation: Revoke the <root> account's AWS access keys and monitor for their recreation.
+    validation: |-
+      Run `aws iam get-credential-report --output text | base64 -d | grep
+      "^<root_account>" | awk -F, '{print $1 " "$9 " "$14}'` and ensure both columns
+      show `false` for `access_key_1_active` and `access_key_2_active`, respectively.
+    impact: 5
+    nodes:
+      - AWS_IAM_USER
+    refs:
+      - text: AWS Access Key Management
+        url: https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-1
+          - aws-cis1.3-1.4
+      - aws-cfg:
+          - aws-cfg-iam-root-access-key-check
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-7.2
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-1
+          - nist-csf-pr.ac-4
+          - nist-csf-pr.pt
+          - nist-csf-pr.pt-3
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-AC-2(f)
+          - nist-800-53-rev4-AC-2(j)
+          - nist-800-53-rev4-AC-3
+          - nist-800-53-rev4-AC-6
+          - nist-800-53-rev4-AC-6(10)
+      - nist-800-171:
+          - nist-800-171-3.1.1
+          - nist-800-171-3.1.2
+          - nist-800-171-3.1.4
+          - nist-800-171-3.1.5
+          - nist-800-171-3.1.6
+          - nist-800-171-3.1.7
+          - nist-800-171-3.4.6
+      - hipaa:
+          - hipaa-164.308(a)(1)(ii)(B)
+          - hipaa-164.308(a)(3)(i)
+          - hipaa-164.308(a)(3)(ii)(B)
+          - hipaa-164.308(a)(4)(ii)(C)
+          - hipaa-164.312(a)(2)(i)
+      - fedramp-moderate:
+          - fedramp-moderate-AC-2(f)
+          - fedramp-moderate-AC-2(j)
+          - fedramp-moderate-AC-3
+          - fedramp-moderate-AC-6
+          - fedramp-moderate-AC-6(10)
+      - fedramp-low:
+          - fedramp-low-AC-2
+      - cmmc-level5:
+          - cmmc-level5-AC.1.001
+          - cmmc-level5-AC.1.002
+          - cmmc-level5-AC.2.007
+          - cmmc-level5-AC.2.008
+          - cmmc-level5-AC.3.017
+          - cmmc-level5-AC.3.018
+      - cmmc-level4:
+          - cmmc-level4-AC.1.001
+          - cmmc-level4-AC.1.002
+          - cmmc-level4-AC.2.007
+          - cmmc-level4-AC.2.008
+          - cmmc-level4-AC.3.017
+          - cmmc-level4-AC.3.018
+      - cmmc-level3:
+          - cmmc-level3-AC.1.001
+          - cmmc-level3-AC.1.002
+          - cmmc-level3-AC.2.007
+          - cmmc-level3-AC.2.008
+          - cmmc-level3-AC.3.017
+          - cmmc-level3-AC.3.018
+      - cmmc-level2:
+          - cmmc-level2-AC.1.001
+          - cmmc-level2-AC.1.002
+          - cmmc-level2-AC.2.007
+          - cmmc-level2-AC.2.008
+      - cmmc-level1:
+          - cmmc-level1-AC.1.001
+          - cmmc-level1-AC.1.002
+      - aws-wa-security:
+          - aws-wa-security-SEC-1
+          - aws-wa-security-SEC-2
+      - aws
+  - id: darkbit-aws-13
+    title: The <Root> AWS Account Should Be Protected by a Hardware MFA Device
+    description:
+      As the <root> AWS user has full control over the AWS account, it represents
+      a single set of credentials that protect the integrity of the entire environment.  Protecting
+      these credentials with with a hardware token increases the attack cost to needed
+      physical access to a hardware token.
+    remediation:
+      Purchase and configure a hardware MFA token on the <root> account and
+      all "administrator" accounts.
+    validation: |-
+      Run `aws iam get-credential-report --output text | base64 -d | awk -F,
+      '{print $1 " "$8}' | grep "^<root_account>"` and verify it shows `true`.  Next,
+      run `aws iam list-virtual-mfa-devices --assignment-status Assigned --query 'VirtualMFADevices[*].SerialNumber'
+      --output json | grep root-account-mfa-device` and verify no results are returned.
+    impact: 5
+    nodes:
+      - AWS_IAM_USER
+      - AWS_IAM_MFA_DEVICE
+    refs:
+      - text: AWS Hardware MFA
+        url: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_enable_physical.html
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-level2
+          - aws-cis1.3-1
+          - aws-cis1.3-1.5
+          - aws-cis1.3-1.6
+      - aws-cfg:
+          - aws-cfg-root-account-hardware-mfa-enabled
+          - aws-cfg-root-account-mfa-enabled
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-8.3
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-3
+          - nist-csf-pr.ac-7
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-AC-2(j)
+          - nist-800-53-rev4-IA-2(1)(11)
+      - nist-800-171:
+          - nist-800-171-3.1.1
+          - nist-800-171-3.1.2
+          - nist-800-171-3.5.3
+      - hipaa:
+          - hipaa-164.308(a)(3)(ii)(A)
+          - hipaa-164.312(d)
+      - fedramp-moderate:
+          - fedramp-moderate-AC-2(j)
+          - fedramp-moderate-IA-2(1)
+      - fedramp-low:
+          - fedramp-low-AC-2
+          - fedramp-low-IA-2
+      - cmmc-level2:
+          - cmmc-level2-AC.1.001
+          - cmmc-level2-AC.1.002
+          - cmmc-level2-IA.1.077
+      - cmmc-level1:
+          - cmmc-level1-AC.1.001
+          - cmmc-level1-AC.1.002
+          - cmmc-level1-IA.1.077
+      - aws-wa-security:
+          - aws-wa-security-SEC-1
+          - aws-wa-security-SEC-2
+      - aws
+  - id: darkbit-aws-17
+    title: The IAM Support Policy Should Be Attached to Manage Incidents With AWS Support
+    description:
+      Non-administrative users that need the ability to open AWS support
+      cases need to be granted explicit access, and the list of those users should be
+      reviewed.
+    remediation:
+      If any non-administrative users require support access, grant them
+      the `AWSSupportAccess` IAM role.  Review the list of these users on a routine
+      basis.
+    validation: |-
+      Run `aws iam list-entities-for-policy --policy-arn arn:aws:iam::aws:policy/AWSSupportAccess` 
+      and ensure at least one user, group, or role entry is present.
+    impact: 2
+    nodes:
+      - AWS_IAM_MANAGED_POLICY
+    refs:
+      - text: AWS Support Access
+        url: https://docs.aws.amazon.com/awssupport/latest/user/getting-started.html#accessing-support
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-1
+          - aws-cis1.3-1.17
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-4
+          - nist-csf-pr.at
+          - nist-csf-pr.at-2
+      - aws
+  - id: darkbit-aws-18
+    title: Ensure IAM Policies That Allow Full "*:*" Administrative Privileges Are Not Used
+    description:
+      To reduce management complexity, custom IAM roles that are identical
+      to the built-in IAM roles should not be used.  Instead, use the `AdministratorAccess`
+      IAM Role.
+    remediation:
+      Modify the IAM Role binding to leverage the built-in `AdministratorAccess`
+      IAM Role.
+    validation: N/A
+    impact: 2
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: IAM Access Policies
+        url: https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_job-functions.html
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-1
+          - aws-cis1.3-1.16
+      - aws-cfg:
+          - aws-cfg-iam-policy-no-statements-with-admin-access
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-7.2
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-PR.AC-1
+          - nist-csf-PR.AC-4
+          - nist-csf-PR.PT
+          - nist-csf-PR.PT-3
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-AC-2(j)
+          - nist-800-53-rev4-AC-3
+          - nist-800-53-rev4-AC-5c
+          - nist-800-53-rev4-AC-6
+          - nist-800-53-rev4-SC-2
+      - nist-800-171:
+          - nist-800-171-3.1.1
+          - nist-800-171-3.1.2
+          - nist-800-171-3.1.4
+          - nist-800-171-3.1.5
+          - nist-800-171-3.1.7
+          - nist-800-171-3.4.6
+      - hipaa:
+          - hipaa-164.308(a)(1)(ii)(B)
+          - hipaa-164.308(a)(3)(i)
+          - hipaa-164.308(a)(3)(ii)(B)
+          - hipaa-164.308(a)(4)(i)
+          - hipaa-164.308(a)(4)(ii)(B)
+          - hipaa-164.308(a)(4)(ii)(C)
+          - hipaa-164.312(a)(1)
+      - fedramp-moderate:
+          - fedramp-moderate-AC-2(j)
+          - fedramp-moderate-AC-3
+          - fedramp-moderate-AC-5c
+          - fedramp-moderate-AC-6
+          - fedramp-moderate-SC-2
+      - fedramp-low:
+          - fedramp-low-AC-2
+      - cmmc-level5:
+          - cmmc-level5-AC.1.001
+          - cmmc-level5-AC.1.002
+          - cmmc-level5-AC.2.007
+          - cmmc-level5-AC.2.008
+          - cmmc-level5-AC.3.017
+          - cmmc-level5-AC.3.018
+      - cmmc-level4:
+          - cmmc-level4-AC.1.001
+          - cmmc-level4-AC.1.002
+          - cmmc-level4-AC.2.007
+          - cmmc-level4-AC.2.008
+          - cmmc-level4-AC.3.017
+          - cmmc-level4-AC.3.018
+      - cmmc-level3:
+          - cmmc-level3-AC.1.001
+          - cmmc-level3-AC.1.002
+          - cmmc-level3-AC.2.007
+          - cmmc-level3-AC.2.008
+          - cmmc-level3-AC.3.017
+          - cmmc-level3-AC.3.018
+      - cmmc-level2:
+          - cmmc-level2-AC.1.001
+          - cmmc-level2-AC.1.002
+          - cmmc-level2-AC.2.007
+          - cmmc-level2-AC.2.008
+      - cmmc-level1:
+          - cmmc-level1-AC.1.001
+          - cmmc-level1-AC.1.002
+      - aws-wa-security:
+          - aws-wa-security-SEC-3
+      - aws
+  - id: darkbit-aws-20
+    title: IAM Users Should Not Have Attached or Inline Policies
+    description:
+      To reduce management complexity, IAM permissions should only be assigned
+      to roles and groups. Users can then be added to those groups. Policies should
+      not be applied directly to a user.
+    remediation:
+      Create groups with the required policies, move the IAM users to the
+      applicable groups, and then remove the inline and directly attached policies from
+      the IAM user.
+    validation:
+      Run `for i in $(aws iam list-users --query 'Users[*].UserName' --output
+      text); do POLS="$(aws iam list-user-policies --user-name $i --query 'PolicyNames[*]'
+      --output text)"; ATT="$(aws iam list-attached-user-policies --user-name $i --query
+      'AttachedPolicies[*].PolicyArn' --output text)";echo "$i $POLS $ATT"; done` and
+      ensure each user has no entries listed.
+    impact: 2
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: IAM Best Practicies
+        url: http://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#use-groups-for-permissions
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-1
+          - aws-cis1.3-1.15
+      - aws-cfg:
+          - aws-cfg-iam-no-inline-policy-check
+          - aws-cfg-iam-user-no-policies-check
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-1
+          - nist-csf-pr.ac-4
+          - nist-csf-pr.pt
+          - nist-csf-pr.pt-3
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-AC-2(j)
+          - nist-800-53-rev4-AC-3
+          - nist-800-53-rev4-AC-5c
+          - nist-800-53-rev4-AC-6
+      - nist-800-171:
+          - nist-800-171-3.1.1
+          - nist-800-171-3.1.2
+          - nist-800-171-3.1.4
+          - nist-800-171-3.1.5
+          - nist-800-171-3.4.6
+      - hipaa:
+          - hipaa-164.308(a)(3)(i)
+          - hipaa-164.308(a)(3)(ii)(B)
+          - hipaa-164.308(a)(4)(i)
+          - hipaa-164.308(a)(4)(ii)(B)
+          - hipaa-164.308(a)(4)(ii)(C)
+          - hipaa-164.312(a)(1)
+      - fedramp-moderate:
+          - fedramp-moderate-AC-2(j)
+          - fedramp-moderate-AC-3
+          - fedramp-moderate-AC-5c
+          - fedramp-moderate-AC-6
+      - fedramp-low:
+          - fedramp-low-AC-2
+      - cmmc-level5:
+          - cmmc-level5-AC.1.001
+          - cmmc-level5-AC.1.002
+          - cmmc-level5-AC.2.007
+          - cmmc-level5-AC.2.008
+          - cmmc-level5-AC.3.017
+          - cmmc-level5-AC.3.018
+      - cmmc-level4:
+          - cmmc-level4-AC.1.001
+          - cmmc-level4-AC.1.002
+          - cmmc-level4-AC.2.007
+          - cmmc-level4-AC.2.008
+          - cmmc-level4-AC.3.017
+          - cmmc-level4-AC.3.018
+      - cmmc-level3:
+          - cmmc-level3-AC.1.001
+          - cmmc-level3-AC.1.002
+          - cmmc-level3-AC.2.007
+          - cmmc-level3-AC.2.008
+          - cmmc-level3-AC.3.017
+          - cmmc-level3-AC.3.018
+      - cmmc-level2:
+          - cmmc-level2-AC.1.001
+          - cmmc-level2-AC.1.002
+          - cmmc-level2-AC.2.007
+          - cmmc-level2-AC.2.008
+      - cmmc-level1:
+          - cmmc-level1-AC.1.001
+          - cmmc-level1-AC.1.002
+      - aws-wa-security:
+          - aws-wa-security-SEC-3
+      - aws
+  - id: darkbit-aws-23
+    title: Security Groups Should Not Allow Access to Administrative Ports From All Hosts
+    description:
+      AWS Security Groups that permit inbound/ingress access from any IP
+      address (0.0.0.0/0) to administrative ports via TCP/22 and TCP/3389  should be reviewed
+      for necessity to prevent unintended exposure of services and systems protected
+      by that security group.  The primary exclusion to this is a dedicated, hardened
+      bastion host.
+    remediation:
+      For each security group, assess whether the attached system requires
+      SSH access from any IP address.  If it doesn't, consider reducing the source IP
+      ranges to a specific set of subnets or to the security group attached to the bastion
+      host(s) in the environment.
+    validation:
+      Run `aws ec2 describe-security-groups --region <region> --query 'SecurityGroups[*]'
+      --output json | jq -r --arg PROTO tcp --arg PORT 22 '.[] | . as $group | .IpPermissions[]
+      | select(.IpRanges[].CidrIp=="0.0.0.0/0" or .Ipv6Ranges[].CidrIpv6=="::/0" or
+      .IpRanges==[] or .Ipv6Ranges==[]) | select((.IpProtocol==$PROTO or .IpProtocol=="-1")
+      and ((.FromPort==null or .FromPort<=($PORT|tonumber)) and (.ToPort==null or .ToPort>=($PORT|tonumber)))
+      and (.UserIdGroupPairs==[])) | "($group.GroupId) ($group.GroupName)"'` and
+      `aws ec2 describe-security-groups --region <region> --query 'SecurityGroups[*]'
+      --output json | jq -r --arg PROTO tcp --arg PORT 3389 '.[] | . as $group | .IpPermissions[]
+      | select(.IpRanges[].CidrIp=="0.0.0.0/0" or .Ipv6Ranges[].CidrIpv6=="::/0" or
+      .IpRanges==[] or .Ipv6Ranges==[]) | select((.IpProtocol==$PROTO or .IpProtocol=="-1")
+      and ((.FromPort==null or .FromPort<=($PORT|tonumber)) and (.ToPort==null or .ToPort>=($PORT|tonumber)))
+      and (.UserIdGroupPairs==[])) | "($group.GroupId) ($group.GroupName)"'`
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: VPC Security Groups
+        url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-5
+          - aws-cis1.3-5.2
+      - aws-cfg:
+          - aws-cfg-restricted-ssh
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-1.2.1
+          - pci-dss-3.2.1-1.3
+          - pci-dss-3.2.1-2.2.2
+      - nist-csf:
+          - nist-csf-PR.AC-3
+          - nist-csf-PR.AC-5
+          - nist-csf-PR.PT-4
+          - nist-csf-DE.AE-1
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-AC-4
+          - nist-800-53-rev4-SC-7
+          - nist-800-53-rev4-SC-7(3)
+      - nist-800-171:
+          - nist-800-171-3.1.1
+          - nist-800-171-3.1.14
+          - nist-800-171-3.1.2
+          - nist-800-171-3.1.20
+          - nist-800-171-3.1.3
+          - nist-800-171-3.13.1
+          - nist-800-171-3.13.2
+          - nist-800-171-3.13.6
+          - nist-800-171-3.4.7
+      - hipaa:
+          - hipaa-164.308(a)(1)(ii)(B)
+          - hipaa-164.312(e)(1)
+      - fedramp-moderate:
+          - fedramp-moderate-AC-4
+          - fedramp-moderate-SC-7
+          - fedramp-moderate-SC-7(3)
+      - cmmc-level5:
+          - cmmc-level5-AC.1.001
+          - cmmc-level5-AC.1.003
+          - cmmc-level5-SC.1.175
+          - cmmc-level5-AC.2.016
+          - cmmc-level5-CM.3.068
+          - cmmc-level5-SC.3.180
+          - cmmc-level5-AC.4.023
+          - cmmc-level5-RM.4.151
+          - cmmc-level5-SC.5.230
+          - cmmc-level5-SC.5.208
+      - cmmc-level4:
+          - cmmc-level4-AC.1.001
+          - cmmc-level4-AC.1.003
+          - cmmc-level4-SC.1.175
+          - cmmc-level4-AC.2.016
+          - cmmc-level4-CM.3.068
+          - cmmc-level4-SC.3.180
+          - cmmc-level4-AC.4.023
+          - cmmc-level4-RM.4.151
+      - cmmc-level3:
+          - cmmc-level3-AC.1.001
+          - cmmc-level3-AC.1.003
+          - cmmc-level3-SC.1.175
+          - cmmc-level3-AC.2.016
+          - cmmc-level3-CM.3.068
+          - cmmc-level3-SC.3.180
+      - cmmc-level2:
+          - cmmc-level2-AC.1.001
+          - cmmc-level2-AC.1.003
+          - cmmc-level2-SC.1.175
+          - cmmc-level2-AC.2.016
+      - cmmc-level1:
+          - cmmc-level1-AC.1.001
+          - cmmc-level1-AC.1.003
+          - cmmc-level1-SC.1.175
+      - aws-wa-security:
+          - aws-wa-security-SEC-5
+      - aws
+  - id: darkbit-aws-29
+    title: VPC Flow Logging Should Be Enabled
+    description:
+      VPC flow logs record metadata about all traffic flowing in to and out
+      of a VPC. These logs are vital for auditing and review after security incidents
+      to be able to create an accurate timeline of network events to go with application
+      and AWS API logs.
+    remediation:
+      For each active VPC, modify it via Actions > Create flow log and direct
+      the output to S3 or a CloudWatch Log.  When directing to an S3 bucket, enable
+      bucket versioning and optionally configure an object lifecycle policy to retain
+      the data for the desired period only.
+    validation: |-
+      Run `for i in $(aws ec2 describe-vpcs --region <region> --query 'Vpcs[?State=="available"].VpcId'
+      --output text); do f=$(aws ec2 describe-flow-logs --region <region> --filter Name="resource-id",Values="${i}"
+      --query 'FlowLogs[?FlowLogStatus=="ACTIVE"].FlowLogId' --output text); echo
+      "$i: $f"; done` for each region and ensure each VPC has an associated flow log id.
+    impact: 2
+    nodes:
+      - AWS_VPC
+      - AWS_FLOW_LOG
+    refs:
+      - text: VPC Flow Logs
+        url: http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/flow-logs.html
+      - text: Working with VPC Flow Logs
+        url: https://docs.aws.amazon.com/vpc/latest/userguide/working-with-flow-logs.html
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level2
+          - aws-cis1.3-3
+          - aws-cis1.3-3.9
+      - aws-cfg:
+          - aws-cfg-vpc-flow-logs-enabled
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-10.3.3
+          - pci-dss-3.2.1-10.3.4
+          - pci-dss-3.2.1-10.3.5
+          - pci-dss-3.2.1-10.3.6
+      - nist-csf:
+          - nist-csf-ID.AM-3
+          - nist-csf-PR.DS-5
+          - nist-csf-PR.PT-1
+          - nist-csf-DE.AE-1
+          - nist-csf-DE.AE-3
+          - nist-csf-DE.CM-1
+          - nist-csf-DE.CM-7
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-AU-2(a)(d)
+          - nist-800-53-rev4-AU-3
+          - nist-800-53-rev4-AU-12(a)(c)
+      - nist-800-171:
+          - nist-800-171-3.1.12
+          - nist-800-171-3.13.1
+          - nist-800-171-3.14.6
+          - nist-800-171-3.14.7
+          - nist-800-171-3.3.1
+      - hipaa:
+          - hipaa-164.308(a)(1)(ii)(D)
+          - hipaa-164.308(a)(3)(ii)(A)
+          - hipaa-164.308(a)(6)(ii)
+          - hipaa-164.312(b)
+      - fedramp-moderate:
+          - fedramp-moderate-AU-2(a)(d)
+          - fedramp-moderate-AU-3
+          - fedramp-moderate-AU-12(a)(c)
+      - fedramp-low:
+          - fedramp-low-AU-2
+      - cmmc-level5:
+          - cmmc-level5-AU.2.042
+          - cmmc-level5-SI.2.217
+          - cmmc-level5-AU.5.055
+          - cmmc-level5-SI.5.223
+      - cmmc-level4:
+          - cmmc-level4-AU.2.042
+          - cmmc-level4-SI.2.217
+      - cmmc-level3:
+          - cmmc-level3-AU.2.042
+          - cmmc-level3-SI.2.217
+      - cmmc-level2:
+          - cmmc-level2-AU.2.042
+          - cmmc-level2-SI.2.217
+      - aws-wa-security:
+          - aws-wa-security-SEC-4
+      - aws
+  - id: darkbit-aws-31
+    title: EKS Cluster API Should Not Be Public
+    description: |-
+      Amazon EKS creates an endpoint for the managed Kubernetes API server that you use to communicate with your cluster using kubectl, for example. By default, this API server endpoint is public to the internet, and access to the API server is secured using a combination of AWS Identity and Access Management (IAM), native Kubernetes Role Based Access Control (RBAC), and an access control list that allows any IP address (0.0.0.0/0) to connect.
+
+      While this makes administration convenient, the scope of potential attackers is not limited should a newly discovered vulnerability or denial-of-service become available.  Also, should valid credentials from a phished administrator/developer be stolen or leaked, they can be directly used without having to originate from a known set of IP ranges.
+    remediation:
+      During cluster creation, specify `endpointPrivateAccess=true` in the
+      `resourcesVpcConfig` block.  Or, specify `publicAccessCidrs` to be a set of CIDR
+      ranges that do not include `0.0.0.0/0`.  For existing clusters, `publicAccessCidrs`
+      can be updated using `aws eks update-cluster-config` under the `--resources-vpc-config`
+      flag.
+    validation:
+      Run `aws eks describe-cluster` and review the contents of the `resourcesVpcConfig`
+      block.  `endpointPrivateAccess` should be `true`.  Or, if `endpointPublicAccess`
+      is `true`, `publicAccessCidrs` should be set to something other than `0.0.0.0/0`.
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: CVE-2019-11253 Billion Laughs
+        url: https://www.stackrox.com/post/2019/09/protecting-kubernetes-api-against-cve-2019-11253-billion-laughs-attack/
+      - text: CVE-2019-11253 Billion Laughs Exploit Code
+        url: https://gist.github.com/bgeesaman/0e0349e94cd22c48bf14d8a9b7d6b8f2
+    tags:
+      - cis:
+          - eks-cis1.0.1
+          - eks-cis1.0.1-level1
+          - eks-cis1.0.1-5
+          - eks-cis1.0.1-5.4
+          - eks-cis1.0.1-5.4.1
+          - eks-cis1.0.1-5.4.2
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ip
+          - nist-csf-pr.ip-1
+          - nist-csf-pr.ma
+          - nist-csf-pr.ma-2
+          - nist-csf-pr.pt
+          - nist-csf-pr.pt-3
+          - nist-csf-pr.pt-4
+      - aws
+  - id: darkbit-aws-32
+    title: Instance Metadata Access From Pods Should Be Protected
+    description:
+      Currently, all pods have the ability to reach the EC2 Metadata API
+      corresponding to the underlying node without restriction.  In EKS, the IAM permissions
+      are that of the worker IAM Role for the Nodegroup.  If the default IAM Role was
+      customized to add permissions to other services, those permissions may be used
+      to enumerate other resources or create new resources.  Also by extension, this
+      means that every container image ever run in this cluster has had the ability
+      to reach and export these credentials.
+    remediation:
+      Deploy a solution such as Amazon's EKS Pod Identity Webhook to run
+      a daemonset that blocks and redirects pods attempting to access the Instance's
+      Metadata API and will optionally serve up a specific IAM Role's credentials instead.  Alternatively,
+      deploy an egress NetworkPolicy blocking egress to 169.254.169.254 for all non-kube-system
+      namespaces.
+    validation:
+      Verify that the EKS Pod Identity Webhook daemonset is installed on all
+      clusters, and attempt to access the instance credentials via `curl` from inside
+      a running `pod`.  e.g. `kubectl exec -it -n <namespace> <podname> curl -s https://169.254.169.254/latest/meta-data/iam/security-credentials`
+    impact: 9
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: IAM Roles to Kubernetes Service Accounts
+        url: https://aws.amazon.com/blogs/opensource/introducing-fine-grained-iam-roles-service-accounts/
+      - text: EKS Pod Identity
+        url: https://github.com/aws/amazon-eks-pod-identity-webhook
+    tags:
+      - cis:
+          - eks-cis1.0.1
+          - eks-cis1.0.1-level1
+          - eks-cis1.0.1-5
+          - eks-cis1.0.1-5.2
+          - eks-cis1.0.1-5.2.1
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-1
+          - nist-csf-pr.ac-4
+          - nist-csf-pr.ac-5
+      - aws
+  - id: darkbit-aws-34
+    title: Amazon ECR Image Scan-on-Push Should Be Enabled
+    description:
+      AWS ECR provides support for performing vulnerability scans on container
+      images either manually or on upload/push. The vulnerability details can be reviewed
+      via manual or automated means to provide a risk assessment of the contents of
+      the container.
+    remediation:
+      Enable ECR scan on push for all ECR repositories, and then review the vulnerability
+      details for each container for any critical or high severity risks.  Consider
+      updating images by rebuilding them and redeploying.
+    validation: |
+      In each region, run `aws ecr describe-repositories --region <region>
+      --query "repositories[]" --output json | jq -r '.[] | "(.repositoryArn) (.imageScanningConfiguration.scanOnPush)"'
+      | grep "false$"` and ensure no entries are present.
+    impact: 5
+    nodes:
+      - AWS_ECR_REPOSITORY
+    refs:
+      - text: ECR Image Scanning
+        url: https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html
+    tags:
+      - cis:
+          - eks-cis1.0.1
+          - eks-cis1.0.1-level1
+          - eks-cis1.0.1-5
+          - eks-cis1.0.1-5.1
+          - eks-cis1.0.1-5.1.1
+      - nist-csf:
+          - nist-csf-id
+          - nist-csf-id.gv
+          - nist-csf-id.gv-1
+          - nist-csf-id.ra
+          - nist-csf-id.ra-2
+          - nist-csf-id.ra-5
+          - nist-csf-id.sc
+          - nist-csf-id.sc-2
+      - aws
+  - id: darkbit-aws-35
+    title: S3 Server Access Control Logging Should Be Enabled
+    description:
+      S3 bucket logging helps maintain an audit trail of access that can
+      be used in the event of a security incident.  S3 logging is disabled by default,
+      so you will be blind to any unauthorized access unless this is explicitly enabled.
+    remediation:
+      In each region, create a dedicated bucket for receiving logs.  Configure
+      each S3 bucket to enable Server Access Logging to that region's logging bucket,
+      and configure an object lifecycle policy to move older logs to "colder" storage
+      and to retain those logs for a desired period of time.
+    validation:
+      Run `for i in $(aws s3api list-buckets --query 'Buckets[*].Name' --output
+      text); do aws s3api get-bucket-logging --bucket $i; done` and ensure each bucket
+      has a valid logging configuration present.
+    impact: 8
+    nodes:
+      - AWS_S3_BUCKET
+    refs:
+      - text: S3 Access Logging
+        url: https://docs.aws.amazon.com/AmazonS3/latest/dev/ServerLogs.html
+      - text: S3 Object Lifecycle Management
+        url: https://docs.aws.amazon.com/AmazonS3/latest/dev/object-lifecycle-mgmt.html
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-3
+          - aws-cis1.3-3.6
+      - aws-cfg:
+          - aws-cfg-s3-bucket-logging-enabled
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-10.1
+          - pci-dss-3.2.1-10.2.1
+          - pci-dss-3.2.1-10.2.2
+          - pci-dss-3.2.1-10.2.3
+          - pci-dss-3.2.1-10.2.4
+          - pci-dss-3.2.1-10.2.7
+          - pci-dss-3.2.1-10.3.1
+          - pci-dss-3.2.1-10.3.2
+          - pci-dss-3.2.1-10.3.3
+          - pci-dss-3.2.1-10.3.4
+          - pci-dss-3.2.1-10.3.5
+          - pci-dss-3.2.1-10.3.6
+      - nist-csf:
+          - nist-csf-ID.AM-3
+          - nist-csf-PR.AC-6
+          - nist-csf-PR.DS-5
+          - nist-csf-PR.PT-1
+          - nist-csf-DE.AE-1
+          - nist-csf-DE.AE-3
+          - nist-csf-DE.AE-4
+          - nist-csf-DE.CM-1
+          - nist-csf-DE.CM-3
+          - nist-csf-DE.CM-6
+          - nist-csf-DE.CM-7
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-AC-2(g)
+          - nist-800-53-rev4-AU-2(a)(d)
+          - nist-800-53-rev4-AU-3
+          - nist-800-53-rev4-AU-12(a)(c)
+      - nist-800-171:
+          - nist-800-171-3.1.12
+          - nist-800-171-3.13.1
+          - nist-800-171-3.14.6
+          - nist-800-171-3.14.7
+          - nist-800-171-3.3.1
+          - nist-800-171-3.3.2
+      - hipaa:
+          - hipaa-164.308(a)(1)(ii)(D)
+          - hipaa-164.308(a)(3)(ii)(A)
+          - hipaa-164.308(a)(6)(ii)
+          - hipaa-164.312(b)
+          - hipaa-164.312(e)(2)(i)
+      - fedramp-moderate:
+          - fedramp-moderate-AC-2(g)
+          - fedramp-moderate-AU-2(a)(d)
+          - fedramp-moderate-AU-3
+          - fedramp-moderate-AU-12(a)(c)
+      - fedramp-low:
+          - fedramp-low-AC-2
+      - cmmc-level5:
+          - cmmc-level5-IA.1.076
+          - cmmc-level5-AU.2.041
+          - cmmc-level5-AU.2.042
+          - cmmc-level5-CM.2.065
+          - cmmc-level5-SI.2.217
+          - cmmc-level5-AC.3.018
+          - cmmc-level5-AU.5.055
+          - cmmc-level5-SI.5.223
+      - cmmc-level4:
+          - cmmc-level4-IA.1.076
+          - cmmc-level4-AU.2.041
+          - cmmc-level4-AU.2.042
+          - cmmc-level4-CM.2.065
+          - cmmc-level4-SI.2.217
+          - cmmc-level4-AC.3.018
+      - cmmc-level3:
+          - cmmc-level3-IA.1.076
+          - cmmc-level3-AU.2.041
+          - cmmc-level3-AU.2.042
+          - cmmc-level3-CM.2.065
+          - cmmc-level3-SI.2.217
+          - cmmc-level3-AC.3.018
+      - cmmc-level2:
+          - cmmc-level2-IA.1.076
+          - cmmc-level2-AU.2.041
+          - cmmc-level2-AU.2.042
+          - cmmc-level2-CM.2.065
+          - cmmc-level2-SI.2.217
+      - cmmc-level1:
+          - cmmc-level1-IA.1.076
+      - aws-wa-security:
+          - aws-wa-security-SEC-4
+      - aws
+  - id: darkbit-aws-42
+    title: S3 Bucket Should Have a Secure Transport Policy Enabled
+    description:
+      S3 buckets can be configured with a bucket policy that further restricts
+      the conditions in which access can be granted, and all S3 buckets should have
+      a bucket policy enforcing the use SSL/TLS connections to prevent eavesdropping
+      of sensitive data when accessed via HTTP.
+    remediation:
+      'Configure S3 bucket policies for each bucket such that the "aws:SecureTransport"
+      setting is "false" in a "deny all" condition block.  Refer to: https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-ssl-requests-only.html
+      for a working example.'
+    validation:
+      'Run `for i in $(aws s3api list-buckets --query ''Buckets[*].Name''
+      --output text); do OUT="$(aws s3api get-bucket-policy --query Policy --bucket
+      $i --output text 2> /dev/null | grep ''aws:SecureTransport'')"; echo "$i: $OUT";
+      done` and verify that each bucket has a policy defined that includes `"aws:SecureTransport":"true"`
+      on the `"Allow"` Effect.'
+    impact: 2
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: S3 SSL Enforcement
+        url: https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-ssl-requests-only.html
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level2
+          - aws-cis1.3-2
+          - aws-cis1.3-2.1
+          - aws-cis1.3-2.1.2
+      - aws-cfg:
+          - aws-cfg-s3-bucket-ssl-requests-only
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-4.1
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ds
+          - nist-csf-pr.ds-2
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-AC-17(2)
+          - nist-800-53-rev4-SC-7
+          - nist-800-53-rev4-SC-8
+          - nist-800-53-rev4-SC-8(1)
+          - nist-800-53-rev4-SC-13
+      - nist-800-171:
+          - nist-800-171-3.1.13
+          - nist-800-171-3.13.1
+          - nist-800-171-3.13.8
+          - nist-800-171-3.5.10
+      - hipaa:
+          - hipaa-164.308(a)(1)(ii)(B)
+          - hipaa-164.312(a)(2)(iv)
+          - hipaa-164.312(e)(1)
+          - hipaa-164.312(e)(2)(i)
+          - hipaa-164.312(e)(2)(ii)
+      - fedramp-moderate:
+          - fedramp-moderate-AC-17(2)
+          - fedramp-moderate-SC-7
+          - fedramp-moderate-SC-8
+          - fedramp-moderate-SC-8(1)
+      - fedramp-low:
+          - fedramp-low-AC-17
+      - cmmc-level5:
+          - cmmc-level5-SC.1.175
+          - cmmc-level5-IA.2.081
+          - cmmc-level5-AC.3.014
+          - cmmc-level5-SC.3.185
+      - cmmc-level4:
+          - cmmc-level4-SC.1.175
+          - cmmc-level4-IA.2.081
+          - cmmc-level4-AC.3.014
+          - cmmc-level4-SC.3.185
+      - cmmc-level3:
+          - cmmc-level3-SC.1.175
+          - cmmc-level3-IA.2.081
+          - cmmc-level3-AC.3.014
+          - cmmc-level3-SC.3.185
+      - cmmc-level2:
+          - cmmc-level2-SC.1.175
+          - cmmc-level2-IA.2.081
+      - cmmc-level1:
+          - cmmc-level1-SC.1.175
+      - aws-wa-security:
+          - aws-wa-security-SEC-9
+      - aws
+  - id: darkbit-aws-43
+    title: AMI/EBS Volumes/EBS Snapshots Should Be Encrypted
+    description:
+      Certain compliance mandates like HIPAA indicate that AMIs, EBS Volumes,
+      and EBS snapshots should have at-rest encryption enabled through AWS using KMS
+      to require an attacker to also have access to the KMS keys to be able to access
+      data on volumes in the account.
+    remediation:
+      Note that EBS Snapshots taken from EBS Volumes without at-rest encryption
+      will also not be encrypted.
+    validation: |-
+      Run `aws ec2 describe-images --region <region> --owners self --query 'Images[*]' --output json | jq -r '.[] | select(.BlockDeviceMappings[].Ebs.Encrypted!=true) | "(.ImageId) (.Name) (.Description)"'` for each region and ensure no entries are present.
+
+      Run `aws ec2 describe-snapshots --region <region> --owner-ids 597908126950 --query 'Snapshots[*]' --output json | jq -r '.[] | select(.State=="completed" and .Encrypted!=true) | "(.SnapshotId) (.Description)"'` for each region and ensure no entries are present.
+
+      Run `aws ec2 describe-volumes --region <region> --query 'Volumes[*]' --output json | jq -r '.[] | select(.Encrypted!=true) | "(.VolumeId) (.SnapshotId)"'` for reach region and ensure no entries are present.
+    impact: 2
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: EBS Encryption
+        url: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSEncryption.html
+      - text: AMI Encryption
+        url: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIEncryption.html
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-level2
+          - aws-cis1.3-2
+          - aws-cis1.3-2.2
+          - aws-cis1.3-2.2.1
+      - aws-cfg:
+          - aws-cfg-encrypted-volumes
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-3.4
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ds
+          - nist-csf-pr.ds-1
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-SC-13
+          - nist-800-53-rev4-SC-28
+      - nist-800-171:
+          - nist-800-171-3.13.16
+          - nist-800-171-3.5.10
+      - hipaa:
+          - hipaa-164.308(a)(1)(ii)(B)
+          - hipaa-164.312(a)(2)(iv)
+          - hipaa-164.312(e)(2)(ii)
+      - fedramp-moderate:
+          - fedramp-moderate-SC-28
+      - fedramp-low:
+          - fedramp-low-SC-13
+      - cmmc-level5:
+          - cmmc-level5-IA.2.081
+          - cmmc-level5-SC.3.191
+      - cmmc-level4:
+          - cmmc-level4-IA.2.081
+          - cmmc-level4-SC.3.191
+      - cmmc-level3:
+          - cmmc-level3-IA.2.081
+          - cmmc-level3-SC.3.191
+      - cmmc-level2:
+          - cmmc-level2-IA.2.081
+      - aws-wa-security:
+          - aws-wa-security-SEC-8
+      - aws
+  - id: darkbit-aws-47
+    title: Amazon EKS Clusters Should Have Application Secrets Encryption Enabled
+    description:
+      Envelope encryption for secrets is available for new Amazon EKS clusters
+      running Kubernetes version 1.13 and above. You can setup your own Customer Master
+      Key (CMK) in KMS and link this key by providing the CMK ARN when you create an
+      EKS cluster. When secrets are stored using the Kubernetes secrets API, they are
+      encrypted with a Kubernetes-generated data encryption key, which is then further
+      encrypted using the linked AWS KMS key.
+    remediation:
+      'Configure a Customer Master Key (CMK) in KMS, and during cluster creation,
+      configure the `--encryption-config` option to specify the ARN of the KMS key.  Note:
+      This cannot be added to an existing EKS cluster.'
+    validation:
+      Run `aws eks describe-cluster` and look for the presence of the `encryptionConfig`
+      block.
+    impact: 3
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: Kubernetes KMS Provider Docs
+        url: https://kubernetes.io/docs/tasks/administer-cluster/kms-provider/
+      - text: EKS Application Secrets Encryption
+        url: https://aws.amazon.com/about-aws/whats-new/2020/03/amazon-eks-adds-envelope-encryption-for-secrets-with-aws-kms/
+      - text: EKS Create Cluster
+        url: https://docs.aws.amazon.com/eks/latest/userguide/create-cluster.html
+    tags:
+      - cis:
+          - eks-cis1.0.1
+          - eks-cis1.0.1-level1
+          - eks-cis1.0.1-5
+          - eks-cis1.0.1-5.3
+          - eks-cis1.0.1-5.3.1
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ds
+          - nist-csf-pr.ds-1
+      - aws
+  - id: darkbit-aws-51
+    title: CloudTrail Should Be Enabled in All Regions
+    description:
+      CloudTrail should be enabled for all regions in order to maintain a
+      record of all changes in the environment, detect suspicious activity and resource
+      usage, and support incident response analysis efforts should an issue occur
+    remediation:
+      Enable CloudTrail for all regions and ensure that one region is also
+      configured to monitor "global" service events.  Also, enable log file validation
+      to have log digests delivered to your S3 bucket to verify that your log files
+      did not change after CloudTrail delivered them.
+    validation: |-
+      Run `aws cloudtrail describe-trails --region us-east-1 --query 'trailList[*]' --output json --no-include-shadow-trails | jq -r '.[] | "(.TrailARN) (.IsOrganizationTrail)"'` in each region and ensure at least one is `true`.
+
+      Run `aws cloudtrail describe-trails --region us-east-1 --query 'trailList[*]' --output json --no-include-shadow-trails | jq -r '.[] | "(.TrailARN) (.IsMultiRegionTrail)"'` and ensure each one is `true`.
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: AWS CloudTrail
+        url: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-create-and-update-a-trail.html
+      - text: AWS CloudTrail Log File Valiation
+        url: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-3
+          - aws-cis1.3-3.1
+      - aws-cfg:
+          - aws-cfg-cloudtrail-enabled
+          - aws-cfg-multi-region-cloudtrail-enabled
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-10.2.1
+          - pci-dss-3.2.1-10.2.2
+          - pci-dss-3.2.1-10.2.3
+          - pci-dss-3.2.1-10.2.4
+          - pci-dss-3.2.1-10.2.5
+          - pci-dss-3.2.1-10.2.6
+          - pci-dss-3.2.1-10.2.7
+          - pci-dss-3.2.1-10.3.1
+          - pci-dss-3.2.1-10.3.2
+          - pci-dss-3.2.1-10.3.3
+          - pci-dss-3.2.1-10.3.4
+          - pci-dss-3.2.1-10.3.5
+          - pci-dss-3.2.1-10.3.6
+      - nist-csf:
+          - nist-csf-ID.AM-3
+          - nist-csf-PR.AC-6
+          - nist-csf-PR.DS-5
+          - nist-csf-PR.MA-2
+          - nist-csf-PR.PT-1
+          - nist-csf-DE.AE-1
+          - nist-csf-DE.AE-3
+          - nist-csf-DE.AE-4
+          - nist-csf-DE.CM-1
+          - nist-csf-DE.CM-3
+          - nist-csf-DE.CM-6
+          - nist-csf-DE.CM-7
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-AC-2(4)
+          - nist-800-53-rev4-AC-2(g)
+          - nist-800-53-rev4-AU-2(a)(d)
+          - nist-800-53-rev4-AU-3
+          - nist-800-53-rev4-AU-12(a)(c)
+      - nist-800-171:
+          - nist-800-171-3.1.12
+          - nist-800-171-3.13.1
+          - nist-800-171-3.14.6
+          - nist-800-171-3.14.7
+          - nist-800-171-3.3.1
+          - nist-800-171-3.3.2
+      - hipaa:
+          - hipaa-164.308(a)(1)(ii)(D)
+          - hipaa-164.308(a)(3)(ii)(A)
+          - hipaa-164.308(a)(6)(ii)
+          - hipaa-164.312(b)
+          - hipaa-164.312(e)(2)(i)
+      - fedramp-moderate:
+          - fedramp-moderate-AC-2(4)
+          - fedramp-moderate-AC-2(g)
+          - fedramp-moderate-AU-2(a)(d)
+          - fedramp-moderate-AU-3
+          - fedramp-moderate-AU-12(a)(c)
+      - fedramp-low:
+          - fedramp-low-AC-2
+      - cmmc-level5:
+          - cmmc-level5-IA.1.076
+          - cmmc-level5-AU.2.041
+          - cmmc-level5-AU.2.042
+          - cmmc-level5-CM.2.065
+          - cmmc-level5-SI.2.217
+          - cmmc-level5-AC.3.018
+          - cmmc-level5-AU.5.055
+          - cmmc-level5-SI.5.223
+      - cmmc-level4:
+          - cmmc-level4-IA.1.076
+          - cmmc-level4-AU.2.041
+          - cmmc-level4-AU.2.042
+          - cmmc-level4-CM.2.065
+          - cmmc-level4-SI.2.217
+          - cmmc-level4-AC.3.018
+      - cmmc-level3:
+          - cmmc-level3-IA.1.076
+          - cmmc-level3-AU.2.041
+          - cmmc-level3-AU.2.042
+          - cmmc-level3-CM.2.065
+          - cmmc-level3-SI.2.217
+          - cmmc-level3-AC.3.018
+      - cmmc-level2:
+          - cmmc-level2-IA.1.076
+          - cmmc-level2-AU.2.041
+          - cmmc-level2-AU.2.042
+          - cmmc-level2-CM.2.065
+          - cmmc-level2-SI.2.217
+      - cmmc-level1:
+          - cmmc-level1-IA.1.076
+      - aws-wa-security:
+          - aws-wa-security-SEC-4
+      - aws
+  - id: darkbit-aws-58
+    title: AWS Config Service Should Be Configured and All Rules Active
+    description:
+      AWS Config records the change history of all supported resources. It
+      can assist in auditing efforts by correlating configuration changes (what exactly
+      was changed) with AWS CloudTrail events (who made the change and when).  Finally,
+      it can generate reports to aid in assessing compliance over a period of time.
+    remediation:
+      Enable the AWS Config Service for all regions and resources in the
+      account and ensure that it is delivering logs.
+    validation:
+      In each region, run `aws configservice get-status --region <region>`
+      and verify the `recorder` is `ON` and the `last status` is `SUCCESS`.
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: AWS Config
+        url: https://aws.amazon.com/config
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-3
+          - aws-cis1.3-3.5
+      - nist-csf:
+          - nist-csf-id
+          - nist-csf-id.am
+          - nist-csf-id.am-2
+          - nist-csf-id.gv
+          - nist-csf-id.gv-4
+          - nist-csf-id.ra
+          - nist-csf-id.ra-1
+          - nist-csf-id.ra-3
+          - nist-csf-id.ra-4
+          - nist-csf-id.ra-5
+      - aws
+  - id: darkbit-aws-61
+    title: Amazon EKS Clusters Should Have Full Audit Logging Configured
+    description:
+      "Amazon EKS control plane logging provides audit and diagnostic logs
+      directly from the Amazon EKS control plane to CloudWatch Logs in your account.
+      \ By default, cluster control plane logs aren't sent to CloudWatch Logs. You must
+      enable each log type individually to send logs for your cluster. CloudWatch Logs
+      ingestion, archive storage, and data scanning rates apply to enabled control plane
+      logs.  The following cluster control plane log types are available: \n\n* Kubernetes
+      API server component logs (api) – Your cluster's API server is the control plane
+      component that exposes the Kubernetes API.\n* Audit (audit) – Kubernetes audit
+      logs provide a record of the individual users, administrators, or system components
+      that have affected your cluster.\n* Authenticator (authenticator) – Authenticator
+      logs are unique to Amazon EKS. These logs represent the control plane component
+      that Amazon EKS uses for Kubernetes Role Based Access Control (RBAC) authentication
+      using IAM credentials.\n* Controller manager (controllerManager) – The controller
+      manager manages the core control loops that are shipped with Kubernetes.\n* Scheduler
+      (scheduler) – The scheduler component manages when and where to run pods in your
+      cluster."
+    remediation:
+      To update the current EKS cluster configuration to add logging to CloudWatch,
+      run `aws eks --region <region> update-cluster-config --name <clustername> --logging
+      '{'clusterLogging':[{'types':['api','audit','authenticator','controllerManager','scheduler'],'enabled':true}]}'`.  The
+      configuration of the cluster will take several minutes to complete.
+    validation:
+      To determine the current control plane logging configuration, run `aws
+      eks describe-cluster` and review the `clusterLogging` types that are `enabled`.  All
+      should be listed as `enabled` and none should be listed as `disabled`.
+    impact: 9
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: EKS Control Plane Logging
+        url: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+    tags:
+      - cis:
+          - eks-cis1.0.1
+          - eks-cis1.0.1-level1
+          - eks-cis1.0.1-2
+          - eks-cis1.0.1-2.1
+          - eks-cis1.0.1-2.1.1
+      - nist-csf:
+          - nist-csf-de
+          - nist-csf-de.ae
+          - nist-csf-de.ae-1
+          - nist-csf-pr
+          - nist-csf-pr.pt
+          - nist-csf-pr.pt-1
+      - aws
+  - id: darkbit-aws-67
+    title: CloudTrail Log File Validation Should Be Enabled
+    description:
+      CloudTrail can optionally generate a SHA-256 hash for every file it
+      delivers and an digest of hashes on an hourly basis.  This provides a forensic
+      investigation with assurance that log files were not tampered with and can be
+      relied on for accuracy and integrity.  The digests are delivered to a separate
+      folder to allow for more granular permissions such as preventing deletion.
+    remediation:
+      Configure the `Enable Log File Validation` setting on each trail.  Using
+      the CLI, run `aws cloudtrail update --name <trailname> --enable-log-file-validation`.
+    validation:
+      In each region, run `for i in $(aws cloudtrail list-trails --region
+      <region> --query 'Trails[*].TrailARN' --output text); do aws cloudtrail describe-trails
+      --trail-name $i --output json | jq -r '.trailList[] | "(.TrailARN) (.LogFileValidationEnabled)"';
+      done` and ensure all cloudtrails are `true`.
+    impact: 5
+    nodes:
+      - AWS_CLOUDTRAIL_TRAIL
+    refs:
+      - text: CloudTrail Log File Integrity
+        url: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html
+      - text: CloudTrail Log File Integrity Validation
+        url: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-enabling.html
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level2
+          - aws-cis1.3-3
+          - aws-cis1.3-3.2
+      - aws-cfg:
+          - aws-cfg-cloud-trail-log-file-validation-enabled
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-10.5.2
+          - pci-dss-3.2.1-10.5.5
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ds
+          - nist-csf-pr.ds-6
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-SI-7
+          - nist-800-53-rev4-SI-7(1)
+      - nist-800-171:
+          - nist-800-171-3.13.1
+          - nist-800-171-3.3.8
+      - hipaa:
+          - hipaa-164.308(a)(1)(ii)(B)
+          - hipaa-164.312(c)(1)
+          - hipaa-164.312(c)(2)
+      - fedramp-moderate:
+          - fedramp-moderate-SI-7
+          - fedramp-moderate-SI-7(1)
+      - cmmc-level5:
+          - cmmc-level5-CM.2.064
+          - cmmc-level5-AU.3.049
+          - cmmc-level5-CM.5.074
+      - cmmc-level4:
+          - cmmc-level4-CM.2.064
+          - cmmc-level4-AU.3.049
+      - cmmc-level3:
+          - cmmc-level3-CM.2.064
+          - cmmc-level3-AU.3.049
+      - cmmc-level2:
+          - cmmc-level2-CM.2.064
+      - aws-wa-security:
+          - aws-wa-security-SEC-4
+      - aws
+  - id: darkbit-aws-72
+    title: S3 Buckets Should Not Be Exposed to the Public
+    description:
+      Giving all users the ability to read the contents of S3 buckets has
+      led to unintentional data breaches for organizations of all sizes and maturity.  It
+      often happens as the result of a misconfiguration or temporary policy applied
+      for testing purposes.  In nearly all use cases, directly exposed S3 buckets to
+      all users is not desired.
+    remediation: |-
+      For each bucket, review the permissions to ensure that `Everyone` (via the console) or `http://acs.amazonaws.com/groups/global/AllUsers` (via the API) are not granted any permissions.
+
+      Strongly consider enabling all four of the S3 Block Public Access policies on the account to enforce non-public buckets regardless of how the resources are created.
+    validation: |-
+      Run `for i in $(aws s3api list-buckets --query 'Buckets[*].Name' --region <region> --output text); do echo "$i"; aws s3api get-bucket-acl --region <region> --bucket $i; done` in each region where buckets are present and verify that no permissions are granted to `http://acs.amazonaws.com/groups/global/AllUsers`.
+
+      To check the S3 Block Public Access policy, run `for i in $(aws s3api list-buckets --query 'Buckets[*].Name' --output text); do aws s3api get-public-access-block --bucket $i; done` and ensure the policy shown is configured to block public access to the entire bucket.
+    impact: 9
+    nodes:
+      - AWS_S3_BUCKET
+    refs:
+      - text: S3 Bucket Policies
+        url: https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html
+      - text: Amazon S3 block public access
+        url: https://docs.aws.amazon.com/AmazonS3/latest/dev/access-control-block-public-access.html
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-1
+          - aws-cis1.3-1.20
+      - aws-cfg:
+          - aws-cfg-s3-account-level-public-access-blocks
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-1.3
+          - pci-dss-3.2.1-2.2
+      - nist-csf:
+          - nist-csf-PR.AC-3
+          - nist-csf-PR.AC-5
+          - nist-csf-PR.DS-5
+          - nist-csf-PR.PT-3
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-AC-3
+          - nist-800-53-rev4-AC-4
+          - nist-800-53-rev4-AC-6
+          - nist-800-53-rev4-AC-21(b)
+          - nist-800-53-rev4-SC-7
+          - nist-800-53-rev4-SC-7(3)
+      - nist-800-171:
+          - nist-800-171-3.1.1
+          - nist-800-171-3.1.14
+          - nist-800-171-3.1.2
+          - nist-800-171-3.1.20
+          - nist-800-171-3.1.3
+          - nist-800-171-3.13.2
+          - nist-800-171-3.3.8
+          - nist-800-171-3.4.6
+      - hipaa:
+          - hipaa-164.308(a)(1)(ii)(B)
+          - hipaa-164.308(a)(3)(i)
+          - hipaa-164.312(a)(1)
+      - fedramp-moderate:
+          - fedramp-moderate-AC-3
+          - fedramp-moderate-AC-4
+          - fedramp-moderate-AC-6
+          - fedramp-moderate-AC-21(b)
+          - fedramp-moderate-SC-7
+          - fedramp-moderate-SC-7(3)
+      - fedramp-low:
+          - fedramp-low-AC-3
+      - cmmc-level5:
+          - cmmc-level5-AC.1.001
+          - cmmc-level5-AC.1.003
+          - cmmc-level5-SC.1.175
+          - cmmc-level5-AC.2.007
+          - cmmc-level5-AC.2.016
+          - cmmc-level5-CM.2.062
+          - cmmc-level5-AU.3.049
+          - cmmc-level5-SC.3.180
+          - cmmc-level5-AC.4.023
+      - cmmc-level4:
+          - cmmc-level4-AC.1.001
+          - cmmc-level4-AC.1.003
+          - cmmc-level4-SC.1.175
+          - cmmc-level4-AC.2.007
+          - cmmc-level4-AC.2.016
+          - cmmc-level4-CM.2.062
+          - cmmc-level4-AU.3.049
+          - cmmc-level4-SC.3.180
+          - cmmc-level4-AC.4.023
+      - cmmc-level3:
+          - cmmc-level3-AC.1.001
+          - cmmc-level3-AC.1.003
+          - cmmc-level3-SC.1.175
+          - cmmc-level3-AC.2.007
+          - cmmc-level3-AC.2.016
+          - cmmc-level3-CM.2.062
+          - cmmc-level3-AU.3.049
+          - cmmc-level3-SC.3.180
+      - cmmc-level2:
+          - cmmc-level2-AC.1.001
+          - cmmc-level2-AC.1.003
+          - cmmc-level2-SC.1.175
+          - cmmc-level2-AC.2.007
+          - cmmc-level2-AC.2.016
+          - cmmc-level2-CM.2.062
+      - cmmc-level1:
+          - cmmc-level1-AC.1.001
+          - cmmc-level1-AC.1.003
+          - cmmc-level1-SC.1.175
+      - aws-wa-security:
+          - aws-wa-security-SEC-5
+          - aws-wa-security-SEC-8
+      - aws
+  - id: darkbit-aws-75
+    title: KMS Keys Should Have Key Rotation Enabled
+    description:
+      Enabling automatic key rotation for a customer managed CMK means that
+      AWS KMS generates new cryptographic material for the CMK every year. It also saves
+      the CMK's older cryptographic material in perpetuity (deleted only when the CMK
+      is deleted) so it can be used to decrypt data that it encrypted.  This process
+      makes rotation seamless and automatic, and this typically satisfies compliance
+      requirements for rotation of credentials.
+    remediation:
+      To enable automatic key rotation, run `aws kms enable-key-rotation
+      --key-id <keyid>`.
+    validation:
+      In each region, run `for i in $(aws kms list-aliases --region <region>
+      --query 'Aliases[*].TargetKeyId' --output text); do aws kms get-key-rotation-status
+      --region <region> --key-id $i | jq -r --arg ARN $i '"($ARN) (.KeyRotationEnabled)"';
+      done` and verify that all are `true`.
+    impact: 5
+    nodes:
+      - AWS_KMS_KEY
+    refs:
+      - text: KMS Key Rotation
+        url: https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level2
+          - aws-cis1.3-3
+          - aws-cis1.3-3.8
+      - aws-cfg:
+          - aws-cfg-cmk-backing-key-rotation-enabled
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-3.6.4
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-SC-12
+      - nist-800-171:
+          - nist-800-171-3.13.10
+      - fedramp-moderate:
+          - fedramp-moderate-SC-12
+      - fedramp-low:
+          - fedramp-low-SC-12
+      - cmmc-level5:
+          - cmmc-level5-SC.3.187
+      - cmmc-level4:
+          - cmmc-level4-SC.3.187
+      - cmmc-level3:
+          - cmmc-level3-SC.3.187
+      - aws-wa-security:
+          - aws-wa-security-SEC-8
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-1
+          - nist-csf-pr.ds
+          - nist-csf-pr.ds-1
+      - aws
+  - id: darkbit-aws-108
+    title: AWS <root> Account Should Not Be Routinely Used
+    description:
+      With the creation of an AWS account, a `root` user is created that
+      cannot be disabled or deleted. That user has unrestricted access
+      to and control over all resources in the AWS account. It is highly
+      recommended that the use of this account be avoided for everyday tasks.
+    remediation: |
+      Discontinue use of the `root` account for day-to-day actions. Consider 
+      deleting the `root` access keys to prevent programatic usage of the `root` account.
+    validation: |
+      Generate a credential report with `aws iam generate-credential-report`. Then 
+      download the report with `aws iam get-credential-report --query 'Content' 
+      --output text | base64 -d | cut -d, -f1,5,11,16 | grep -B1 '<root_account>'`, 
+      and confirm the root account password and access keys have not been recently 
+      used.
+    impact: 8
+    nodes:
+      - AWS_IAM_USER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-1
+          - aws-cis1.3-1.7
+      - nist-csf:
+          - nist-csf-todo
+      - aws
+  - id: darkbit-aws-110
+    title: IAM Users Should Have Only One Valid AWS Access Key Available
+    description: |
+      Access keys are long-term credentials. Access keys can be used to
+      sign programmatic requests to the AWS CLI or AWS API. Minimize the risk 
+      of credential leakage by not allowing users to have multiple access keys.
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - AWS_IAM_USER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-1
+          - aws-cis1.3-1.13
+      - nist-csf:
+          - nist-csf-todo
+      - aws
+  - id: darkbit-aws-111
+    title: AWS Access Keys Should Be Rotated Every 90 Days
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-1
+          - aws-cis1.3-1.14
+      - aws-cfg:
+          - aws-cfg-access-keys-rotated
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-8.2.4
+      - nist-csf:
+          - nist-csf-PR.AC-1
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-AC-2(1)
+          - nist-800-53-rev4-AC-2(j)
+      - hipaa:
+          - hipaa-164.308(a)(3)(ii)(C)
+          - hipaa-164.308(a)(4)(ii)(C)
+      - fedramp-moderate:
+          - fedramp-moderate-AC-2(1)
+          - fedramp-moderate-AC-2(j)
+      - fedramp-low:
+          - fedramp-low-AC-2
+      - aws-wa-security:
+          - aws-wa-security-SEC-2
+      - aws
+  - id: darkbit-aws-113
+    title: AWS IAM SSL/TLS Certificates Should Not Be Expired
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-1
+          - aws-cis1.3-1.19
+      - nist-csf:
+          - nist-csf-todo
+      - aws
+  - id: darkbit-aws-114
+    title: AWS IAM Access Analyzer Should Be Enabled
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-1
+          - aws-cis1.3-1.21
+      - nist-csf:
+          - nist-csf-todo
+      - aws
+  - id: darkbit-aws-115
+    title: S3 Buckets Should Be Encrypted At Rest
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-level2
+          - aws-cis1.3-2
+          - aws-cis1.3-2.1
+          - aws-cis1.3-2.1.1
+      - aws-cfg:
+          - aws-cfg-s3-bucket-server-side-encryption-enabled
+          - aws-cfg-s3-default-encryption-kms
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-3.4
+      - nist-csf:
+          - nist-csf-PR.DS-1
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-SC-13
+          - nist-800-53-rev4-SC-28
+      - nist-800-171:
+          - nist-800-171-3.13.16
+          - nist-800-171-3.3.8
+          - nist-800-171-3.5.10
+      - hipaa:
+          - hipaa-164.308(a)(1)(ii)(B)
+          - hipaa-164.312(a)(2)(iv)
+          - hipaa-164.312(e)(2)(ii)
+      - fedramp-moderate:
+          - fedramp-moderate-SC-28
+      - fedramp-low:
+          - fedramp-low-SC-13
+      - cmmc-level5:
+          - cmmc-level5-IA.2.081
+          - cmmc-level5-AU.3.049
+          - cmmc-level5-SC.3.191
+      - cmmc-level4:
+          - cmmc-level4-IA.2.081
+          - cmmc-level4-AU.3.049
+          - cmmc-level4-SC.3.191
+      - cmmc-level3:
+          - cmmc-level3-IA.2.081
+          - cmmc-level3-AU.3.049
+          - cmmc-level3-SC.3.191
+      - cmmc-level2:
+          - cmmc-level2-IA.2.081
+      - aws-wa-security:
+          - aws-wa-security-SEC-8
+      - aws
+  - id: darkbit-aws-116
+    title: AWS EBS Volume Default Encryption Should Be Enabled
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-level2
+          - aws-cis1.3-2
+          - aws-cis1.3-2.2
+          - aws-cis1.3-2.2.1
+      - aws-cfg:
+          - aws-cfg-ec2-ebs-encryption-by-default
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-SC-28
+      - nist-800-171:
+          - nist-800-171-3.13.16
+      - hipaa:
+          - hipaa-164.308(a)(1)(ii)(B)
+          - hipaa-164.312(a)(2)(iv)
+          - hipaa-164.312(e)(2)(ii)
+      - fedramp-moderate:
+          - fedramp-moderate-SC-28
+      - fedramp-low:
+          - fedramp-low-SC-13
+      - cmmc-level5:
+          - cmmc-level5-IA.2.081
+          - cmmc-level5-SC.3.191
+      - cmmc-level4:
+          - cmmc-level4-IA.2.081
+          - cmmc-level4-SC.3.191
+      - cmmc-level3:
+          - cmmc-level3-IA.2.081
+          - cmmc-level3-SC.3.191
+      - cmmc-level2:
+          - cmmc-level2-IA.2.081
+      - aws-wa-security:
+          - aws-wa-security-SEC-8
+      - aws
+  - id: darkbit-aws-117
+    title: CloudTrail Logging Bucket Should Not Be Public
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-3
+          - aws-cis1.3-3.3
+      - nist-csf:
+          - nist-csf-todo
+      - aws
+  - id: darkbit-aws-118
+    title: CloudTrail Logs Should Be Integrated With CloudWatch Logs
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-3
+          - aws-cis1.3-3.4
+      - aws-cfg:
+          - aws-cfg-cloud-trail-cloud-watch-logs-enabled
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-10.2
+      - nist-csf:
+          - nist-csf-PR.PT-1
+          - nist-csf-DE.AE-1
+          - nist-csf-DE.AE-3
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-AC-2(4)
+          - nist-800-53-rev4-AC-2(g)
+          - nist-800-53-rev4-AU-2(a)(d)
+          - nist-800-53-rev4-AU-3
+          - nist-800-53-rev4-AU-6(1)(3)
+          - nist-800-53-rev4-AU-7(1)
+          - nist-800-53-rev4-AU-12(a)(c)
+          - nist-800-53-rev4-CA-7(a)(b)
+          - nist-800-53-rev4-SI-4(2)
+          - nist-800-53-rev4-SI-4(4)
+          - nist-800-53-rev4-SI-4(5)
+          - nist-800-53-rev4-SI-4(a)(b)(c)
+      - nist-800-171:
+          - nist-800-171-3.3.1
+          - nist-800-171-3.3.2
+      - hipaa:
+          - hipaa-164.308(a)(1)(ii)(D)
+          - hipaa-164.308(a)(6)(ii)
+          - hipaa-164.312(b)
+          - hipaa-164.312(e)(2)(i)
+      - fedramp-moderate:
+          - fedramp-moderate-AC-2(4)
+          - fedramp-moderate-AC-2(g)
+          - fedramp-moderate-AU-2(a)(d)
+          - fedramp-moderate-AU-3
+          - fedramp-moderate-AU-6(1)(3)
+          - fedramp-moderate-AU-7(1)
+          - fedramp-moderate-AU-12(a)(c)
+          - fedramp-moderate-CA-7(a)(b)
+          - fedramp-moderate-SI-4(2)
+          - fedramp-moderate-SI-4(4)
+          - fedramp-moderate-SI-4(5)
+          - fedramp-moderate-SI-4(a)(b)(c)
+      - fedramp-low:
+          - fedramp-low-AC-2
+      - cmmc-level5:
+          - cmmc-level5-AC.2.013
+          - cmmc-level5-AU.2.041
+          - cmmc-level5-AU.2.042
+          - cmmc-level5-SI.2.214
+          - cmmc-level5-SI.2.216
+          - cmmc-level5-SI.2.217
+          - cmmc-level5-AU.3.046
+          - cmmc-level5-AU.4.053
+          - cmmc-level5-AU.5.055
+          - cmmc-level5-SI.5.223
+      - cmmc-level4:
+          - cmmc-level4-AC.2.013
+          - cmmc-level4-AU.2.041
+          - cmmc-level4-AU.2.042
+          - cmmc-level4-SI.2.214
+          - cmmc-level4-SI.2.216
+          - cmmc-level4-SI.2.217
+          - cmmc-level4-AU.3.046
+          - cmmc-level4-AU.4.053
+      - cmmc-level3:
+          - cmmc-level3-AC.2.013
+          - cmmc-level3-AU.2.041
+          - cmmc-level3-AU.2.042
+          - cmmc-level3-SI.2.214
+          - cmmc-level3-SI.2.216
+          - cmmc-level3-SI.2.217
+          - cmmc-level3-AU.3.046
+      - cmmc-level2:
+          - cmmc-level2-AC.2.013
+          - cmmc-level2-AU.2.041
+          - cmmc-level2-AU.2.042
+          - cmmc-level2-SI.2.214
+          - cmmc-level2-SI.2.216
+          - cmmc-level2-SI.2.217
+      - aws-wa-security:
+          - aws-wa-security-SEC-4
+      - aws
+  - id: darkbit-aws-119
+    title: CloudTrail Logs Should Be Encrypted At Rest Via KMS CMKs
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level2
+          - aws-cis1.3-3
+          - aws-cis1.3-3.7
+      - aws-cfg:
+          - aws-cfg-cloud-trail-encryption-enabled
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-10.5.1
+      - nist-csf:
+          - nist-csf-PR.DS-1
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-AU-9
+          - nist-800-53-rev4-SC-13
+          - nist-800-53-rev4-SC-28
+      - nist-800-171:
+          - nist-800-171-3.13.16
+      - hipaa:
+          - hipaa-164.308(a)(1)(ii)(B)
+          - hipaa-164.312(a)(2)(iv)
+          - hipaa-164.312(e)(2)(ii)
+      - fedramp-moderate:
+          - fedramp-moderate-AU-9
+          - fedramp-moderate-SC-28
+      - fedramp-low:
+          - fedramp-low-AU-9
+          - fedramp-low-SC-13
+      - cmmc-level5:
+          - cmmc-level5-AU.3.049
+          - cmmc-level5-SC.3.191
+      - cmmc-level4:
+          - cmmc-level4-AU.3.049
+          - cmmc-level4-SC.3.191
+      - cmmc-level3:
+          - cmmc-level3-AU.3.049
+          - cmmc-level3-SC.3.191
+      - aws-wa-security:
+          - aws-wa-security-SEC-4
+          - aws-wa-security-SEC-8
+      - aws
+  - id: darkbit-aws-120
+    title: S3 Object Level Logging For Write Events Should Be Enabled
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level2
+          - aws-cis1.3-3
+          - aws-cis1.3-3.10
+      - aws-cfg:
+          - aws-cfg-cloudtrail-s3-dataevents-enabled
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-10.3.1
+          - pci-dss-3.2.1-10.3.2
+          - pci-dss-3.2.1-10.3.3
+          - pci-dss-3.2.1-10.3.4
+          - pci-dss-3.2.1-10.3.5
+          - pci-dss-3.2.1-10.3.6
+      - nist-csf:
+          - nist-csf-PR.DS-5
+          - nist-csf-DE.AE-3
+          - nist-csf-DE.AE-4
+          - nist-csf-DE.CM-1
+          - nist-csf-DE.CM-3
+          - nist-csf-DE.CM-6
+          - nist-csf-DE.CM-7
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-AC-2(g)
+          - nist-800-53-rev4-AU-2(a)(d)
+          - nist-800-53-rev4-AU-3
+          - nist-800-53-rev4-AU-12(a)(c)
+      - nist-800-171:
+          - nist-800-171-3.1.12
+          - nist-800-171-3.13.1
+          - nist-800-171-3.14.6
+          - nist-800-171-3.14.7
+          - nist-800-171-3.3.1
+          - nist-800-171-3.3.2
+      - hipaa:
+          - hipaa-164.308(a)(1)(ii)(D)
+          - hipaa-164.308(a)(3)(ii)(A)
+          - hipaa-164.308(a)(6)(ii)
+          - hipaa-164.312(b)
+          - hipaa-164.312(e)(2)(i)
+      - fedramp-moderate:
+          - fedramp-moderate-AC-2(g)
+          - fedramp-moderate-AU-2(a)(d)
+          - fedramp-moderate-AU-3
+          - fedramp-moderate-AU-12(a)(c)
+      - fedramp-low:
+          - fedramp-low-AC-2
+      - cmmc-level5:
+          - cmmc-level5-AU.2.041
+          - cmmc-level5-AU.2.042
+          - cmmc-level5-SI.2.217
+          - cmmc-level5-AC.3.018
+          - cmmc-level5-AU.5.055
+          - cmmc-level5-SI.5.223
+      - cmmc-level4:
+          - cmmc-level4-AU.2.041
+          - cmmc-level4-AU.2.042
+          - cmmc-level4-SI.2.217
+          - cmmc-level4-AC.3.018
+      - cmmc-level3:
+          - cmmc-level3-AU.2.041
+          - cmmc-level3-AU.2.042
+          - cmmc-level3-SI.2.217
+          - cmmc-level3-AC.3.018
+      - cmmc-level2:
+          - cmmc-level2-AU.2.041
+          - cmmc-level2-AU.2.042
+          - cmmc-level2-SI.2.217
+      - aws-wa-security:
+          - aws-wa-security-SEC-4
+      - aws
+  - id: darkbit-aws-121
+    title: S3 Object Level Logging For Read Events Should Be Enabled
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level2
+          - aws-cis1.3-3
+          - aws-cis1.3-3.11
+      - aws-cfg:
+          - aws-cfg-cloudtrail-s3-dataevents-enabled
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-10.3.1
+          - pci-dss-3.2.1-10.3.2
+          - pci-dss-3.2.1-10.3.3
+          - pci-dss-3.2.1-10.3.4
+          - pci-dss-3.2.1-10.3.5
+          - pci-dss-3.2.1-10.3.6
+      - nist-csf:
+          - nist-csf-PR.DS-5
+          - nist-csf-DE.AE-3
+          - nist-csf-DE.AE-4
+          - nist-csf-DE.CM-1
+          - nist-csf-DE.CM-3
+          - nist-csf-DE.CM-6
+          - nist-csf-DE.CM-7
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-AC-2(g)
+          - nist-800-53-rev4-AU-2(a)(d)
+          - nist-800-53-rev4-AU-3
+          - nist-800-53-rev4-AU-12(a)(c)
+      - nist-800-171:
+          - nist-800-171-3.1.12
+          - nist-800-171-3.13.1
+          - nist-800-171-3.14.6
+          - nist-800-171-3.14.7
+          - nist-800-171-3.3.1
+          - nist-800-171-3.3.2
+      - hipaa:
+          - hipaa-164.308(a)(1)(ii)(D)
+          - hipaa-164.308(a)(3)(ii)(A)
+          - hipaa-164.308(a)(6)(ii)
+          - hipaa-164.312(b)
+          - hipaa-164.312(e)(2)(i)
+      - fedramp-moderate:
+          - fedramp-moderate-AC-2(g)
+          - fedramp-moderate-AU-2(a)(d)
+          - fedramp-moderate-AU-3
+          - fedramp-moderate-AU-12(a)(c)
+      - fedramp-low:
+          - fedramp-low-AC-2
+      - cmmc-level5:
+          - cmmc-level5-AU.2.041
+          - cmmc-level5-AU.2.042
+          - cmmc-level5-SI.2.217
+          - cmmc-level5-AC.3.018
+          - cmmc-level5-AU.5.055
+          - cmmc-level5-SI.5.223
+      - cmmc-level4:
+          - cmmc-level4-AU.2.041
+          - cmmc-level4-AU.2.042
+          - cmmc-level4-SI.2.217
+          - cmmc-level4-AC.3.018
+      - cmmc-level3:
+          - cmmc-level3-AU.2.041
+          - cmmc-level3-AU.2.042
+          - cmmc-level3-SI.2.217
+          - cmmc-level3-AC.3.018
+      - cmmc-level2:
+          - cmmc-level2-AU.2.041
+          - cmmc-level2-AU.2.042
+          - cmmc-level2-SI.2.217
+      - aws-wa-security:
+          - aws-wa-security-SEC-4
+      - aws
+  - id: darkbit-aws-122
+    title: Network ACLs Should Not Allow Access to Administrative Ports From All Hosts
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level1
+          - aws-cis1.3-5
+          - aws-cis1.3-5.1
+      - nist-csf:
+          - nist-csf-todo
+      - aws
+  - id: darkbit-aws-123
+    title: VPC Default Security Groups Should Restrict All Traffic
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - aws-cis1.3
+          - aws-cis1.3-level2
+          - aws-cis1.3-5
+          - aws-cis1.3-5.3
+      - aws-cfg:
+          - aws-cfg-vpc-default-security-group-closed
+      - pci-dss-3.2.1:
+          - pci-dss-3.2.1-1.2
+          - pci-dss-3.2.1-1.3
+          - pci-dss-3.2.1-2.1
+      - nist-csf:
+          - nist-csf-PR.AC-3
+          - nist-csf-PR.AC-5
+          - nist-csf-DE.AE-1
+      - nist-800-53-rev4:
+          - nist-800-53-rev4-AC-4
+          - nist-800-53-rev4-SC-7
+          - nist-800-53-rev4-SC-7(3)
+      - nist-800-171:
+          - nist-800-171-3.1.1
+          - nist-800-171-3.1.14
+          - nist-800-171-3.1.2
+          - nist-800-171-3.1.20
+          - nist-800-171-3.1.3
+          - nist-800-171-3.13.2
+          - nist-800-171-3.4.7
+      - fedramp-moderate:
+          - fedramp-moderate-AC-4
+          - fedramp-moderate-SC-7
+          - fedramp-moderate-SC-7(3)
+      - cmmc-level5:
+          - cmmc-level5-AC.1.001
+          - cmmc-level5-AC.1.003
+          - cmmc-level5-SC.1.175
+          - cmmc-level5-AC.2.016
+          - cmmc-level5-CM.3.068
+          - cmmc-level5-SC.3.180
+          - cmmc-level5-AC.4.023
+          - cmmc-level5-RM.4.151
+          - cmmc-level5-SC.5.230
+          - cmmc-level5-SC.5.208
+      - cmmc-level4:
+          - cmmc-level4-AC.1.001
+          - cmmc-level4-AC.1.003
+          - cmmc-level4-SC.1.175
+          - cmmc-level4-AC.2.016
+          - cmmc-level4-CM.3.068
+          - cmmc-level4-SC.3.180
+          - cmmc-level4-AC.4.023
+          - cmmc-level4-RM.4.151
+      - cmmc-level3:
+          - cmmc-level3-AC.1.001
+          - cmmc-level3-AC.1.003
+          - cmmc-level3-SC.1.175
+          - cmmc-level3-AC.2.016
+          - cmmc-level3-CM.3.068
+          - cmmc-level3-SC.3.180
+      - cmmc-level2:
+          - cmmc-level2-AC.1.001
+          - cmmc-level2-AC.1.003
+          - cmmc-level2-SC.1.175
+          - cmmc-level2-AC.2.016
+      - cmmc-level1:
+          - cmmc-level1-AC.1.001
+          - cmmc-level1-AC.1.003
+          - cmmc-level1-SC.1.175
+      - aws-wa-security:
+          - aws-wa-security-SEC-5
+      - aws
+  - id: darkbit-aws-125
+    title: EKS Nodegroups Should Run AMI Linux 2
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - eks-cis1.0.1
+          - eks-cis1.0.1-level1
+          - eks-cis1.0.1-3
+          - eks-cis1.0.1-3.1
+          - eks-cis1.0.1-3.1.1
+          - eks-cis1.0.1-3.1.2
+          - eks-cis1.0.1-3.1.3
+          - eks-cis1.0.1-3.1.4
+          - eks-cis1.0.1-3.2
+          - eks-cis1.0.1-3.2.1
+          - eks-cis1.0.1-3.2.2
+          - eks-cis1.0.1-3.2.3
+          - eks-cis1.0.1-3.2.4
+          - eks-cis1.0.1-3.2.5
+          - eks-cis1.0.1-3.2.6
+          - eks-cis1.0.1-3.2.7
+          - eks-cis1.0.1-3.2.8
+          - eks-cis1.0.1-3.2.9
+          - eks-cis1.0.1-3.2.10
+          - eks-cis1.0.1-3.2.11
+      - nist-csf:
+          - nist-csf-todo
+      - aws
+  - id: darkbit-aws-126
+    title: EKS Clusters Should Have The Latest CNI Plugin That Supports Network Policy
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - eks-cis1.0.1
+          - eks-cis1.0.1-level1
+          - eks-cis1.0.1-4
+          - eks-cis1.0.1-4.3
+          - eks-cis1.0.1-4.3.1
+      - nist-csf:
+          - nist-csf-todo
+      - aws
+  - id: darkbit-aws-128
+    title: EKS Clusters Should Have Read-Only Permissions to ECR Registries
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - eks-cis1.0.1
+          - eks-cis1.0.1-level1
+          - eks-cis1.0.1-5
+          - eks-cis1.0.1-5.1
+          - eks-cis1.0.1-5.1.3
+      - nist-csf:
+          - nist-csf-todo
+      - aws
+  - id: darkbit-aws-129
+    title: EKS Nodes Should Not Have Public IP Addresses
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - eks-cis1.0.1
+          - eks-cis1.0.1-level1
+          - eks-cis1.0.1-5
+          - eks-cis1.0.1-5.4
+          - eks-cis1.0.1-5.4.3
+      - nist-csf:
+          - nist-csf-todo
+      - aws
+  - id: darkbit-aws-130
+    title: EKS HTTPS Load Balancers Should Use TLS Certificates
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - eks-cis1.0.1
+          - eks-cis1.0.1-level2
+          - eks-cis1.0.1-5
+          - eks-cis1.0.1-5.4
+          - eks-cis1.0.1-5.4.5
+      - nist-csf:
+          - nist-csf-todo
+      - aws
+  - id: darkbit-aws-131
+    title: EKS Clusters Should Manage RBAC Users With AWS IAM Authenticator
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - eks-cis1.0.1
+          - eks-cis1.0.1-level2
+          - eks-cis1.0.1-5
+          - eks-cis1.0.1-5.5
+          - eks-cis1.0.1-5.5.1
+      - nist-csf:
+          - nist-csf-todo
+      - aws
+  - id: darkbit-aws-132
+    title: Fargate Should Be Used For Running Untrusted Workloads
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - eks-cis1.0.1
+          - eks-cis1.0.1-level1
+          - eks-cis1.0.1-5
+          - eks-cis1.0.1-5.6
+          - eks-cis1.0.1-5.6.1
+      - nist-csf:
+          - nist-csf-todo
+      - aws
+  #GCP
+  - id: darkbit-gcp-6
+    title:
+      IAM.ServiceAccountUser and IAM.serviceAccountTokenCreator Should Not Be Granted
+      at the Project Level
+    description:
+      When creating a GCP resources that attaches a GCP service account,
+      the calling user or service account must have the permission to "use" that service
+      account. Otherwise, the ability to create a GCE instance with any service account
+      attached would be a direct path to privilege escalation if at least one other
+      service account in the project had higher permissions. This permission can be
+      granted on a specific service account or at the project level.  Granting the permission
+      directly on the service account resource permits "use" of just that service account.  Granting
+      the permission at the project level permits the "use" of any service account in
+      the project.  Even if the project does not currently have a highly privileged
+      service account today, it might in the future, and that would inadvertently increase
+      the power of this binding.
+    remediation:
+      Remove the permission at the project level and instead assign "iam.serviceAccountUser"
+      or "iam.serviceAccountTokenCreator" on the small number of service accounts in the
+      project that are necessary.
+    validation:
+      Run `gcloud beta projects get-iam-policy PROJECTID --flatten='bindings[]'
+      --filter=bindings.role:iam.serviceAccountUser --format="csv[no-heading](bindings.members[])"`
+      for each project and ensure no results are displayed. Perform the same for
+      `iam.serviceAccountTokenCreator`.
+    impact: 5
+    nodes:
+      - GCP_IDENTITY
+      - GCP_CLOUDRESOURCEMANAGER_PROJECT
+    refs:
+      - text: Granting IAM Roles to Service Accounts
+        url: https://cloud.google.com/iam/docs/granting-roles-to-service-accounts
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-1
+          - gcp-cis1.1-1.6
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-1
+          - nist-csf-pr.ac-4
+          - nist-csf-pr.ac-6
+      - google cloud
+  - id: darkbit-gcp-14
+    title: VPC Flow Logging Should Be Enabled on All VPC Subnets
+    description:
+      VPC flow logs record metadata about all traffic flowing in and out
+      of a VPC. These logs are vital for auditing and review after security incidents
+      to be able to create an accurate timeline of network events to go with application
+      and Cloud API Audit logs.
+    remediation:
+      Enable VPC Flow logging on all VPCs with a 100% sample rate for production
+      environments or those that hold sensitive data.  When directing to a GCS bucket,
+      enable bucket versioning and optionally configure an object lifecycle policy to
+      retain the data for the desired period only.
+    validation:
+      In each project, run `gcloud compute networks subnets list --format=json
+      | jq -r '.[] | select(.logConfig.enable | not) | "(.name) (.region)"'` and ensure
+      no entries are present.
+    impact: 7
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: Using VPC Flow Logs
+        url: https://cloud.google.com/vpc/docs/using-flow-logs
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-3
+          - gcp-cis1.1-3.8
+      - nist-csf:
+          - nist-csf-de
+          - nist-csf-de.ae
+          - nist-csf-de.ae-1
+          - nist-csf-de.cm
+          - nist-csf-de.cm-1
+          - nist-csf-de.cm-7
+      - google cloud
+  - id: darkbit-gcp-15
+    title: Firewall Rules Should Not Allow Access to SSH TCP/22 From All Hosts
+    description:
+      Firewall rules that permit inbound/ingress access from any IP address
+      (0.0.0.0/0) to administrative ports via SSH (TCP/22) should be reviewed for necessity
+      to prevent unintended exposure of services and systems protected by that security
+      group.  The primary exclusion to this is a dedicated, hardened bastion host.
+    remediation:
+      For each firewall rule, assess whether the attached systems requires
+      SSH access from any IP address.  If it doesn't, consider reducing the source IP
+      ranges to a specific set of subnets or to the bastion host(s) in the environment.
+    validation:
+      In each project, run `gcloud compute firewall-rules list --format=json
+      | jq -r '.[] | select(.sourceRanges) | select(.allowed) | select(.sourceRanges[]
+      | contains("0.0.0.0/0")) | "(.name) (.allowed[])"'` and ensure no entries that
+      permit `IPProtocol` of `tcp` and `ports` of `22`.
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: Configuring Firewall Rules
+        url: https://cloud.google.com/vpn/docs/how-to/configuring-firewall-rules
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level2
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-3
+          - gcp-cis1.1-3.6
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-3
+          - nist-csf-pr.ac-4
+          - nist-csf-pr.ac-5
+          - nist-csf-pr.ds
+          - nist-csf-pr.ds-5
+      - google cloud
+  - id: darkbit-gcp-17
+    title: GCE Instances Should Not Have Public IP Addresses
+    description:
+      GCE Instances should not have public IP addresses assigned directly
+      to them, and should be administered using their private IP and services running
+      on them exposed only via load balancers.  This reduces the scope of attacks against
+      vulnerable services and affords additional protection against denial-of-service.
+    remediation:
+      Configure all GCE Instances to not have public IP addresses assigned.  In
+      GKE, enable private nodes.  For services running on these systems that should
+      be exposed externally, configure a load balancer.  For remote administration,
+      consider using the Identity-Aware Proxy service to create an SSH or RDP-over-TLS
+      tunnel directly to the private IP of the instance.
+    validation:
+      'In each project, run `gcloud compute instances list --format=json |
+      jq -r ''.[] | . as $instance | .networkInterfaces[] | select(.accessConfigs) |
+      .accessConfigs[] | select(.type=="ONE_TO_ONE_NAT") | "($instance.name): (.natIP)"''`
+      and ensure that no entries with public IPs exist.'
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: IAP Proxy for GCE
+        url: https://cloud.google.com/iap/docs/enabling-compute-howto
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level2
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-4
+          - gcp-cis1.1-4.9
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-3
+          - nist-csf-pr.ac-4
+          - nist-csf-pr.ac-5
+      - google cloud
+  - id: darkbit-gcp-18
+    title: Default VPC Networks Should Not Be Present
+    description:
+      Each project contains a default VPC/Network with default subnets in
+      every region for ease of use, but the IP ranges used are likely not desired and
+      may overlap between different projects.  This may cause issues in the future if
+      VPC Peering is desired as the subnets will conflict and prevent routing.
+    remediation:
+      Delete the default VPC/Network and subnets in each project and instead
+      create a new VPC and subnets according to the networking and IP address management
+      needs of the organization to avoid overlap.  To ensure all projects created do
+      not have the default VPC/Network and subnets created automatically, configure
+      the constraints/compute.skipDefaultNetworkCreation organization policy at the
+      organization node.
+    validation:
+      In each project, run `gcloud compute networks list --format=json | jq
+      -r 'select(.[]) | .[] | select(.name=="default") | .name'` and ensure no entries
+      are listed.
+    impact: 2
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: Default VPC Network
+        url: https://cloud.google.com/vpc/docs/vpc#default-network
+      - text: Organization Policies
+        url: https://cloud.google.com/resource-manager/docs/organization-policy/org-policy-constraints
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level2
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-3
+          - gcp-cis1.1-3.1
+      - nist-csf:
+          - nist-csf-id
+          - nist-csf-id.am
+          - nist-csf-id.am-3
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-5
+          - nist-csf-pr.ds
+          - nist-csf-pr.ds-7
+          - nist-csf-pr.pt
+          - nist-csf-pr.pt-4
+      - google cloud
+  - id: darkbit-gcp-19
+    title: User-Managed GCP Service Account Keys Should Not Be Older Than 90 Days
+    description:
+      GCP Service Account Keys that are created by an administrator are known
+      as "user-managed" keys.  Unless rotated by the user, they are static for their
+      lifetime.  They should be rotated on a frequent basis to limit their active lifetime
+      in the event the key material is compromised.
+    remediation:
+      GCP Service Accounts have native, dynamic key integrations to services
+      like GCE, GKE, AppEngine, Cloud Functions, and more such that exporting a static
+      key is only necessary for integrations from non-GCP services like Splunk, Sumologic,
+      Datadog, etc that need access to GCP resources from outside the organization.  This
+      removes the need for exporting keys for all but a small number of clearly defined
+      use cases for those types of integrations.  Refactor GCP applications using static,
+      exported service account keys to use the native integration.  For keys used by
+      external services, rotate them every 90 days.
+    validation:
+      'Run `for project in $(gcloud projects list --filter=parent.id=ORGIDNUMBER
+      --format="value(projectId)"); do for sa in $(gcloud iam service-accounts list
+      --format="value(email)" --project=$project); do gcloud iam service-accounts keys
+      list --iam-account $sa --project=$project --format=json | jq -r ''.[] | select(.keyType=="USER_MANAGED")
+      | "(.name): (.validAfterTime) (.validBeforeTime)"''; done; done` and review the
+      validAfterTime and validBeforeTime values for each key to ensure they are not
+      valid for longer than 90 days.'
+    impact: 2
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: Managing Service Account Keys
+        url: https://cloud.google.com/iam/docs/creating-managing-service-account-keys
+      - text: Security Health Analytics
+        url: https://cloud.google.com/security-command-center/docs/how-to-manage-security-health-analytics
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-1
+          - gcp-cis1.1-1.7
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-1
+          - nist-csf-pr.ac-3
+          - nist-csf-pr.ac-6
+          - nist-csf-pr.ac-7
+      - google cloud
+  - id: darkbit-gcp-20
+    title: GCP Projects Should Enable Data Access Logging
+    description:
+      GCP Audit logs automatically capture administrative activity logs for
+      any creation or modification of resources via the GCP API.  e.g. "create GCE instance"
+      or "delete GCS bucket".  By default, read requests to get/list resources and read/write
+      requests that access user-provided data are not logged.  e.g. "get or delete an
+      object in a GCS bucket".  These logs can and should be enabled on non-development
+      projects to enable full capture of API activity necessary to support incident
+      analysis and for meeting certain regulatory compliance requirements.
+    remediation:
+      'Enable "Admin READ" and "Data READ and WRITE" access logging for "allServices"
+      at the organization level so that it applies to all downstream folders and projects.  Configure
+      Stackdriver to export audit logs to a storage medium such as a GCS bucket and
+      configure a lifecycle and retention policy to automatically move data to cheaper
+      storage and to prune old data.  Caveat: Audit logs are often verbose and generate
+      large volumes of log entries, and storing these in GCS buckets incurs an additional
+      cost.  Use the exemption configuration to remove GCP internal service audit logs
+      if necessary.'
+    validation: |-
+      Run `for project in $(gcloud projects list --filter=parent.id=ORGIDNUMBER --format="value(projectId)"); do gcloud projects get-iam-policy $project --format=json | jq -r 'select(.auditConfigs)'; done` and ensure that it returns the following: `[
+            {
+              "service": "allServices",
+              "auditLogConfigs": [
+                { "logType": "ADMIN_READ" },
+                { "logType": "DATA_READ"  },
+                { "logType": "DATA_WRITE" },
+              ]
+            },
+          ]`.
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: Project Audit Logs
+        url: https://cloud.google.com/logging/docs/audit/understanding-audit-logs
+      - text: Configuring Data Access Logs
+        url: https://cloud.google.com/logging/docs/audit/configure-data-access
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-2
+          - gcp-cis1.1-2.1
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-not-scored
+          - gke-cis1.1-2
+          - gke-cis1.1-2.2
+          - gke-cis1.1-2.2.1
+          - gke-cis1.1-2.2.2
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.pt
+          - nist-csf-pr.pt-1
+      - google cloud
+  - id: darkbit-gcp-22
+    title: CloudSQL Instances Should Have a Private IP Address
+    description:
+      By default, CloudSQL instances are assigned a public IPv4 address,
+      and the access list allows any source IP address to attempt to connect and authenticate
+      to the database.  This facilitates development and ease of connectivity for troubleshooting,
+      but it means an attacker can access the potentially sensitive data in the database
+      without restriction if they obtain valid credentials.
+    remediation:
+      To reduce the likelihood of an attacker to access the database service
+      directly or to use stolen credentials from any source IP, the instance should
+      be configured with a private IP address only. This should be configured during
+      creation of the instance and a VPC peering relationship should be configured between
+      the CloudSQL VPC and the VPCs where applications accessing the database reside.
+    validation:
+      'In each project, run `gcloud sql instances list --format=json | jq
+      -r ''.[] | select(.settings.ipConfiguration.ipv4Enabled==true) | "(.name) Public
+      IP: (.settings.ipConfiguration.ipv4Enabled)"''` and ensure no entries are listed.'
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: CloudSQL MySQL Private IP
+        url: https://cloud.google.com/sql/docs/mysql/configure-private-services-access
+      - text: CloudSQL PostgreSQL Private IP
+        url: https://cloud.google.com/sql/docs/postgres/configure-private-services-access
+      - text: CloudSQL Sqlserver Private IP
+        url: https://cloud.google.com/sql/docs/sqlserver/configure-private-services-access
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level2
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-6
+          - gcp-cis1.1-6.6
+      - nist-csf:
+          - nist-csf-id
+          - nist-csf-id.am
+          - nist-csf-id.am-3
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-5
+      - google cloud
+  - id: darkbit-gcp-23
+    title: CloudSQL Instances Should Require SSL/TLS
+    description:
+      By default, CloudSQL instances will accept both SSL/TLS and plaintext
+      database connections.  As CloudSQL instances are provisioned inside a separate
+      VPC within GCP that the user does not control, this means that database traffic
+      will traverse a VPC peering connection without in-transit encryption.  Requiring
+      SSL/TLS connections ensures that all connections are encrypted over the wire.
+    remediation:
+      Configure the instance during creation or while running to `require-ssl`.  For
+      example, `gcloud sql instances patch [INSTANCE_NAME] --require-ssl`.  To allow
+      applications to connect securely without changing application code, the cloudsql-proxy
+      can be used.  It can handle setting up a localhost SSL proxy/tunnel and applications
+      can be configured to connect to the database via that tunnel.
+    validation:
+      'In each project, run `gcloud sql instances list --format=json | jq
+      -r ''.[] | select(.settings.ipConfiguration.requireSsl==null) | "(.name) SSL:
+      (.settings.ipConfiguration.requireSsl)"''` and ensure no entries are listed.'
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: CloudSQL MySQL Require SSL/TLS
+        url: https://cloud.google.com/sql/docs/mysql/configure-ssl-instance
+      - text: CloudSQL PostgreSQL Require SSL/TLS
+        url: https://cloud.google.com/sql/docs/postgres/configure-ssl-instance
+      - text: CloudSQL Sqlserver Require SSL/TLS
+        url: https://cloud.google.com/sql/docs/sqlserver/configure-ssl-instance
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-6
+          - gcp-cis1.1-6.4
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-7
+          - nist-csf-pr.ds
+          - nist-csf-pr.ds-2
+      - google cloud
+  - id: darkbit-gcp-26
+    title: Firewall Rules Should Not Allow Access to RDP TCP/3389 From All Hosts
+    description:
+      Firewall rules that permit inbound/ingress access from any IP address
+      (0.0.0.0/0) to database ports via RDP (TCP/3389) should be reviewed for necessity
+      to prevent unintended exposure of services and systems protected by that security
+      group.  The primary exclusion to this is a dedicated, hardened bastion host.
+    remediation:
+      For each firewall rule, assess whether the attached systems requires
+      Remote Desktop access from any IP address.  If it doesn't, consider reducing the
+      source IP ranges to a specific set of subnets or to the bastion host(s) in the
+      environment.
+    validation:
+      In each project, run ``gcloud compute firewall-rules list --format=json
+      | jq -r '.[] | select(.sourceRanges) | select(.allowed) | select(.sourceRanges[]
+      | contains("0.0.0.0/0")) | "(.name) (.allowed[])"' and ensure no entries that
+      permit `IPProtocol` of `tcp` and `ports` of `3389`.
+    impact: 7
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: Configuring Firewall Rules
+        url: https://cloud.google.com/vpn/docs/how-to/configuring-firewall-rules
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level2
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-3
+          - gcp-cis1.1-3.7
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-3
+          - nist-csf-pr.ac-4
+          - nist-csf-pr.ac-5
+          - nist-csf-pr.ds
+          - nist-csf-pr.ds-5
+      - google cloud
+  - id: darkbit-gcp-33
+    title: Load Balancers Should Use a MODERN or RESTRICTED SSL Policy
+    description:
+      By default, Load Balancers use an SSL/TLS policy equivalent to the
+      COMPATIBLE profile which supports a wide range of ciphers and TLS versions of
+      varying security.  In nearly all use cases, the more stringent profiles should
+      be used to ensure client connections only negotiate with strong ciphers and recent
+      TLS versions.  For compliance-focused environments, the RESTRICTED policy should
+      be used.
+    remediation:
+      Configure all Load Balancers to leverage the MODERN or RESTRICTED SSL
+      policy or a CUSTOM SSL policy with equivalent enforcement of secure ciphers and
+      TLS versions.
+    validation: |
+      Run `gcloud compute target-https-proxies list --format=json | jq -r
+      '.[] | select(.sslPolicy | not) | "(.name) (.selfLink)"'` and `gcloud compute
+      target-ssl-proxies list --format=json | jq -r '.[] | select(.sslPolicy | not)
+      | "(.name) (.selfLink)"'` and ensure they do not return any entries.
+    impact: 3
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: GCP SSL Policies
+        url: https://cloud.google.com/load-balancing/docs/ssl-policies-concepts
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-not-scored
+          - gcp-cis1.1-3
+          - gcp-cis1.1-3.9
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-7
+          - nist-csf-pr.ds
+          - nist-csf-pr.ds-2
+          - nist-csf-pr.pt
+          - nist-csf-pr.pt-4
+      - google cloud
+  - id: darkbit-gcp-38
+    title: GKE Network Policy Support Should Be Installed in All Clusters
+    description:
+      By default in Kubernetes, all Pods can communicate with each other
+      by IP and egress to any subnet (including the Internet) unless routing or firewalls
+      are added to prevent that traffic.  This presents ample opportunity for lateral
+      movement from the perspective of a compromised workload. One of the best ways
+      to reduce the scope of that movement is to deploy NetworkPolicy resources that
+      define firewall rules for pod-to-pod traffic.  In GKE, the Network Policy add-on
+      must be enabled to allow for the cluster to enforce firewall policies on Pods.
+    remediation:
+      Configure the cluster to enabled Network Policy support to allow for
+      in-cluster support for NetworkPolicy (firewall rules) resources.
+    validation:
+      Run `gcloud container clusters describe <clustername> --format=json
+      | jq -r 'select(.networkPolicy.enabled==true and .networkPolicy.provider=="CALICO")
+      | "(.name)"'` and ensure that the cluster's name is listed.
+    impact: 9
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: Kubernetes Network Policy
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#restrict_with_network_policy
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-not-scored
+          - gke-cis1.1-4
+          - gke-cis1.1-4.3
+          - gke-cis1.1-4.3.1
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-4
+          - nist-csf-pr.ac-5
+          - nist-csf-pr.ds
+          - nist-csf-pr.ds-5
+      - google cloud
+  - id: darkbit-gcp-39
+    title: GKE Control Plane Access Should Be Restricted to a Known Set of IP Ranges
+    description:
+      The Kubernetes API Server systems (Control Plane) expose the Kubernetes
+      API Server TLS port publicly without an IP restrictions or limitations.  This
+      provides convenient remote administrative access, but it affords only a single
+      layer of defense in front of the Kubernetes cluster and all applications and data
+      inside.  A pre-authentication or denial-of-service vulnerability could compromise
+      or disrupt the cluster completely.  Several pre-authentication denial-of-service
+      vulnerabilities have been discovered and fixed in recent Kubernetes releases.
+    remediation:
+      Configure the master authorized networks on the GKE cluster to be restricted
+      to a known set of IP ranges for API Server access.  In environments with bastion
+      hosts or VPNs, their internal subnet range or security groups are commonly used.
+    validation:
+      Run `gcloud container clusters describe <clustername> --format=json
+      | jq -r 'select(.masterAuthorizedNetworksConfig.enabled==true) | select(.masterAuthorizedNetworksConfig.cidrBlocks[].cidrBlock!="0.0.0.0/0")
+      | "(.name)"'` and ensure that the cluster's name is listed.
+    impact: 9
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: Billion Laughs Attack
+        url: https://www.stackrox.com/post/2019/09/protecting-kubernetes-api-against-cve-2019-11253-billion-laughs-attack/
+      - text: Billion Laughs PoC
+        url: https://gist.github.com/bgeesaman/0e0349e94cd22c48bf14d8a9b7d6b8f2
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.6
+          - gke-cis1.1-5.6.3
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-3
+          - nist-csf-pr.ac-5
+          - nist-csf-pr.pt
+          - nist-csf-pr.pt-3
+          - nist-csf-pr.pt-4
+      - google cloud
+  - id: darkbit-gcp-40
+    title:
+      GKE Workload Identity Should Be Enabled and Enforcing Metadata Protection
+      on All Nodepools
+    description:
+      Currently, all pods have the ability to reach the Instance Metadata
+      API corresponding to the underlying node.  By extension, those pods can access
+      the APIs and data used to bootstrap the Kubernetes worker node.  The credentials
+      used to bootstrap a Kubernetes worker node are very commonly sufficient to be
+      used to privilege escalate to "cluster-admin".  Also by extension, this means
+      that every container image ever run in this cluster in the non-"prod" namespace
+      has had the ability to reach and export these credentials.  Therefore, it's very
+      important for a cluster's security posture to prevent pods from being able to
+      reach the Instance Metadata API to fetch those bootstrapping credentials.
+    remediation:
+      Configure Workload Identity on the cluster and every node pool in the
+      cluster with the GKE_METADATA setting enabled.  Alternatively, deploy an egress
+      NetworkPolicy blocking egress to 169.254.169.254 for all non-kube-system namespaces.
+    validation:
+      Run `gcloud container clusters describe <clustername> --format=json
+      | jq -r 'select(.workloadIdentityConfig.workloadPool | test("svc.id.goog")) |
+      "(.name)"'` and ensure that the cluster's name is listed.
+    impact: 9
+    nodes:
+      - GCP_CONTAINER_CLUSTER
+    refs:
+      - text: GKE Workload Identity
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
+      - text: Hardening GKE
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#workload_identity
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-not-scored
+          - gke-cis1.1-level2
+          - gke-cis1.1-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.2
+          - gke-cis1.1-5.2.2
+          - gke-cis1.1-5.4
+          - gke-cis1.1-5.4.2
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-1
+          - nist-csf-pr.ac-4
+          - nist-csf-pr.ac-5
+          - nist-csf-pr.ac-6
+          - nist-csf-pr.ac-7
+          - nist-csf-pr.ds
+          - nist-csf-pr.ds-2
+          - nist-csf-pr.pt
+          - nist-csf-pr.pt-3
+      - google cloud
+  - id: darkbit-gcp-41
+    title: GKE Node Pools Should Use Dedicated GCP Service Accounts
+    description:
+      By default, GKE associates the "default" compute service account to
+      GKE worker nodes, and it is automatically granted the "Project Editor" IAM Role.  To
+      avoid using an inherently shared service account with over-provisioned permissions,
+      create a dedicated service account for each GKE cluster in each project and grant
+      it only the minimal IAM permissions needed.
+    remediation: |-
+      Create a dedicated GCP service account for each cluster in each project. Create a custom IAM Role with the "monitoring.viewer", "monitoring.metricWriter", and "logging.logWriter" permissions, and associate that with the dedicated GCP service account.  Also, ensure the OAuth Scopes attached to the nodes are:
+
+      * https://www.googleapis.com/auth/devstorage.read_only
+      * https://www.googleapis.com/auth/logging.write
+      * https://www.googleapis.com/auth/monitoring
+      * https://www.googleapis.com/auth/servicecontrol
+      * https://www.googleapis.com/auth/service.management.readonly
+      * https://www.googleapis.com/auth/trace.append
+
+      Consideration: Changing the service account or the OAuth Scopes will result in a rolling redeployment of the Node Pool.
+    validation:
+      Run `gcloud container clusters describe <clustername> --format=json
+      | jq -r 'select(.nodePools[].config.serviceAccount | test("-compute@developer.gserviceaccount.com")
+      | not) | "(.name)"'` and ensure that the cluster's name is listed.
+    impact: 9
+    nodes:
+      - GCP_CONTAINER_NODEPOOL
+      - GCP_IDENTITY
+    refs:
+      - text: GKE NodePool OAuth Scopes
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#use_least_privilege_sa
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.2
+          - gke-cis1.1-5.2.1
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-1
+          - nist-csf-pr.ac-6
+          - nist-csf-pr.ip
+          - nist-csf-pr.ip-1
+          - nist-csf-pr.pt
+          - nist-csf-pr.pt-3
+      - google cloud
+  - id: darkbit-gcp-42
+    title: GKE Node Pools Should Use Shielded GKE Nodes
+    description:
+      Starting in GKE 1.13.6 and later, GKE Worker nodes can be provisioned
+      with a Virtual Trusted Platform Module (vTPM) that can be used to cryptographically
+      verify the integrity of the boot process and to securely distribute the bootstrapping
+      credentials used by the Kubelet to attach the node to the cluster on first boot.  Without
+      this feature, the Kubelet's bootstrapping credentials are available via the GCE
+      Metadata API, and that can be accessed by any Pod unless additional protections
+      are put in place.  These credentials can be leveraged to escalate to cluster-admin
+      in most situations.
+    remediation:
+      'Modify the cluster node pool configuration to enable shielded nodes
+      (--enable-shielded-nodes) and secure boot (--shielded-secure-boot).  This will
+      remove the sensitive bootstrapping credentials from the GCE Metadata API and enable
+      additional verification checks to ensure the worker nodes have not been compromised
+      at a fundamental level.  Considerations: The nodes must be running the COS or
+      COS_CONTAINERD operating system, and enabling this change will require a node
+      pool rolling redeployment performed at the next maintenance window.'
+    validation:
+      Run `gcloud container clusters describe <clustername> --format=json
+      | jq -r 'select(.nodePools[].config.shieldedInstanceConfig.enableIntegrityMonitoring==true
+      and .nodePools[].config.shieldedInstanceConfig.enableSecureBoot==true) | "(.name)"'`
+      and ensure that the cluster's name is listed.
+    impact: 9
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: GKE Hardening
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#shielded_nodes
+      - text: GKE Shielded Nodes
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/shielded-gke-node
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level2
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-4
+          - gcp-cis1.1-4.8
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-level2
+          - gke-cis1.1-scored
+          - gke-cis1.1-not-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.3
+          - gke-cis1.1-5.3.1
+          - gke-cis1.1-5.4
+          - gke-cis1.1-5.4.2
+          - gke-cis1.1-5.5
+          - gke-cis1.1-5.5.5
+          - gke-cis1.1-5.5.6
+          - gke-cis1.1-5.5.7
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ds
+          - nist-csf-pr.ds-6
+          - nist-csf-pr.ds-8
+          - nist-csf-pr.pt
+          - nist-csf-pr.pt-5
+      - google cloud
+  - id: darkbit-gcp-44
+    title: GKE Clusters Should Use a Private Cluster Endpoint/IP
+    description:
+      By default, GKE creates clusters with a public IP address on the control
+      plane without any network restriction on source IP ranges that can access it.  Even
+      though the access controls protecting the API server require authentication and
+      authorization, the API server is open to denial-of-service attacks, being probed
+      by bots/scanners inflating Stackdriver logs, and direct exploitation should a
+      Kubernetes API Server vulnerability be discovered.
+    remediation: |-
+      Consider rebuilding GKE clusters with the "private master endpoint" configuration to ensure the API server is not assigned a routable public IP address.  Additional considerations:
+
+      * Converting a public to a private GKE cluster requires rebuilding it.
+      * Use a dedicated /28 subnet for the control plane IP space that does not overlap anywhere and is not part of 172.17.0.0/16.
+      * Private control planes leverage VPC peering and count toward VPC peering quota.
+      * Modifications to the VPC peering or firewall rules from the control plane to the worker nodes can break the cluster.
+    validation:
+      Run `gcloud container clusters describe <clustername> --format=json
+      | jq -r 'select(.privateClusterConfig.enablePrivateEndpoint==true) | "(.name)"'`
+      and ensure that the cluster's name is listed.
+    impact: 9
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: GKE Private Clusters
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level2
+          - gke-cis1.1-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.6
+          - gke-cis1.1-5.6.4
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-3
+          - nist-csf-pr.ac-5
+          - nist-csf-pr.pt
+          - nist-csf-pr.pt-3
+          - nist-csf-pr.pt-4
+      - google cloud
+  - id: darkbit-gcp-47
+    title: GKE Intranode Visibility Should Be Enabled on All Clusters
+    description:
+      When enabling VPC Flow Logs on a VPC where GKE clusters are running,
+      traffic that does not exit the node is not captured.  That is, traffic between
+      two pods on the same node do not exit the host's network and therefore are omitted
+      from VPC Flow Logging.  Enabling Intranode Visibility allows this traffic to be
+      recorded in the VPC Flow Logs for analysis and diagnosis.
+    remediation:
+      'Configure Intranode Visibility on GKE Clusters running in VPCs with
+      Flow logging enabled.  Considerations: VPC Flow logs may increase in size and
+      contribute to additional cost.'
+    validation:
+      Run `gcloud container clusters describe <clustername> --format=json
+      | jq -r 'select(.networkConfig.enableIntraNodeVisibility==true) | "(.name)"'`
+      and ensure that the cluster's name is listed.
+    impact: 2
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: GKE Intranode Visibility
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/intranode-visibility
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level2
+          - gke-cis1.1-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.6
+          - gke-cis1.1-5.6.1
+      - nist-csf:
+          - nist-csf-de
+          - nist-csf-de.ae
+          - nist-csf-de.ae-1
+          - nist-csf-de.ae-3
+          - nist-csf-de.cm
+          - nist-csf-de.cm-1
+          - nist-csf-de.cm-7
+      - google cloud
+  - id: darkbit-gcp-48
+    title: GKE Logs Should Be Sent to Stackdriver/GCP Cloud Monitoring
+    description:
+      By default, GKE enables a Stackdriver log export managed add-on capability
+      that ships all Host OS, Kubernetes components, and container logs to the Stackdriver
+      endpoint in the current project.  This provides a detailed record of nearly all
+      activities in the cluster and nodes to support troubleshooting and auditing functions.  Even
+      if a third party logging solution is implemented to capture and ship logs, it's
+      recommended that this add-on is enabled to ensure all Host OS and Kubernetes component
+      logs are captured off-cluster.
+    remediation:
+      Configure the Kubernetes Engine Monitoring for "System and workload
+      logging and monitoring" via the console or by way of the `--enable-stackdriver-kubernetes`
+      option to gcloud on all GKE clusters. Existing clusters can have this feature
+      enabled in-place with no downtime.
+    validation:
+      Run `gcloud container clusters describe <clustername> --format=json
+      | jq -r 'select(.loggingService=="logging.googleapis.com/kubernetes") | "(.name)"'`
+      and ensure that the cluster's name is listed.
+    impact: 9
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: Kubernetes Engine Monitoring
+        url: https://cloud.google.com/monitoring/kubernetes-engine/installing
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.7
+          - gke-cis1.1-5.7.1
+      - nist-csf:
+          - nist-csf-de
+          - nist-csf-de.ae
+          - nist-csf-de.ae-1
+          - nist-csf-de.ae-2
+      - google cloud
+  - id: darkbit-gcp-50
+    title: GKE Node Pools Should Use the COS or COS_CONTAINERD Operating System
+    description:
+      GKE Nodes can leverage either Container-Optimized OS or Ubuntu-based
+      operating system images.  Unless there is a very specific use-case that a Container-Optimized
+      OS image cannot support such as installed certain drivers and/or kernel modules,
+      Ubuntu nodes are not recommended.  Container-Optimized OS is a fully hardened
+      operating system designed specifically to run containerized workloads with a high
+      degree of security, and it receives automatic updates from Google.  The track
+      record for security issues that affect Ubuntu nodes in GKE that did not affect
+      COS nodes is also important to consider.
+    remediation:
+      'Configure your GKE Node Pools to leverage either the COS or COS_CONTAINERD
+      image type.  The COS image leverages Docker, and the COS_CONTAINERD image implements
+      only containerd and does not use the commonly known Docker socket at `/var/run/docker.sock`
+      which allows applications that can access that socket to effectively be "root"
+      on the host.  If your workloads do not require the ability to mount the docker
+      socket for activities such as image building in-cluster or certain security features,
+      COS_CONTAINERD offers an even smaller attack surface than COS.  Considerations:
+      changing the image type recreates the nodes in the node pool.'
+    validation:
+      Run `gcloud container clusters describe <clustername> --format=json
+      | jq -r 'select(.nodePools[].config.imageType | test("^COS")) | "(.name)"'` and
+      ensure that the cluster's name is listed.
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: GKE Node Images
+        url: https://cloud.google.com/kubernetes-engine/docs/concepts/node-images
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-level2
+          - gke-cis1.1-scored
+          - gke-cis1.1-3
+          - gke-cis1.1-3.1
+          - gke-cis1.1-3.1.1
+          - gke-cis1.1-3.1.2
+          - gke-cis1.1-3.1.3
+          - gke-cis1.1-3.1.4
+          - gke-cis1.1-3.2.1
+          - gke-cis1.1-3.2.2
+          - gke-cis1.1-3.2.3
+          - gke-cis1.1-3.2.5
+          - gke-cis1.1-3.2.6
+          - gke-cis1.1-3.2.7
+          - gke-cis1.1-3.2.8
+          - gke-cis1.1-3.2.10
+          - gke-cis1.1-3.2.11
+          - gke-cis1.1-3.2.12
+          - gke-cis1.1-5
+          - gke-cis1.1-5.5
+          - gke-cis1.1-5.5.1
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ip
+          - nist-csf-pr.ip-1
+          - nist-csf-pr.pt
+          - nist-csf-pr.pt-3
+      - google cloud
+  - id: darkbit-gcp-52
+    title: GKE Node Pools Should Enable AutoRepair
+    description:
+      GKE Nodes have several health checks that continuously run to validate
+      that the worker node is running and capable of handling workloads.  If an issue
+      occurs that the system cannot auto-resolve, the automatic repair feature will
+      handle evicting workloads from the node and reprovisioning the underlying GCE
+      instance for you.  This is highly recommended for reducing administrator load
+      and maintaining healthy clusters.
+    remediation:
+      Configure the node pools to enable AutoRepair during node pool creation
+      or to existing clusters with the `--enable-autorepair` feature set.
+    validation:
+      Run `gcloud container clusters describe <clustername> --format=json
+      | jq -r 'select(.nodePools[].management.autoRepair==true) | "(.name)"'` and ensure
+      that the cluster's name is listed.
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: GKE Node Auto Repair
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-repair
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-scored
+          - gke-cis1.1-5.5
+          - gke-cis1.1-5.5.2
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.pt
+          - nist-csf-pr.pt-5
+      - google cloud
+  - id: darkbit-gcp-53
+    title: GKE Node Pools Should Enable AutoUpgrade
+    description:
+      The GKE service will automatically maintain the version and patch release
+      of the control plane nodes, but the Node Pools are left to the user to keep upgraded
+      by default.  This can result in situations where security issues are patched on
+      the control plane but not on the nodes, and performing node upgrades is an activity
+      that can consume a large amount of administrative time if performed manually across
+      many clusters and node pools.  If your workloads are properly configured to withstand
+      a single node failure, these maintenance activities can be performed during upgrade
+      windows without manual intervention or downtime.
+    remediation:
+      Configure the node pools to enable AutoUpgrade during node pool creation
+      or to existing clusters with the `--enable-autoupgrade` feature set.  It's strongly
+      recommended to validate that all workloads can handle the upgrade process smoothly
+      in a development cluster before enabling this setting in production.
+    validation:
+      Run `gcloud container clusters describe <clustername> --format=json
+      | jq -r 'select(.nodePools[].management.autoUpgrade==true) | "(.name)"'` and ensure
+      that the cluster's name is listed.
+    impact: 2
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: GKE Node Auto Upgrade
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-upgrades
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-scored
+          - gke-cis1.1-5.5
+          - gke-cis1.1-5.5.3
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ma
+          - nist-csf-pr.ma-1
+          - nist-csf-pr.pt
+          - nist-csf-pr.pt-5
+      - google cloud
+  - id: darkbit-gcp-55
+    title: GKE Subnet Alias Ranges Should Be Configured
+    description:
+      In order to support private GKE Clusters, Alias IP ranges on the VPC
+      Subnets is required.  In addition to private clusters, Alias IP ranges simplify
+      the route tables in the VPC, reduce the number of "hops" traffic takes from load
+      balancers to Pods, and allows the GCE network interfaces to perform anti-spoofing
+      checks as IP forwarding is not required on the instance.  Finally, the separation
+      of VM IPs from Container IPs allows for native firewall rules to be configured
+      for pod traffic separately from VM traffic.
+    remediation:
+      During cluster creation, specify a VPC Subnet that supports Alias IP
+      ranges and secondary ranges for Pods and Services.  This can only be done at cluster
+      creation time.
+    validation:
+      Run `gcloud container clusters describe <clustername> --format=json
+      | jq -r 'select(.ipAllocationPolicy.useIpAliases==true) | "(.name)"'` and ensure
+      that the cluster's name is listed.
+    impact: 5
+    nodes:
+      - GCP_CONTAINER_CLUSTER
+    refs:
+      - text: VPC Alias IPs
+        url: https://cloud.google.com/vpc/docs/alias-ip
+      - text: VPC-Native GKE Clusters
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/alias-ips
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.6
+          - gke-cis1.1-5.6.2
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-5
+          - nist-csf-pr.pt
+          - nist-csf-pr.pt-3
+          - nist-csf-pr.pt-4
+      - google cloud
+  - id: darkbit-gcp-56
+    title: GKE Legacy ABAC Authorization Should Not Be Used
+    description:
+      Role-Based Access Control has been the default authorization mechanism
+      in Kubernetes since version 1.6.  GKE still provides a legacy capability that
+      supports ABAC, but it should not be used.  It essentially provides "cluster admin"
+      access for any authenticated credential to the cluster and has no method for changing
+      this policy.  This is an extremely permissive setting that allows for full cluster
+      compromise should an attacker gain access to a single pod with a mounted Kubernetes
+      service account or a valid cluster credential.
+    remediation:
+      Configure the cluster without the `--enable-legacy-authorization` flag
+      set.  If migrating an existing cluster from ABAC to RBAC by modifying this setting
+      in-place, ensure that all the required RBAC RoleBindings and ClusterRoleBindings
+      are present first.  This should be performed in a development environment before
+      applying this process to production clusters.
+    validation:
+      Run `gcloud container clusters describe <clustername> --format=json
+      | jq -r 'select(.legacyAbac.enabled | not) | "(.name)"'` and ensure that the cluster's
+      name is listed.
+    impact: 9
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: GKE Cluster Hardening
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.8
+          - gke-cis1.1-5.8.4
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-4
+          - nist-csf-pr.ip
+          - nist-csf-pr.ip-1
+      - google cloud
+  - id: darkbit-gcp-59
+    title: CloudSQL Instance Automatic Backups With Point-in-Time Recovery Should Be Configured
+    description:
+      By default, CloudSQL instances have automatic backups with point-in-time
+      recovery enabled.  It's important that these settings are not disabled to ensure
+      that all databases can be restored to a known-good state should a security incident
+      occur.  For example, a SQL injection attack that results in the deletion or modification
+      of tables in the database.
+    remediation:
+      Ensure all CloudSQL instances are configured with automatic backups
+      during a desired window and point-in-time recovery is enabled.  Existing instances
+      can be modified to have these settings take effect, but it requires the instance
+      to be restarted.
+    validation:
+      'In each project, run `gcloud sql instances list --format=json | jq
+      -r ''.[] | select(.settings.backupConfiguration.enabled==false) | "(.name) Backups
+      on: (.settings.backupConfiguration.enabled) and PITR on: (.settings.backupConfiguration.binaryLogEnabled)"''`
+      and ensure no entries are listed.'
+    impact: 9
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: CloudSQL MySQL Backups
+        url: https://cloud.google.com/sql/docs/mysql/backup-recovery/backups
+      - text: CloudSQL PostgreSQL Backups
+        url: https://cloud.google.com/sql/docs/postgres/backup-recovery/backups
+      - text: CloudSQL Sqlserver Backups
+        url: https://cloud.google.com/sql/docs/sqlserver/backup-recovery/backups
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-6
+          - gcp-cis1.1-6.7
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ip
+          - nist-csf-pr.ip-10
+          - nist-csf-pr.ip-4
+          - nist-csf-pr.pt
+          - nist-csf-pr.pt-5
+      - google cloud
+  - id: darkbit-gcp-60
+    title: Default Compute Service Account Should Not Be Bound To Project Editor
+    description:
+      By default, the Default Compute service account is enabled and bound to
+      the primitive IAM role named "Project Editor" in projects where the Compute API has
+      been enabled.  In addition, this service account is bound to all new GCE, GKE, and
+      other compute instances by default.
+    remediation:
+      Remove the IAM role binding of "Project Editor" from the default compute
+      service account in all projects.
+    validation: 'For each project, run `gcloud projects get-iam-policy
+      PROJECTID --format=json | jq -r ''select(.bindings) | .bindings[] | .role as $role
+      | select(.role=="roles/editor") | "($role): (.members[])"''` and validate that the
+      default compute service account ending in `-compute@developer.gserviceaccount.com`
+      is not present.'
+    impact: 7
+    nodes:
+      - GCP_CLOUDRESOURCEMANAGER_PROJECT
+      - GCP_IAM_ROLE
+    refs:
+      - text: Default Compute Service Account
+        url: https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#using_the_default_service_account
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-1
+          - gcp-cis1.1-1.5
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ac
+          - nist-csf-pr.ac-1
+          - nist-csf-pr.ac-4
+      - google cloud
+  - id: darkbit-gcp-61
+    title: Application-Level Encryption of Secrets in GKE Etcd Should Be Implemented
+    description:
+      The Kubernetes API Server has the ability to leverage an external KMS
+      provider for encryption and decryption of secrets stored inside etcd.  This provides
+      additional protection in the event of unauthorized access to the disk or datastore
+      where etcd maintains the cluster state.  It also ensures that the most sensitive
+      data in etcd backups are not directly readable if stored in cloud storage buckets.
+    remediation:
+      Follow the instructions for your specific cloud provider's Kubernetes
+      offering to enable application level encryption of Kubernetes Secrets with KMS
+      keys.
+    validation:
+      Follow the instructions for your specific cloud provider's Kubernetes
+      offering to verify that application level encryption of Kubernetes Secrets with
+      KMS keys is configured.
+    impact: 2
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: Kubernetes KMS Provider
+        url: https://kubernetes.io/docs/tasks/administer-cluster/kms-provider/
+      - text: GKE Application Secrets Encryption
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/encrypting-secrets
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.3
+          - gke-cis1.1-5.3.1
+      - nist-csf:
+          - nist-csf-pr
+          - nist-csf-pr.ds
+          - nist-csf-pr.ds-1
+          - nist-csf-pr.ds-5
+      - kubernetes
+  - id: darkbit-gcp-62
+    title: GCP Service Accounts Should Not Have User-Managed Keys Attached
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - GCP_CLOUDRESOURCEMANAGER_PROJECT
+      - GCP_IDENTITY
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-1
+          - gcp-cis1.1-1.4
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-63
+    title: GCP Service Accounts Should Not Be Bound To Admin, Editor, or Owner Roles
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 7
+    nodes:
+      - GCP_IDENTITY
+      - GCP_IAM_ROLE
+    refs:
+      - text: Default Compute Service Account
+        url: https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#using_the_default_service_account
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-1
+          - gcp-cis1.1-1.5
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-64
+    title: Service Account Admin and Service Account User Should Not Be Attached To The Same Identity
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 9
+    nodes:
+      - GCP_IDENTITY
+      - GCP_IAM_ROLE
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level2
+          - gcp-cis1.1-not-scored
+          - gcp-cis1.1-1
+          - gcp-cis1.1-1.8
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-65
+    title: Cloud KMS Keys Should Not Be Public
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 10
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-1
+          - gcp-cis1.1-1.9
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-66
+    title: Cloud KMS Keys Should Be Rotated Every 90 Days
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-1
+          - gcp-cis1.1-1.10
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-67
+    title: Cloud KMS Admin and Cloud KMS Encrypter/Decrypter Should Not Be Attached To The Same Identity
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - GCP_IDENTITY
+      - GCP_IAM_ROLE
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level2
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-1
+          - gcp-cis1.1-1.11
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-72
+    title: Log Sinks Should Be Configured For All Log Entries
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - GCP_IDENTITY
+      - GCP_IAM_ROLE
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-2
+          - gcp-cis1.1-2.2
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-73
+    title: Logging Buckets Should Have Retention Policies and Bucket Lock Enabled
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - GCP_IDENTITY
+      - GCP_IAM_ROLE
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-2
+          - gcp-cis1.1-2.3
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-74
+    title: Log Metric Filter And Alert Should Notify On Project Ownership Changes
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - GCP_IDENTITY
+      - GCP_IAM_ROLE
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-2
+          - gcp-cis1.1-2.4
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-75
+    title: Log Metric Filter And Alert Should Notify On Audit Configuration Changes
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - GCP_IDENTITY
+      - GCP_IAM_ROLE
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-2
+          - gcp-cis1.1-2.5
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-76
+    title: Log Metric Filter And Alert Should Notify On Firewall Rule Changes
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - GCP_IDENTITY
+      - GCP_IAM_ROLE
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-2
+          - gcp-cis1.1-2.7
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-77
+    title: Log Metric Filter And Alert Should Notify On Route Changes
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - GCP_IDENTITY
+      - GCP_IAM_ROLE
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-2
+          - gcp-cis1.1-2.8
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-78
+    title: Log Metric Filter And Alert Should Notify On Network Changes
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - GCP_IDENTITY
+      - GCP_IAM_ROLE
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-2
+          - gcp-cis1.1-2.9
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-79
+    title: Log Metric Filter And Alert Should Notify On Cloud Storage IAM Changes
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - GCP_IDENTITY
+      - GCP_IAM_ROLE
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-2
+          - gcp-cis1.1-2.10
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-80
+    title: Log Metric Filter And Alert Should Notify On SQL Instance Changes
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - GCP_IDENTITY
+      - GCP_IAM_ROLE
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-2
+          - gcp-cis1.1-2.11
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-81
+    title: Legacy VPC Networks Should Not Be Present
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-3
+          - gcp-cis1.1-3.2
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-82
+    title: Cloud DNS Domains Should Have DNSSEC Enabled
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-3
+          - gcp-cis1.1-3.3
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-83
+    title: Cloud DNS Domains Should Not Use RSASHA1 For The Key Signing Key
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-not-scored
+          - gcp-cis1.1-3
+          - gcp-cis1.1-3.4
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-84
+    title: Cloud DNS Domains Should Not Use RSASHA1 For The Zone Signing Key
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-not-scored
+          - gcp-cis1.1-3
+          - gcp-cis1.1-3.5
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-85
+    title: GCE Instances Should Not Have The Default Compute Service Account Attached
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-4
+          - gcp-cis1.1-4.1
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-86
+    title: GCE Instances Should Not Have The "cloud-platform" OAuth2 Scope Assigned
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-4
+          - gcp-cis1.1-4.2
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-87
+    title: GCE Instances Should Block Project-Wide SSH Keys
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-4
+          - gcp-cis1.1-4.3
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-88
+    title: OSLogin Should Be Enabled In Compute Projects And GCE Instances Should Not Override Via Metadata
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-4
+          - gcp-cis1.1-4.4
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-89
+    title: GCE Instances Should Not Be Available Via Serial Console
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-4
+          - gcp-cis1.1-4.5
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-90
+    title: GCE Instances Should Not Have IP Forwarding Enabled
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-4
+          - gcp-cis1.1-4.6
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-91
+    title: Business Critical GCE Instances Should Have CSEK Encrypted Disks
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level2
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-4
+          - gcp-cis1.1-4.7
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-92
+    title: GCE Instances Should Be Shielded Nodes
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level2
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-4
+          - gcp-cis1.1-4.8
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-93
+    title: Google App Engine Applications Should Enforce HTTPS
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level2
+          - gcp-cis1.1-not-scored
+          - gcp-cis1.1-4
+          - gcp-cis1.1-4.10
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-94
+    title: GCS Buckets Should Not Be Public
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-5
+          - gcp-cis1.1-5.1
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-95
+    title: GCS Buckets Should Have Uniform IAM Access Configured
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level2
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-5
+          - gcp-cis1.1-5.2
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-97
+    title: CloudSQL Instances Running MySQL Should Have "local_infile" Disabled
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-6
+          - gcp-cis1.1-6.1
+          - gcp-cis1.1-6.1.2
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-98
+    title: CloudSQL Instances Running PostgreSQL Should Have "log_checkpoints" Enabled
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-6
+          - gcp-cis1.1-6.2
+          - gcp-cis1.1-6.2.1
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-99
+    title: CloudSQL Instances Running PostgreSQL Should Have "log_connections" Enabled
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-6
+          - gcp-cis1.1-6.2
+          - gcp-cis1.1-6.2.2
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-100
+    title: CloudSQL Instances Running PostgreSQL Should Have "log_disconnections" Enabled
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-6
+          - gcp-cis1.1-6.2
+          - gcp-cis1.1-6.2.3
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-101
+    title: CloudSQL Instances Running PostgreSQL Should Have "log_lock_waits" Enabled
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-6
+          - gcp-cis1.1-6.2
+          - gcp-cis1.1-6.2.4
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-102
+    title: CloudSQL Instances Running PostgreSQL Should Have "log_min_messages" Set To "ERROR"
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-not-scored
+          - gcp-cis1.1-6
+          - gcp-cis1.1-6.2
+          - gcp-cis1.1-6.2.5
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-103
+    title: CloudSQL Instances Running PostgreSQL Should Have "log_temp_files" Enabled
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-6
+          - gcp-cis1.1-6.2
+          - gcp-cis1.1-6.2.6
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-104
+    title: CloudSQL Instances Running PostgreSQL Should Have "log_min_duration_statement" Disabled
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-6
+          - gcp-cis1.1-6.2
+          - gcp-cis1.1-6.2.7
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-105
+    title: CloudSQL Instances Running SQL Server Should Have "cross db ownership chaining" Disabled
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-6
+          - gcp-cis1.1-6.3
+          - gcp-cis1.1-6.3.1
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-106
+    title: CloudSQL Instances Running SQL Server Should Have "contained database authentication" Disabled
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-6
+          - gcp-cis1.1-6.3
+          - gcp-cis1.1-6.3.2
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-107
+    title: CloudSQL Instances Should Have Restrictive Authorized Networks Configured
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-6
+          - gcp-cis1.1-6.5
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-108
+    title: BigQuery Datasets Should Not Be Public
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-7
+          - gcp-cis1.1-7.1
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-109
+    title: GKE Clusters Should Not Have Client Certificate Authentication Enabled
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-not-scored
+          - gke-cis1.1-2
+          - gke-cis1.1-2.1
+          - gke-cis1.1-2.1.1
+          - gke-cis1.1-5
+          - gke-cis1.1-5.8
+          - gke-cis1.1-5.8.2
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-110
+    title: GCR Image Vulnerability Scanning Should Be Enabled
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.1
+          - gke-cis1.1-5.1.1
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-112
+    title: GKE Clusters Should Have Read-Only Permissions to GCR Registries
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-not-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.1
+          - gke-cis1.1-5.1.3
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-113
+    title: GKE Clusters Nodes Should Disable Legacy Metadata API Access
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.4
+          - gke-cis1.1-5.4.1
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-114
+    title: GKE Clusters Should Use Stable Or Regular Release Channels
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-not-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.5
+          - gke-cis1.1-5.5.4
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-115
+    title: GKE Cluster Nodes Should Not Have Public IP Addresses
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.6
+          - gke-cis1.1-5.6.5
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-117
+    title: HTTPS Load Balancers Should Use Google-Managed SSL Certificates
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level2
+          - gke-cis1.1-not-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.6
+          - gke-cis1.1-5.6.8
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-121
+    title: GKE Clusters Should Support Google Groups In RBAC Bindings
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level2
+          - gke-cis1.1-not-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.8
+          - gke-cis1.1-5.8.3
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-122
+    title: GKE Cluster Node Boot And Persistent Disks Should Be Encrypted With Customer Managed Encryption Keys (CMEK)
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-not-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.9
+          - gke-cis1.1-5.9.1
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-123
+    title: Alpha GKE Clusters Should Not Be Used In Production
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.10
+          - gke-cis1.1-5.10.2
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-124
+    title: GKE Sandbox (Gvisor) Should Be Enabled For Untrusted Workloads
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level2
+          - gke-cis1.1-not-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.10
+          - gke-cis1.1-5.10.4
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-125
+    title: GKE Clusters Should Enable Binary Authorization
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level2
+          - gke-cis1.1-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.10
+          - gke-cis1.1-5.10.5
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-126
+    title: Cloud Security Command Center (CSCC) Should Be Enabled In The Organization
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-not-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.10
+          - gke-cis1.1-5.10.6
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+
