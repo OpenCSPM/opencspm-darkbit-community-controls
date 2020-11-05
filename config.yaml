@@ -19,6 +19,7 @@ controls:
     refs:
       - text: AWS Access Keys
         url: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -94,6 +95,7 @@ controls:
         url: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_checking-status.html
       - text: AWS MFA Enablement
         url: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_enable_virtual.html
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -180,6 +182,7 @@ controls:
     refs:
       - text: AWS IAM Account Password Policy
         url: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_passwords_account-policy.html
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -276,6 +279,7 @@ controls:
     refs:
       - text: AWS Access Key Management
         url: https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -376,6 +380,7 @@ controls:
     refs:
       - text: AWS Hardware MFA
         url: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_enable_physical.html
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -441,6 +446,7 @@ controls:
     refs:
       - text: AWS Support Access
         url: https://docs.aws.amazon.com/awssupport/latest/user/getting-started.html#accessing-support
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -470,6 +476,7 @@ controls:
     refs:
       - text: IAM Access Policies
         url: https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_job-functions.html
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -569,6 +576,7 @@ controls:
     refs:
       - text: IAM Best Practicies
         url: http://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#use-groups-for-permissions
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -674,6 +682,7 @@ controls:
     refs:
       - text: VPC Security Groups
         url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -777,6 +786,7 @@ controls:
         url: http://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/flow-logs.html
       - text: Working with VPC Flow Logs
         url: https://docs.aws.amazon.com/vpc/latest/userguide/working-with-flow-logs.html
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -860,6 +870,7 @@ controls:
         url: https://www.stackrox.com/post/2019/09/protecting-kubernetes-api-against-cve-2019-11253-billion-laughs-attack/
       - text: CVE-2019-11253 Billion Laughs Exploit Code
         url: https://gist.github.com/bgeesaman/0e0349e94cd22c48bf14d8a9b7d6b8f2
+    public: true
     tags:
       - cis:
           - eks-cis1.0.1
@@ -906,6 +917,7 @@ controls:
         url: https://aws.amazon.com/blogs/opensource/introducing-fine-grained-iam-roles-service-accounts/
       - text: EKS Pod Identity
         url: https://github.com/aws/amazon-eks-pod-identity-webhook
+    public: true
     tags:
       - cis:
           - eks-cis1.0.1
@@ -941,6 +953,7 @@ controls:
     refs:
       - text: ECR Image Scanning
         url: https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-scanning.html
+    public: true
     tags:
       - cis:
           - eks-cis1.0.1
@@ -981,6 +994,7 @@ controls:
         url: https://docs.aws.amazon.com/AmazonS3/latest/dev/ServerLogs.html
       - text: S3 Object Lifecycle Management
         url: https://docs.aws.amazon.com/AmazonS3/latest/dev/object-lifecycle-mgmt.html
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -1096,6 +1110,7 @@ controls:
     refs:
       - text: S3 SSL Enforcement
         url: https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-ssl-requests-only.html
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -1182,6 +1197,7 @@ controls:
         url: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSEncryption.html
       - text: AMI Encryption
         url: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIEncryption.html
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -1252,6 +1268,7 @@ controls:
         url: https://aws.amazon.com/about-aws/whats-new/2020/03/amazon-eks-adds-envelope-encryption-for-secrets-with-aws-kms/
       - text: EKS Create Cluster
         url: https://docs.aws.amazon.com/eks/latest/userguide/create-cluster.html
+    public: true
     tags:
       - cis:
           - eks-cis1.0.1
@@ -1287,6 +1304,7 @@ controls:
         url: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-create-and-update-a-trail.html
       - text: AWS CloudTrail Log File Valiation
         url: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -1403,6 +1421,7 @@ controls:
     refs:
       - text: AWS Config
         url: https://aws.amazon.com/config
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -1455,6 +1474,7 @@ controls:
     refs:
       - text: EKS Control Plane Logging
         url: https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html
+    public: true
     tags:
       - cis:
           - eks-cis1.0.1
@@ -1494,6 +1514,7 @@ controls:
         url: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html
       - text: CloudTrail Log File Integrity Validation
         url: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-enabling.html
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -1561,6 +1582,7 @@ controls:
         url: https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html
       - text: Amazon S3 block public access
         url: https://docs.aws.amazon.com/AmazonS3/latest/dev/access-control-block-public-access.html
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -1673,6 +1695,7 @@ controls:
     refs:
       - text: KMS Key Rotation
         url: https://docs.aws.amazon.com/kms/latest/developerguide/rotate-keys.html
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -1728,6 +1751,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -1751,6 +1775,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -1771,6 +1796,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -1808,6 +1834,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -1828,6 +1855,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -1847,6 +1875,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -1905,6 +1934,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -1952,6 +1982,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -1972,6 +2003,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -2071,6 +2103,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -2123,6 +2156,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -2206,6 +2240,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -2289,6 +2324,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -2309,6 +2345,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - aws-cis1.3
@@ -2391,6 +2428,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - eks-cis1.0.1
@@ -2427,6 +2465,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - eks-cis1.0.1
@@ -2448,6 +2487,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - eks-cis1.0.1
@@ -2469,6 +2509,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - eks-cis1.0.1
@@ -2490,6 +2531,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - eks-cis1.0.1
@@ -2511,6 +2553,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - eks-cis1.0.1
@@ -2532,6 +2575,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - eks-cis1.0.1
@@ -2575,6 +2619,7 @@ controls:
     refs:
       - text: Granting IAM Roles to Service Accounts
         url: https://cloud.google.com/iam/docs/granting-roles-to-service-accounts
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -2611,6 +2656,7 @@ controls:
     refs:
       - text: Using VPC Flow Logs
         url: https://cloud.google.com/vpc/docs/using-flow-logs
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -2648,6 +2694,7 @@ controls:
     refs:
       - text: Configuring Firewall Rules
         url: https://cloud.google.com/vpn/docs/how-to/configuring-firewall-rules
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -2688,6 +2735,7 @@ controls:
     refs:
       - text: IAP Proxy for GCE
         url: https://cloud.google.com/iap/docs/enabling-compute-howto
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -2728,6 +2776,7 @@ controls:
         url: https://cloud.google.com/vpc/docs/vpc#default-network
       - text: Organization Policies
         url: https://cloud.google.com/resource-manager/docs/organization-policy/org-policy-constraints
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -2779,6 +2828,7 @@ controls:
         url: https://cloud.google.com/iam/docs/creating-managing-service-account-keys
       - text: Security Health Analytics
         url: https://cloud.google.com/security-command-center/docs/how-to-manage-security-health-analytics
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -2832,6 +2882,7 @@ controls:
         url: https://cloud.google.com/logging/docs/audit/understanding-audit-logs
       - text: Configuring Data Access Logs
         url: https://cloud.google.com/logging/docs/audit/configure-data-access
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -2879,6 +2930,7 @@ controls:
         url: https://cloud.google.com/sql/docs/postgres/configure-private-services-access
       - text: CloudSQL Sqlserver Private IP
         url: https://cloud.google.com/sql/docs/sqlserver/configure-private-services-access
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -2922,6 +2974,7 @@ controls:
         url: https://cloud.google.com/sql/docs/postgres/configure-ssl-instance
       - text: CloudSQL Sqlserver Require SSL/TLS
         url: https://cloud.google.com/sql/docs/sqlserver/configure-ssl-instance
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -2959,6 +3012,7 @@ controls:
     refs:
       - text: Configuring Firewall Rules
         url: https://cloud.google.com/vpn/docs/how-to/configuring-firewall-rules
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -2999,6 +3053,7 @@ controls:
     refs:
       - text: GCP SSL Policies
         url: https://cloud.google.com/load-balancing/docs/ssl-policies-concepts
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -3038,6 +3093,7 @@ controls:
     refs:
       - text: Kubernetes Network Policy
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#restrict_with_network_policy
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -3080,6 +3136,7 @@ controls:
         url: https://www.stackrox.com/post/2019/09/protecting-kubernetes-api-against-cve-2019-11253-billion-laughs-attack/
       - text: Billion Laughs PoC
         url: https://gist.github.com/bgeesaman/0e0349e94cd22c48bf14d8a9b7d6b8f2
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -3127,6 +3184,7 @@ controls:
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
       - text: Hardening GKE
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#workload_identity
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -3182,6 +3240,7 @@ controls:
     refs:
       - text: GKE NodePool OAuth Scopes
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#use_least_privilege_sa
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -3232,6 +3291,7 @@ controls:
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#shielded_nodes
       - text: GKE Shielded Nodes
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/shielded-gke-node
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -3287,6 +3347,7 @@ controls:
     refs:
       - text: GKE Private Clusters
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -3326,6 +3387,7 @@ controls:
     refs:
       - text: GKE Intranode Visibility
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/intranode-visibility
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -3368,6 +3430,7 @@ controls:
     refs:
       - text: Kubernetes Engine Monitoring
         url: https://cloud.google.com/monitoring/kubernetes-engine/installing
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -3412,6 +3475,7 @@ controls:
     refs:
       - text: GKE Node Images
         url: https://cloud.google.com/kubernetes-engine/docs/concepts/node-images
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -3466,6 +3530,7 @@ controls:
     refs:
       - text: GKE Node Auto Repair
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-repair
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -3504,6 +3569,7 @@ controls:
     refs:
       - text: GKE Node Auto Upgrade
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-upgrades
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -3544,6 +3610,7 @@ controls:
         url: https://cloud.google.com/vpc/docs/alias-ip
       - text: VPC-Native GKE Clusters
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/alias-ips
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -3586,6 +3653,7 @@ controls:
     refs:
       - text: GKE Cluster Hardening
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -3629,6 +3697,7 @@ controls:
         url: https://cloud.google.com/sql/docs/postgres/backup-recovery/backups
       - text: CloudSQL Sqlserver Backups
         url: https://cloud.google.com/sql/docs/sqlserver/backup-recovery/backups
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -3666,6 +3735,7 @@ controls:
     refs:
       - text: Default Compute Service Account
         url: https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#using_the_default_service_account
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -3703,6 +3773,7 @@ controls:
         url: https://kubernetes.io/docs/tasks/administer-cluster/kms-provider/
       - text: GKE Application Secrets Encryption
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/encrypting-secrets
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -3729,6 +3800,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -3751,6 +3823,7 @@ controls:
     refs:
       - text: Default Compute Service Account
         url: https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#using_the_default_service_account
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -3773,6 +3846,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -3794,6 +3868,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -3815,6 +3890,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -3837,6 +3913,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -3859,6 +3936,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -3881,6 +3959,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -3903,6 +3982,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -3925,6 +4005,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -3947,6 +4028,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -3969,6 +4051,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -3991,6 +4074,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4013,6 +4097,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4035,6 +4120,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4056,6 +4142,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4077,6 +4164,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4098,6 +4186,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4119,6 +4208,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4140,6 +4230,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4161,6 +4252,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4182,6 +4274,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4203,6 +4296,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4224,6 +4318,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4245,6 +4340,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4266,6 +4362,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4287,6 +4384,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4308,6 +4406,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4329,6 +4428,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4350,6 +4450,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4371,6 +4472,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4393,6 +4495,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4415,6 +4518,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4437,6 +4541,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4459,6 +4564,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4481,6 +4587,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4503,6 +4610,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4525,6 +4633,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4547,6 +4656,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4569,6 +4679,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4591,6 +4702,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4612,6 +4724,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gcp-cis1.1
@@ -4633,6 +4746,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -4658,6 +4772,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -4680,6 +4795,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -4702,6 +4818,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -4724,6 +4841,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -4746,6 +4864,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -4768,6 +4887,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -4790,6 +4910,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -4812,6 +4933,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -4834,6 +4956,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -4856,6 +4979,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -4878,6 +5002,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gke-cis1.1
@@ -4900,6 +5025,7 @@ controls:
     refs:
       - text: TODO
         url: TODO
+    public: true
     tags:
       - cis:
           - gke-cis1.1
