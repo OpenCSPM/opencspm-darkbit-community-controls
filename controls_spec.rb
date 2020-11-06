@@ -63,7 +63,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   )
   policies = graphdb.query(q).mapped_results
   policies.each do |policy|
-    describe "arn:aws::::#{policy.account}", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe "arn:aws:::#{policy.account}/account", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have adequate IAM password policy' do
         expect(policy.minimum_password_length.to_i).to be >= 14
         expect(policy.require_symbols).to eq('true')
