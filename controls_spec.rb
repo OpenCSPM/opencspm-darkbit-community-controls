@@ -601,9 +601,29 @@ end
 
 control_id = 'darkbit-gcp-14'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (s:GCP_COMPUTE_SUBNETWORK) 
+    RETURN s.name as name, 
+           s.resource_data_logConfig_enable as flow_logging, 
+           s.resource_data_logConfig_flowSampling as flow_sampling, 
+           s.resource_data_logConfig_metadata as metadata
+  )
+  subnets = graphdb.query(q).mapped_results
+  if subnets.length > 0
+    subnets.each do |subnet|
+      describe subnet.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have full VPC Flow logging enabled' do
+          expect(subnet.flow_logging).to eq('true')
+          expect(subnet.flow_sampling).to eq('1')
+          expect(subnet.metadata).to eq('INCLUDE_ALL_METADATA')
+        end
+      end
+    end
+  else
+    describe 'No Subnets found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have full VPC Flow logging enabled' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -619,9 +639,27 @@ end
 
 control_id = 'darkbit-gcp-17'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (i:GCP_COMPUTE_INSTANCE)
+    WHERE i.resource_data_labels_goog_gke_node IS NULL
+    OPTIONAL MATCH (i)-[:HAS_NETWORKACCESSCONFIG]->(n:GCP_COMPUTE_NETWORKACCESSCONFIG)
+    WHERE i.resource_data_labels_goog_gke_node IS NULL
+    return i.name as name, n.type as network_type
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have a private IP' do
+          expect(instance.network_type).not_to eq('ONE_TO_ONE_NAT')
+        end
+      end
+    end
+  else
+    describe 'No Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have a private IP' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -691,18 +729,51 @@ end
 
 control_id = 'darkbit-gcp-38'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (c:GCP_CONTAINER_CLUSTER)
+    RETURN c.name as name, c.resource_data_networkPolicy_enabled as network_policy
+  )
+  gkeclusters = graphdb.query(q).mapped_results
+  if gkeclusters.length > 0
+    gkeclusters.each do |cluster|
+      describe cluster.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have Network Policy configured' do
+          expect(cluster.network_policy).to eq('true')
+        end
+      end
+    end
+  else
+    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have Network Policy configured' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
 control_id = 'darkbit-gcp-39'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (c:GCP_CONTAINER_CLUSTER)
+    OPTIONAL MATCH (c:GCP_CONTAINER_CLUSTER)-[:HAS_MASTERAUTHORIZEDNETWORK]->(n:GCP_CONTAINER_MASTERAUTHORIZEDNETWORK)
+    WHERE n.cidr_block = '0.0.0.0/0'
+    RETURN c.name, c.resource_data_masterAuthorizedNetworksConfig_enabled as authorized_networks_enabled, n.cidr_block as any_ip
+  )
+  gkeclusters = graphdb.query(q).mapped_results
+  if gkeclusters.length > 0
+    gkeclusters.each do |cluster|
+      describe cluster.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should restrict access to the API' do
+          expect(cluster.authorized_networks_enabled).to eq('true')
+          expect(cluster.any_ip).not_to eq('0.0.0.0/0')
+        end
+      end
+    end
+  else
+    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should restrict access to the API' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -757,63 +828,168 @@ end
 
 control_id = 'darkbit-gcp-42'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (c:GCP_CONTAINER_CLUSTER)
+    RETURN c.name as name, c.resource_data_shieldedNodes_enabled as shielded_nodes
+  )
+  gkeclusters = graphdb.query(q).mapped_results
+  if gkeclusters.length > 0
+    gkeclusters.each do |cluster|
+      describe cluster.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have Shielded Nodes configured' do
+          expect(cluster.shielded_nodes).to eq('true')
+        end
+      end
+    end
+  else
+    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have Shielded Nodes configured' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
 control_id = 'darkbit-gcp-44'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (c:GCP_CONTAINER_CLUSTER)
+    RETURN c.name as name, c.resource_data_privateClusterConfig_privateEndpoint as private_endpoint
+  )
+  gkeclusters = graphdb.query(q).mapped_results
+  if gkeclusters.length > 0
+    gkeclusters.each do |cluster|
+      describe cluster.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have a Private Master Endpoint configured' do
+          expect(cluster.private_endpoint).not_to be(nil)
+        end
+      end
+    end
+  else
+    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have a Private Master Endpoint configured' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
 control_id = 'darkbit-gcp-47'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (c:GCP_CONTAINER_CLUSTER)
+    RETURN c.name as name, c.resource_data_networkConfig_enableIntraNodeVisibility as intranode_visibility
+  )
+  gkeclusters = graphdb.query(q).mapped_results
+  if gkeclusters.length > 0
+    gkeclusters.each do |cluster|
+      describe cluster.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have IntraNode Visibility configured' do
+          expect(cluster.intranode_visibility).to eq('true')
+        end
+      end
+    end
+  else
+    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have IntraNode Visibility configured' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
 control_id = 'darkbit-gcp-48'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (c:GCP_CONTAINER_CLUSTER)
+    RETURN c.name as name, c.resource_data_loggingService as logging
+  )
+  gkeclusters = graphdb.query(q).mapped_results
+  if gkeclusters.length > 0
+    gkeclusters.each do |cluster|
+      describe cluster.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have GCP Logging configured' do
+          expect(cluster.logging).to eq('logging.googleapis.com/kubernetes')
+        end
+      end
+    end
+  else
+    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have GCP Logging configured' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
 control_id = 'darkbit-gcp-50'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (c:GCP_CONTAINER_NODEPOOL)
+    RETURN c.name as name, c.config_imageType as os
+  )
+  gkenodepools = graphdb.query(q).mapped_results
+  if gkenodepools.length > 0
+    gkenodepools.each do |nodepool|
+      describe nodepool.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should use COS or COS_CONTAINERD' do
+          expect(nodepool.os).to match(/^COS.*/i)
+        end
+      end
+    end
+  else
+    describe 'No GKE NodePools found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should use COS or COS_CONTAINERD' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
 control_id = 'darkbit-gcp-52'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (c:GCP_CONTAINER_NODEPOOL)
+    RETURN c.name as name, c.management_autoRepair as autorepair
+  )
+  gkenodepools = graphdb.query(q).mapped_results
+  if gkenodepools.length > 0
+    gkenodepools.each do |nodepool|
+      describe nodepool.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have autorepair enabled' do
+          expect(nodepool.autorepair).to eq('true')
+        end
+      end
+    end
+  else
+    describe 'No GKE NodePools found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have autorepair enabled' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
 control_id = 'darkbit-gcp-53'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (c:GCP_CONTAINER_NODEPOOL)
+    RETURN c.name as name, c.management_autoUpgrade as autoupgrade
+  )
+  gkenodepools = graphdb.query(q).mapped_results
+  if gkenodepools.length > 0
+    gkenodepools.each do |nodepool|
+      describe nodepool.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have autoupgrade enabled' do
+          expect(nodepool.autoupgrade).to eq('true')
+        end
+      end
+    end
+  else
+    describe 'No GKE NodePools found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have autoupgrade enabled' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -844,16 +1020,30 @@ end
 
 control_id = 'darkbit-gcp-56'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (c:GCP_CONTAINER_CLUSTER)
+    RETURN c.name as name, c.resource_data_legacyAbac as abac
+  )
+  gkeclusters = graphdb.query(q).mapped_results
+  if gkeclusters.length > 0
+    gkeclusters.each do |cluster|
+      describe cluster.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should not have legacy Abac configured' do
+          expect(cluster.abac).to be(nil)
+        end
+      end
+    end
+  else
+    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not have legacy Abac configured' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
 control_id = 'darkbit-gcp-59'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -862,8 +1052,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-60'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
     MATCH (c:GCP_IDENTITY { member_type: 'serviceAccount' })-[r:HAS_IAMROLE]-(p:GCP_CLOUDRESOURCEMANAGER_PROJECT)
     WHERE c.name ENDS WITH '-compute@developer.gserviceaccount.com'
@@ -888,18 +1077,31 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-61'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
+  q = %s(
+    MATCH (c:GCP_CONTAINER_CLUSTER)
+    RETURN c.name as name, c.resource_data_databaseEncryption_state as encryption_state
+  )
+  gkeclusters = graphdb.query(q).mapped_results
+  if gkeclusters.length > 0
+    gkeclusters.each do |cluster|
+      describe cluster.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should encrypt secrets at rest in Etcd' do
+          expect(cluster.encryption_state).to eq('ENCRYPTED')
+        end
+      end
+    end
+  else
+    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should encrypt secrets at rest in Etcd' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
 control_id = 'darkbit-gcp-62'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -908,8 +1110,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-63'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -918,8 +1119,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-64'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -928,8 +1128,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-65'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -938,8 +1137,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-66'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -948,8 +1146,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-67'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -958,8 +1155,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-72'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -968,8 +1164,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-73'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -978,8 +1173,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-74'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -988,8 +1182,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-75'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -998,8 +1191,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-76'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1008,8 +1200,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-77'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1018,8 +1209,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-78'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1028,8 +1218,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-79'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1038,8 +1227,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-80'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1048,8 +1236,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-81'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1058,8 +1245,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-82'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1068,8 +1254,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-83'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1078,8 +1263,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-84'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1088,8 +1272,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-85'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1098,18 +1281,34 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-86'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
+  q = %s(
+    MATCH (i:GCP_COMPUTE_INSTANCE)
+    WHERE i.resource_data_labels_goog_gke_node IS NULL
+    OPTIONAL MATCH (i:GCP_COMPUTE_INSTANCE)-[r:HAS_OAUTHSCOPE]->(s:GCP_IAM_OAUTHSCOPE { name: 'https://www.googleapis.com/auth/cloud-platform'} )
+    WHERE i.resource_data_labels_goog_gke_node IS NULL
+    RETURN i.name as name, s.name as cloud_platform_scope
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should not have cloud-platform oauth scope assigned' do
+          expect(instance.cloud_platform_scope).to eq(nil)
+        end
+      end
+    end
+  else
+    describe 'No Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not have cloud-platform oauth scope assigned' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
 control_id = 'darkbit-gcp-87'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1118,8 +1317,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-88'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1128,8 +1326,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-89'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1138,18 +1335,32 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-90'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
+  q = %s(
+    MATCH (i:GCP_COMPUTE_INSTANCE)
+    WHERE i.resource_data_labels_goog_gke_node IS NULL
+    RETURN i.name as name, i.resource_data_canIpForward as can_ip_forward
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should not have ip forwarding enabled' do
+          expect(instance.can_ip_forward).to eq('false')
+        end
+      end
+    end
+  else
+    describe 'No Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not have ip forwarding enabled' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
 control_id = 'darkbit-gcp-91'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1158,18 +1369,38 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-92'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
+  q = %s(
+    MATCH  (i:GCP_COMPUTE_INSTANCE)
+    WHERE  i.resource_data_labels_goog_gke_node IS NULL
+    RETURN i.name,
+           i.resource_data_shieldedInstanceConfig_enableIntegrityMonitoring as integrity_monitoring,
+           i.resource_data_shieldedInstanceConfig_enableSecureBoot as secure_boot,
+           i.resource_data_shieldedInstanceConfig_enableVtpm as enable_vtpm
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have shielded node configuration enabled' do
+          expect(instance.integrity_monitoring).to eq('true')
+          expect(instance.secure_boot).to eq('true')
+          expect(instance.enable_vtpm).to eq('true')
+        end
+      end
+    end
+  else
+    describe 'No Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have shielded node configuration enabled' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
+
 control_id = 'darkbit-gcp-93'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1178,8 +1409,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-94'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1188,8 +1418,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-95'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1198,8 +1427,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-97'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1208,8 +1436,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-98'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1218,8 +1445,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-99'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1228,8 +1454,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-100'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1238,8 +1463,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-101'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1248,8 +1472,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-102'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1258,8 +1481,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-103'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1268,8 +1490,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-104'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1278,8 +1499,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-105'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1288,8 +1508,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-106'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1298,8 +1517,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-107'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1308,8 +1526,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-108'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1318,8 +1535,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-109'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1328,8 +1544,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-110'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1338,8 +1553,7 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-112'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1348,18 +1562,31 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-113'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
+  q = %s(
+    MATCH (c:GCP_CONTAINER_NODEPOOL)
+    RETURN c.name as name, c.config_metadata_disable_legacy_endpoints as disabled_legacy_metadata
+  )
+  gkenodepools = graphdb.query(q).mapped_results
+  if gkenodepools.length > 0
+    gkenodepools.each do |nodepool|
+      describe nodepool.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have legacy metadata endpoints disabled' do
+          expect(nodepool.disabled_legacy_metadata).to eq('true')
+        end
+      end
+    end
+  else
+    describe 'No GKE NodePools found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have legacy metadata endpoints disabled' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
 control_id = 'darkbit-gcp-114'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1368,18 +1595,31 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-115'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
+  q = %s(
+    MATCH (c:GCP_CONTAINER_CLUSTER)
+    RETURN c.name as name, c.resource_data_privateClusterConfig_enablePrivateNodes as private_nodes
+  )
+  gkeclusters = graphdb.query(q).mapped_results
+  if gkeclusters.length > 0
+    gkeclusters.each do |cluster|
+      describe cluster.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have private nodes configured' do
+          expect(cluster.private_nodes).to eq('true')
+        end
+      end
+    end
+  else
+    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have private nodes configured' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
 control_id = 'darkbit-gcp-117'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1388,18 +1628,32 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-121'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
+  q = %s(
+    MATCH (c:GCP_CONTAINER_CLUSTER)
+    RETURN c.name as name, c.resource_data_authenticatorGroupsConfig_enabled as google_groups_rbac
+  )
+  gkeclusters = graphdb.query(q).mapped_results
+  if gkeclusters.length > 0
+    gkeclusters.each do |cluster|
+      describe cluster.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have google groups RBAC integration configured' do
+          expect(cluster.google_groups_rbac).to eq('true')
+        end
+      end
+    end
+  else
+    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have google groups RBAC integration configured' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
+
 control_id = 'darkbit-gcp-122'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1408,18 +1662,31 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-123'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
+  q = %s(
+    MATCH (c:GCP_CONTAINER_CLUSTER)
+    RETURN c.name as name, c.resource_data_enableKubernetesAlpha as alpha
+  )
+  gkeclusters = graphdb.query(q).mapped_results
+  if gkeclusters.length > 0
+    gkeclusters.each do |cluster|
+      describe cluster.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should not run alpha clusters' do
+          expect(cluster.alpha).not_to eq('true')
+        end
+      end
+    end
+  else
+    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not run alpha clusters' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
 control_id = 'darkbit-gcp-124'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
@@ -1428,18 +1695,31 @@ RSpec.describe "[#{control_id}] #{title}" do
 end
 
 control_id = 'darkbit-gcp-125'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
+  q = %s(
+    MATCH (c:GCP_CONTAINER_CLUSTER)
+    RETURN c.name as name, c.resource_data_binaryAuthorization_enabled as binary_authorization
+  )
+  gkeclusters = graphdb.query(q).mapped_results
+  if gkeclusters.length > 0
+    gkeclusters.each do |cluster|
+      describe cluster.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have binary authorization enabled' do
+          expect(cluster.binary_authorization).to eq('true')
+        end
+      end
+    end
+  else
+    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have binary authorization enabled' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
 control_id = 'darkbit-gcp-126'
-title = config_file['controls'].filter { |control| control['id'] == control_id }.first['title'] || 'Unknown Title'
-RSpec.describe "[#{control_id}] #{title}" do
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
     it 'should not have a placeholder configuration' do
       expect(true).to eq(true)
