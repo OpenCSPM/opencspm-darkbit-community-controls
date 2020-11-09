@@ -2652,7 +2652,7 @@ controls:
       no entries are present.
     impact: 7
     nodes:
-      - PLACEHOLDER
+      - GCP_COMPUTE_SUBNETWORK
     refs:
       - text: Using VPC Flow Logs
         url: https://cloud.google.com/vpc/docs/using-flow-logs
@@ -2731,7 +2731,7 @@ controls:
       and ensure that no entries with public IPs exist.'
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_COMPUTE_INSTANCE
     refs:
       - text: IAP Proxy for GCE
         url: https://cloud.google.com/iap/docs/enabling-compute-howto
@@ -3089,7 +3089,7 @@ controls:
       | "(.name)"'` and ensure that the cluster's name is listed.
     impact: 9
     nodes:
-      - PLACEHOLDER
+      - GCP_CONTAINER_CLUSTER
     refs:
       - text: Kubernetes Network Policy
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#restrict_with_network_policy
@@ -3130,7 +3130,7 @@ controls:
       | "(.name)"'` and ensure that the cluster's name is listed.
     impact: 9
     nodes:
-      - PLACEHOLDER
+      - GCP_CONTAINER_CLUSTER
     refs:
       - text: Billion Laughs Attack
         url: https://www.stackrox.com/post/2019/09/protecting-kubernetes-api-against-cve-2019-11253-billion-laughs-attack/
@@ -3285,7 +3285,7 @@ controls:
       and ensure that the cluster's name is listed.
     impact: 9
     nodes:
-      - PLACEHOLDER
+      - GCP_CONTAINER_CLUSTER
     refs:
       - text: GKE Hardening
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#shielded_nodes
@@ -3343,7 +3343,7 @@ controls:
       and ensure that the cluster's name is listed.
     impact: 9
     nodes:
-      - PLACEHOLDER
+      - GCP_CONTAINER_CLUSTER
     refs:
       - text: GKE Private Clusters
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters
@@ -3383,7 +3383,7 @@ controls:
       and ensure that the cluster's name is listed.
     impact: 2
     nodes:
-      - PLACEHOLDER
+      - GCP_CONTAINER_CLUSTER
     refs:
       - text: GKE Intranode Visibility
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/intranode-visibility
@@ -3426,7 +3426,7 @@ controls:
       and ensure that the cluster's name is listed.
     impact: 9
     nodes:
-      - PLACEHOLDER
+      - GCP_CONTAINER_CLUSTER
     refs:
       - text: Kubernetes Engine Monitoring
         url: https://cloud.google.com/monitoring/kubernetes-engine/installing
@@ -3471,7 +3471,7 @@ controls:
       ensure that the cluster's name is listed.
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_CONTAINER_NODEPOOL
     refs:
       - text: GKE Node Images
         url: https://cloud.google.com/kubernetes-engine/docs/concepts/node-images
@@ -3526,7 +3526,7 @@ controls:
       that the cluster's name is listed.
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_CONTAINER_NODEPOOL
     refs:
       - text: GKE Node Auto Repair
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-repair
@@ -3565,7 +3565,7 @@ controls:
       that the cluster's name is listed.
     impact: 2
     nodes:
-      - PLACEHOLDER
+      - GCP_CONTAINER_NODEPOOL
     refs:
       - text: GKE Node Auto Upgrade
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-upgrades
@@ -3649,7 +3649,7 @@ controls:
       name is listed.
     impact: 9
     nodes:
-      - PLACEHOLDER
+      - GCP_CONTAINER_CLUSTER
     refs:
       - text: GKE Cluster Hardening
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster
@@ -3767,7 +3767,7 @@ controls:
       KMS keys is configured.
     impact: 2
     nodes:
-      - PLACEHOLDER
+      - GCP_CONTAINER_CLUSTER
     refs:
       - text: Kubernetes KMS Provider
         url: https://kubernetes.io/docs/tasks/administer-cluster/kms-provider/
@@ -4248,7 +4248,7 @@ controls:
     validation: TODO
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_COMPUTE_INSTANCE
     refs:
       - text: TODO
         url: TODO
