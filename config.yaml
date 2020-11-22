@@ -3787,7 +3787,7 @@ controls:
           - nist-csf-pr.ds
           - nist-csf-pr.ds-1
           - nist-csf-pr.ds-5
-      - kubernetes
+      - google cloud
   - id: darkbit-gcp-62
     title: GCP Service Accounts Should Not Have User-Managed Keys Attached
     description: TODO
