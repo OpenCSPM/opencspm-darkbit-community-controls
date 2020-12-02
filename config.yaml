@@ -654,7 +654,7 @@ controls:
     title: Security Groups Should Not Allow Access to Administrative Ports From All Hosts
     description:
       AWS Security Groups that permit inbound/ingress access from any IP
-      address (0.0.0.0/0) to administrative ports via TCP/22 and TCP/3389  should be reviewed
+      address (0.0.0.0/0) to administrative ports via TCP/22 and TCP/3389 should be reviewed
       for necessity to prevent unintended exposure of services and systems protected
       by that security group.  The primary exclusion to this is a dedicated, hardened
       bastion host.
@@ -663,19 +663,40 @@ controls:
       SSH access from any IP address.  If it doesn't, consider reducing the source IP
       ranges to a specific set of subnets or to the security group attached to the bastion
       host(s) in the environment.
-    validation:
-      Run `aws ec2 describe-security-groups --region <region> --query 'SecurityGroups[*]'
-      --output json | jq -r --arg PROTO tcp --arg PORT 22 '.[] | . as $group | .IpPermissions[]
-      | select(.IpRanges[].CidrIp=="0.0.0.0/0" or .Ipv6Ranges[].CidrIpv6=="::/0" or
-      .IpRanges==[] or .Ipv6Ranges==[]) | select((.IpProtocol==$PROTO or .IpProtocol=="-1")
-      and ((.FromPort==null or .FromPort<=($PORT|tonumber)) and (.ToPort==null or .ToPort>=($PORT|tonumber)))
-      and (.UserIdGroupPairs==[])) | "($group.GroupId) ($group.GroupName)"'` and
-      `aws ec2 describe-security-groups --region <region> --query 'SecurityGroups[*]'
-      --output json | jq -r --arg PROTO tcp --arg PORT 3389 '.[] | . as $group | .IpPermissions[]
-      | select(.IpRanges[].CidrIp=="0.0.0.0/0" or .Ipv6Ranges[].CidrIpv6=="::/0" or
-      .IpRanges==[] or .Ipv6Ranges==[]) | select((.IpProtocol==$PROTO or .IpProtocol=="-1")
-      and ((.FromPort==null or .FromPort<=($PORT|tonumber)) and (.ToPort==null or .ToPort>=($PORT|tonumber)))
-      and (.UserIdGroupPairs==[])) | "($group.GroupId) ($group.GroupName)"'`
+    validation: |-
+      Run the following commands to show security groups that allow administrative ports from any host.
+
+      ```
+      aws ec2 describe-security-groups \
+        --region $AWS_REGION \
+        --query 'SecurityGroups[*]' \
+        --output json | jq -r --arg PROTO tcp --arg PORT 22 '.[] | . as $group | .IpPermissions[] |
+        select(.IpRanges[].CidrIp=="0.0.0.0/0"
+        or .Ipv6Ranges[].CidrIpv6=="::/0"
+        or .IpRanges==[]
+        or .Ipv6Ranges==[]) |
+        select((.IpProtocol==$PROTO or .IpProtocol=="-1")
+        and ((.FromPort==null or .FromPort<=($PORT|tonumber))
+        and (.ToPort==null or .ToPort>=($PORT|tonumber)))
+        and (.UserIdGroupPairs==[])) | "\($group.GroupId) \($group.GroupName)"'
+      ```
+
+      and
+
+      ```
+      aws ec2 describe-security-groups \
+        --region $AWS_REGION \
+        --query 'SecurityGroups[*]' \
+        --output json | jq -r --arg PROTO tcp --arg PORT 3389 '.[] | . as $group | .IpPermissions[] | 
+        select(.IpRanges[].CidrIp=="0.0.0.0/0"
+        or .Ipv6Ranges[].CidrIpv6=="::/0"
+        or .IpRanges==[]
+        or .Ipv6Ranges==[]) |
+        select((.IpProtocol==$PROTO or .IpProtocol=="-1")
+        and ((.FromPort==null or .FromPort<=($PORT|tonumber))
+        and (.ToPort==null or .ToPort>=($PORT|tonumber)))
+        and (.UserIdGroupPairs==[])) | "\($group.GroupId) \($group.GroupName)"'
+      ```
     impact: 5
     nodes:
       - PLACEHOLDER
@@ -892,23 +913,27 @@ controls:
   - id: darkbit-aws-32
     title: Instance Metadata Access From Pods Should Be Protected
     description:
-      Currently, all pods have the ability to reach the EC2 Metadata API
-      corresponding to the underlying node without restriction.  In EKS, the IAM permissions
-      are that of the worker IAM Role for the Nodegroup.  If the default IAM Role was
-      customized to add permissions to other services, those permissions may be used
-      to enumerate other resources or create new resources.  Also by extension, this
-      means that every container image ever run in this cluster has had the ability
-      to reach and export these credentials.
+      Pods should not have the ability to reach the EC2 Metadata API of the underlying node
+      without restriction.  In EKS, the IAM permissions are that of the worker IAM Role
+      for the Nodegroup.  If the default IAM Role was customized to add permissions to
+      other services, those permissions may be used to enumerate other resources or create
+      new resources.  Also by extension, this means that every container image ever run
+      in this cluster has had the ability to reach and export these credentials.
     remediation:
       Deploy a solution such as Amazon's EKS Pod Identity Webhook to run
       a daemonset that blocks and redirects pods attempting to access the Instance's
       Metadata API and will optionally serve up a specific IAM Role's credentials instead.  Alternatively,
       deploy an egress NetworkPolicy blocking egress to 169.254.169.254 for all non-kube-system
       namespaces.
-    validation:
+    validation: |-
       Verify that the EKS Pod Identity Webhook daemonset is installed on all
       clusters, and attempt to access the instance credentials via `curl` from inside
-      a running `pod`.  e.g. `kubectl exec -it -n <namespace> <podname> curl -s https://169.254.169.254/latest/meta-data/iam/security-credentials`
+      a running `pod`.  For example: 
+
+      ```
+      kubectl exec -it -n <namespace> <podname> \
+       curl -s https://169.254.169.254/latest/meta-data/iam/security-credentials
+      ```
     impact: 9
     nodes:
       - PLACEHOLDER
@@ -982,10 +1007,15 @@ controls:
       each S3 bucket to enable Server Access Logging to that region's logging bucket,
       and configure an object lifecycle policy to move older logs to "colder" storage
       and to retain those logs for a desired period of time.
-    validation:
-      Run `for i in $(aws s3api list-buckets --query 'Buckets[*].Name' --output
-      text); do aws s3api get-bucket-logging --bucket $i; done` and ensure each bucket
-      has a valid logging configuration present.
+    validation: |-
+      Run the command below and ensure each bucket has a valid logging configuration present.
+
+      ```
+      for i in $(aws s3api list-buckets --query 'Buckets[*].Name' --output text); do
+        echo $i
+        aws s3api get-bucket-logging --bucket $i
+      done
+      ```
     impact: 8
     nodes:
       - AWS_S3_BUCKET
@@ -1571,9 +1601,25 @@ controls:
 
       Strongly consider enabling all four of the S3 Block Public Access policies on the account to enforce non-public buckets regardless of how the resources are created.
     validation: |-
-      Run `for i in $(aws s3api list-buckets --query 'Buckets[*].Name' --region <region> --output text); do echo "$i"; aws s3api get-bucket-acl --region <region> --bucket $i; done` in each region where buckets are present and verify that no permissions are granted to `http://acs.amazonaws.com/groups/global/AllUsers`.
+      Run the following commands in each region where buckets are present and verify that no permissions are granted to `http://acs.amazonaws.com/groups/global/AllUsers`.
 
-      To check the S3 Block Public Access policy, run `for i in $(aws s3api list-buckets --query 'Buckets[*].Name' --output text); do aws s3api get-public-access-block --bucket $i; done` and ensure the policy shown is configured to block public access to the entire bucket.
+      ```
+      for i in $(aws s3api list-buckets --query 'Buckets[*].Name' --region $AWS_REGION --output text); do
+        echo $i
+        aws s3api get-bucket-acl \
+          --region $AWS_REGION \
+          --bucket $i
+      done
+      ```
+
+      To check the S3 Block Public Access policy, run the following commands and ensure the policy shown is configured to block public access to the entire bucket.
+
+      ```
+      for i in $(aws s3api list-buckets --query 'Buckets[*].Name' --output text); do
+        echo $i
+        aws s3api get-public-access-block --bucket $i
+      done
+      ```
     impact: 9
     nodes:
       - AWS_S3_BUCKET
@@ -1684,11 +1730,16 @@ controls:
     remediation:
       To enable automatic key rotation, run `aws kms enable-key-rotation
       --key-id <keyid>`.
-    validation:
-      In each region, run `for i in $(aws kms list-aliases --region <region>
-      --query 'Aliases[*].TargetKeyId' --output text); do aws kms get-key-rotation-status
-      --region <region> --key-id $i | jq -r --arg ARN $i '"($ARN) (.KeyRotationEnabled)"';
-      done` and verify that all are `true`.
+    validation: |-
+      In each region, run the following command and verify that all are `true`.
+
+      ```
+      for i in $(aws kms list-aliases --region $AWS_REGION --query 'Aliases[*].TargetKeyId' --output text); do \
+        aws kms get-key-rotation-status \
+        --region $AWS_REGION \
+        --key-id $i | jq -r --arg ARN $i '"($ARN) (.KeyRotationEnabled)"'
+      done
+      ```
     impact: 5
     nodes:
       - AWS_KMS_KEY
@@ -3520,7 +3571,7 @@ controls:
     remediation:
       Configure the node pools to enable AutoRepair during node pool creation
       or to existing clusters with the `--enable-autorepair` feature set.
-    validation:
+    validation: |
       Run `gcloud container clusters describe <clustername> --format=json
       | jq -r 'select(.nodePools[].management.autoRepair==true) | "(.name)"'` and ensure
       that the cluster's name is listed.
@@ -5037,4 +5088,3 @@ controls:
       - nist-csf:
           - nist-csf-todo
       - google cloud
-
