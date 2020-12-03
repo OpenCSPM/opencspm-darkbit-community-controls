@@ -1644,12 +1644,26 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: GCP_STORAGE_BUCKET
 control_id = 'darkbit-gcp-95'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (b:GCP_STORAGE_BUCKET)
+    RETURN b.name as name, b.resource_data_iamConfiguration_uniformBucketLevelAccess_enabled as uniform_iam_access
+  )
+  buckets = graphdb.query(q).mapped_results
+  if buckets.length > 0
+    buckets.each do |bucket|
+      describe bucket.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have uniform IAM access configured' do
+          expect(bucket.uniform_iam_access).to eq('true')
+        end
+      end
+    end
+  else
+    describe 'No GCS Buckets found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have uniform IAM access configured' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
