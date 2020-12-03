@@ -630,6 +630,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# BLOCKED: Needs firewall rule deep parsing
 control_id = 'darkbit-gcp-15'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -666,6 +667,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: VPC Networks
 control_id = 'darkbit-gcp-18'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -675,6 +677,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: SA Keys
 control_id = 'darkbit-gcp-19'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -684,6 +687,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: Project iam-policy
 control_id = 'darkbit-gcp-20'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -693,6 +697,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: CloudSQL
 control_id = 'darkbit-gcp-22'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -702,6 +707,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: CloudSQL
 control_id = 'darkbit-gcp-23'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -711,6 +717,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# BLOCKED: Needs firewall rule deep parsing
 control_id = 'darkbit-gcp-26'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -720,6 +727,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_COMPUTE_TARGETHTTPSPROXY and GCP_COMPUTE_TARGETSSLPROXY?
 control_id = 'darkbit-gcp-33'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1044,6 +1052,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: CloudSQL
 control_id = 'darkbit-gcp-59'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1102,6 +1111,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP SA Keys
 control_id = 'darkbit-gcp-62'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1111,6 +1121,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP SA and IAM
 control_id = 'darkbit-gcp-63'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1120,6 +1131,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: IAM and GCP_CLOUDKMS_KEYRING
 control_id = 'darkbit-gcp-64'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1129,6 +1141,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: IAM and GCP_CLOUDKMS_KEYRING
 control_id = 'darkbit-gcp-65'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1138,6 +1151,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_CLOUDKMS_CRYPTOKEY
 control_id = 'darkbit-gcp-66'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1147,6 +1161,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: IAM
 control_id = 'darkbit-gcp-67'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1156,6 +1171,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: PROJECT or FOLDER GCP_LOGGING_LOGSINK
 control_id = 'darkbit-gcp-72'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1165,6 +1181,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_CLOUDSTORAGE_BUCKET
 control_id = 'darkbit-gcp-73'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1174,6 +1191,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_LOGGING_LOGMETRIC (suboptimal)
 control_id = 'darkbit-gcp-74'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1183,6 +1201,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_LOGGING_LOGMETRIC (suboptimal)
 control_id = 'darkbit-gcp-75'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1192,6 +1211,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_LOGGING_LOGMETRIC (suboptimal)
 control_id = 'darkbit-gcp-76'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1201,6 +1221,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_LOGGING_LOGMETRIC (suboptimal)
 control_id = 'darkbit-gcp-77'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1210,6 +1231,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_LOGGING_LOGMETRIC (suboptimal)
 control_id = 'darkbit-gcp-78'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1219,6 +1241,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_LOGGING_LOGMETRIC (suboptimal)
 control_id = 'darkbit-gcp-79'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1228,6 +1251,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_LOGGING_LOGMETRIC (suboptimal)
 control_id = 'darkbit-gcp-80'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1237,6 +1261,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: Legacy VPC
 control_id = 'darkbit-gcp-81'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1246,6 +1271,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: Cloud DNS
 control_id = 'darkbit-gcp-82'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1255,6 +1281,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: Cloud DNS
 control_id = 'darkbit-gcp-83'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1264,6 +1291,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: Cloud DNS
 control_id = 'darkbit-gcp-84'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1273,6 +1301,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_COMPUTE_INSTANCE GCP_IDENTITY
 control_id = 'darkbit-gcp-85'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1309,6 +1338,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_COMPUTE_INSTANCE
 control_id = 'darkbit-gcp-87'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1318,6 +1348,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_COMPUTE_INSTANCE and GCP_COMPUTE_PROJECT
 control_id = 'darkbit-gcp-88'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1327,6 +1358,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_COMPUTE_INSTANCE and GCP_COMPUTE_PROJECT
 control_id = 'darkbit-gcp-89'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1361,6 +1393,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_COMPUTE_INSTANCE and GCP_COMPUTE_DISK
 control_id = 'darkbit-gcp-91'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1400,7 +1433,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-
+# TODO: GCP_APPENGINE_APPLICATION
 control_id = 'darkbit-gcp-93'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1410,6 +1443,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_STORAGE_BUCKET and IAM
 control_id = 'darkbit-gcp-94'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1419,6 +1453,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_STORAGE_BUCKET
 control_id = 'darkbit-gcp-95'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1428,6 +1463,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-97'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1437,6 +1473,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-98'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1446,6 +1483,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-99'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1455,6 +1493,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-100'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1464,6 +1503,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-101'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1473,6 +1513,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-102'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1482,6 +1523,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-103'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1491,6 +1533,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-104'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1500,6 +1543,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-105'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1509,6 +1553,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-106'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1518,6 +1563,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-107'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1527,6 +1573,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_BIGQUERY_DATASET and IAM
 control_id = 'darkbit-gcp-108'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1536,6 +1583,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_CONTAINER_CLUSTER
 control_id = 'darkbit-gcp-109'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1545,6 +1593,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_SERVICEUSAGE_SERVICE and GCP_CONTAINERREGISTRY_IMAGE and GCP_STORAGE_BUCKET
 control_id = 'darkbit-gcp-110'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1554,6 +1603,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_CONTAINER_CLUSTER and IAM and GCP_SERVICEUSAGE_SERVICE and GCP_CONTAINERREGISTRY_IMAGE and GCP_STORAGE_BUCKET
 control_id = 'darkbit-gcp-112'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1587,6 +1637,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_CONTAINER_CLUSTER
 control_id = 'darkbit-gcp-114'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1620,6 +1671,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_COMPUTE_TARGETHTTPSPROXY
 control_id = 'darkbit-gcp-117'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1653,7 +1705,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-
+# TODO: GCP_CONTAINER_CLUSTER and GCP_CONTAINER_NODEPOOL and GCE_COMPUTE_INSTANCE
 control_id = 'darkbit-gcp-122'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1687,6 +1739,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: GCP_CONTAINER_CLUSTER and GCP_CONTAINER_NODEPOOL
 control_id = 'darkbit-gcp-124'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1720,6 +1773,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# BLOCKED: Ability to validate CSCC automatically?
 control_id = 'darkbit-gcp-126'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
