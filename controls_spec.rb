@@ -1,4 +1,5 @@
 require 'yaml'
+require 'date'
 
 config_file = YAML.load(File.read(File.expand_path(File.dirname(__FILE__) + '/config.yaml')))
 control_pack = config_file['id']
@@ -119,7 +120,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: map relationship to account and check across accounts
+## TODO: map relationship to account and check across accounts
 control_id = 'darkbit-aws-17'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %(
@@ -667,22 +668,54 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: VPC Networks
 control_id = 'darkbit-gcp-18'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (v:GCP_COMPUTE_NETWORK)
+    WHERE NOT v.resource_data_name IS NULL
+    RETURN v.name as vpc_name, v.resource_data_name as friendly_name
+  )
+  vpcs = graphdb.query(q).mapped_results
+  if vpcs.length > 0
+    vpcs.each do |vpc|
+      describe vpc.vpc_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should not be a default VPC' do
+          expect(vpc.friendly_name).not_to eq('default')
+        end
+      end
+    end
+  else
+    describe 'No VPCs found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not be a default VPC' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# TODO: SA Keys
 control_id = 'darkbit-gcp-19'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (sa:GCP_IAM_SERVICEACCOUNTKEY)
+    WHERE sa.resource_data_keyType = "USER_MANAGED"
+      and NOT sa.resource_data_validAfterTime IS NULL
+    RETURN sa.name as sa_name, sa.resource_data_validAfterTime as start_time
+  )
+  sas = graphdb.query(q).mapped_results
+  if sas.length > 0
+    sas.each do |sa|
+      describe sa.sa_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should not be older than 90 days' do
+          days_old = (DateTime.now - DateTime.parse(sa.start_time)).to_i
+          expect(days_old).to be <= 90
+        end
+      end
+    end
+  else
+    describe 'No SA Keys found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not be older than 90 days' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -697,22 +730,50 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: CloudSQL
 control_id = 'darkbit-gcp-22'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (instance:GCP_SQLADMIN_INSTANCE)
+    RETURN instance.name as name, instance.resource_data_settings_ipConfiguration_ipv4Enabled as public
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should not be public' do
+          expect(instance.public).to eq('false')
+        end
+      end
+    end
+  else
+    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not be public' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# TODO: CloudSQL
 control_id = 'darkbit-gcp-23'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (instance:GCP_SQLADMIN_INSTANCE)
+    RETURN instance.name as name, instance.resource_data_settings_ipConfiguration_requireSsl as requires_ssl
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should require SSL' do
+          expect(instance.requires_ssl).to eq('true')
+        end
+      end
+    end
+  else
+    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should require SSL' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -1052,12 +1113,28 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: CloudSQL
 control_id = 'darkbit-gcp-59'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (instance:GCP_SQLADMIN_INSTANCE)
+    WHERE instance.resource_data_instanceType <> 'READ_REPLICA_INSTANCE'
+    RETURN instance.name, instance.resource_data_settings_backupConfiguration_enabled as backups, instance.resource_data_settings_backupConfiguration_binaryLogEnabled as binlog_enabled
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have automatic backups configured' do
+          expect(instance.backups).to eq('true')
+          expect(instance.binlog_enabled).to eq('true')
+        end
+      end
+    end
+  else
+    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have automatic backups configured' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -1111,12 +1188,28 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: GCP SA Keys
 control_id = 'darkbit-gcp-62'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (sak:GCP_IAM_SERVICEACCOUNTKEY)
+    WHERE sak.resource_data_keyType = "USER_MANAGED"
+    RETURN DISTINCT sak.resource_parent as sa_id
+  )
+  sas = graphdb.query(q).mapped_results
+  if sas.length > 0
+    sas.each do |sa|
+      sa_id = sa.sa_id.gsub(/^\/\//, '')
+      describe sa_id, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should not have user-managed keys' do
+          expect(sa_id).to be_nil
+        end
+      end
+    end
+  else
+    describe 'No User-Managed SA Keys found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not have user-managed keys' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -1151,12 +1244,29 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: GCP_CLOUDKMS_CRYPTOKEY
 control_id = 'darkbit-gcp-66'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (key:GCP_CLOUDKMS_CRYPTOKEY)
+    WHERE key.resource_data_primary_state = "ENABLED"
+      AND key.resource_data_purpose = "ENCRYPT_DECRYPT"
+    RETURN key.name, key.resource_data_primary_generateTime as last_generated
+  )
+  keys = graphdb.query(q).mapped_results
+  if keys.length > 0
+    keys.each do |key|
+      describe key.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should not be older than 90 days' do
+          days_old = (DateTime.now - DateTime.parse(key.last_generated)).to_i
+          expect(days_old).to be <= 90
+        end
+      end
+    end
+  else
+    describe 'No KMS Keys found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not be older than 90 days' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -1261,42 +1371,123 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: Legacy VPC
 control_id = 'darkbit-gcp-81'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (v:GCP_COMPUTE_NETWORK)
+    WHERE NOT v.resource_data_name IS NULL
+    RETURN v.name as vpc_name, v.resource_data_IPv4Range as legacy_range
+  )
+  vpcs = graphdb.query(q).mapped_results
+  if vpcs.length > 0
+    vpcs.each do |vpc|
+      describe vpc.vpc_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should not be a legacy VPC' do
+          expect(vpc.legacy_range).to be_nil
+        end
+      end
+    end
+  else
+    describe 'No VPCs found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not be a legacy VPC' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# TODO: Cloud DNS
 control_id = 'darkbit-gcp-82'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (zone:GCP_DNS_MANAGEDZONE)
+    RETURN zone.name as name, zone.resource_data_dnssecConfig_state as state
+  )
+  zones = graphdb.query(q).mapped_results
+  if zones.length > 0
+    zones.each do |zone|
+      describe zone.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have DNSSEC enabled' do
+          expect(zone.state).to eq('ON')
+        end
+      end
+    end
+  else
+    describe 'No DNS Zones found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have DNSSEC enabled' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# TODO: Cloud DNS
 control_id = 'darkbit-gcp-83'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (zone:GCP_DNS_MANAGEDZONE)
+    RETURN zone.name as name, zone.resource_data_dnssecConfig_state as state, zone.resource_data_dnssecConfig_defaultKeySpecs_0_keyType as first_type, zone.resource_data_dnssecConfig_defaultKeySpecs_0_algorithm as first_algorithm, zone.resource_data_dnssecConfig_defaultKeySpecs_1_keyType as second_type, zone.resource_data_dnssecConfig_defaultKeySpecs_1_algorithm as second_algorithm
+  )
+  zones = graphdb.query(q).mapped_results
+  if zones.length > 0
+    zones.each do |zone|
+      zone_type = nil
+      zone_algorithm = nil
+
+      if zone.first_type == 'KEY_SIGNING'
+        zone_type = zone.first_type
+        zone_algorithm = zone.first_algorithm
+      end
+      if zone.second_type == 'KEY_SIGNING'
+        zone_type = zone.second_type
+        zone_algorithm = zone.second_algorithm
+      end
+
+      describe zone.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should not have RSASHA1 for the Key Signing Key' do
+          expect(zone_algorithm).not_to eq('RSASHA1')
+        end
+      end
+    end
+  else
+    describe 'No DNS Zones found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not have RSASHA1 for the Signing Key' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# TODO: Cloud DNS
 control_id = 'darkbit-gcp-84'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (zone:GCP_DNS_MANAGEDZONE)
+    RETURN zone.name as name, zone.resource_data_dnssecConfig_state as state, zone.resource_data_dnssecConfig_defaultKeySpecs_0_keyType as first_type, zone.resource_data_dnssecConfig_defaultKeySpecs_0_algorithm as first_algorithm, zone.resource_data_dnssecConfig_defaultKeySpecs_1_keyType as second_type, zone.resource_data_dnssecConfig_defaultKeySpecs_1_algorithm as second_algorithm
+  )
+  zones = graphdb.query(q).mapped_results
+  if zones.length > 0
+    zones.each do |zone|
+      zone_type = nil
+      zone_algorithm = nil
+
+      if zone.first_type == 'ZONE_SIGNING'
+        zone_type = zone.first_type
+        zone_algorithm = zone.first_algorithm
+      end
+      if zone.second_type == 'ZONE_SIGNING'
+        zone_type = zone.second_type
+        zone_algorithm = zone.second_algorithm
+      end
+
+      describe zone.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should not have RSASHA1 for the Zone Signing Key' do
+          expect(zone_algorithm).not_to eq('RSASHA1')
+        end
+      end
+    end
+  else
+    describe 'No DNS Zones found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not have RSASHA1 for the Signing Key' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -1338,7 +1529,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: GCP_COMPUTE_INSTANCE
+# BLOCKED: Parsing of metadata keys GCP_COMPUTE_INSTANCE
 control_id = 'darkbit-gcp-87'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1348,7 +1539,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: GCP_COMPUTE_INSTANCE and GCP_COMPUTE_PROJECT
+# BLOCKED: Parsing of metadata keys GCP_COMPUTE_INSTANCE
 control_id = 'darkbit-gcp-88'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1358,7 +1549,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: GCP_COMPUTE_INSTANCE and GCP_COMPUTE_PROJECT
+# BLOCKED: Parsing of metadata keys GCP_COMPUTE_INSTANCE
 control_id = 'darkbit-gcp-89'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1637,12 +1828,26 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: GCP_CONTAINER_CLUSTER
 control_id = 'darkbit-gcp-114'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (c:GCP_CONTAINER_CLUSTER)
+    RETURN c.name as name, c.resource_data_releaseChannel_channel as channel_type
+  )
+  gkeclusters = graphdb.query(q).mapped_results
+  if gkeclusters.length > 0
+    gkeclusters.each do |cluster|
+      describe cluster.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should use stable or regular channel' do
+          expect(cluster.channel_type).not_to eq('RAPID')
+        end
+      end
+    end
+  else
+    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should use stable or regular channel' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -1705,12 +1910,27 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: GCP_CONTAINER_CLUSTER and GCP_CONTAINER_NODEPOOL and GCE_COMPUTE_INSTANCE
 control_id = 'darkbit-gcp-122'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (instance:GCP_COMPUTE_INSTANCE)-[:HAS_DISK]->(disk:GCP_COMPUTE_DISK)
+    WHERE NOT instance.resource_data_labels_goog_gke_node IS NULL
+    RETURN instance.name, disk.resource_data_diskEncryptionKey_kmsKeyName as key_name
+  )
+  gkenodes = graphdb.query(q).mapped_results
+  if gkenodes.length > 0
+    gkenodes.each do |node|
+      describe node.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have CMEK configured for its disks' do
+          expect(node.key_name).not_to be_nil
+        end
+      end
+    end
+  else
+    describe 'No GKE Node Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have CMEK configured for its disks' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -1739,12 +1959,27 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: GCP_CONTAINER_CLUSTER and GCP_CONTAINER_NODEPOOL
 control_id = 'darkbit-gcp-124'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (np:GCP_CONTAINER_NODEPOOL)
+    WHERE NOT np.name ENDS WITH '/default-pool'
+    RETURN np.name, np.resource_data_config_sandboxConfig_sandboxType as sandbox_type
+  )
+  nps = graphdb.query(q).mapped_results
+  if nps.length > 0
+    nps.each do |np|
+      describe np.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have Gvisor enabled' do
+          expect(np.sandbox_type).to eq('GVISOR')
+        end
+      end
+    end
+  else
+    describe 'No GKE Nodepools found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have Gvisor enabled' do
+        expect(true).to eq(true)
+      end
     end
   end
 end

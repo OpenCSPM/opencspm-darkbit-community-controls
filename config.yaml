@@ -4213,8 +4213,8 @@ controls:
     nodes:
       - PLACEHOLDER
     refs:
-      - text: TODO
-        url: TODO
+      - text: Enabling Cloud DNS DNSSEC
+        url: https://cloud.google.com/dns/dnssec-config#enabling
     public: true
     tags:
       - cis:
