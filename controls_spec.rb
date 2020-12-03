@@ -1788,12 +1788,26 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: GCP_CONTAINER_CLUSTER
 control_id = 'darkbit-gcp-109'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (c:GCP_CONTAINER_CLUSTER)
+    RETURN c.name as name, c.resource_data_masterAuth_clientCertificate as client_cert_auth
+  )
+  gkeclusters = graphdb.query(q).mapped_results
+  if gkeclusters.length > 0
+    gkeclusters.each do |cluster|
+      describe cluster.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should not have client certificate authentication enabled' do
+          expect(cluster.client_cert_auth).to be_nil
+        end
+      end
+    end
+  else
+    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not have client certificate authentication enabled' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
