@@ -2045,3 +2045,27 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
     end
   end
 end
+
+control_id = 'darkbit-gcp-127'
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
+  q = %s(
+    MATCH (c:GCP_CONTAINER_CLUSTER)
+    RETURN c.name as name, c.resource_data_masterAuth_username as basic_auth_user
+  )
+  gkeclusters = graphdb.query(q).mapped_results
+  if gkeclusters.length > 0
+    gkeclusters.each do |cluster|
+      describe cluster.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should not have basic authentication enabled' do
+          expect(cluster.basic_auth_user).not_to eq('admin')
+        end
+      end
+    end
+  else
+    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not have basic authentication enabled' do
+        expect(true).to eq(true)
+      end
+    end
+  end
+end

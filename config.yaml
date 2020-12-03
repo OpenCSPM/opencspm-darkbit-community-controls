@@ -5088,3 +5088,26 @@ controls:
       - nist-csf:
           - nist-csf-todo
       - google cloud
+  - id: darkbit-gcp-127
+    title: GKE Clusters Should Not Have Basic Authentication Enabled
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 9
+    nodes:
+      - PLACEHOLDER
+    refs:
+      - text: TODO
+        url: TODO
+    public: true
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-not-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.8
+          - gke-cis1.1-5.8.1
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
