@@ -720,12 +720,27 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: Project iam-policy
+# BLOCKED: Project auditLogConfig relationship
 control_id = 'darkbit-gcp-20'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)
+    RETURN project.name as name
+  )
+  projects = graphdb.query(q).mapped_results
+  if projects.length > 0
+    projects.each do |project|
+      describe project.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have audit logging configured' do
+          expect(project.name).to be_nil
+        end
+      end
+    end
+  else
+    describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have audit logging configured' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -788,12 +803,29 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: GCP_COMPUTE_TARGETHTTPSPROXY and GCP_COMPUTE_TARGETSSLPROXY?
 control_id = 'darkbit-gcp-33'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (httpsproxy:GCP_COMPUTE_TARGETHTTPSPROXY)
+    OPTIONAL MATCH (sslproxy:GCP_COMPUTE_TARGETSSLPROXY)
+    RETURN httpsproxy.name as https_name, httpsproxy.resource_data_sslPolicy as https_sslpolicy, sslproxy.name as ssl_name, sslproxy.resource_data_sslPolicy as ssl_sslpolicy
+  )
+  proxies = graphdb.query(q).mapped_results
+  if proxies.length > 0
+    proxies.each do |proxy|
+      proxy_name = proxy.https_name || proxy.ssl_name
+      proxy_policy = proxy.https_sslpolicy || proxy.ssl_sslPolicy
+      describe proxy_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have an SSL Policy configured' do
+          expect(proxy_policy).not_to be_nil
+        end
+      end
+    end
+  else
+    describe 'No HTTPS or SSL Proxies found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have an SSL Policy configured' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -1214,32 +1246,93 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: GCP SA and IAM
 control_id = 'darkbit-gcp-63'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (gi:GCP_IDENTITY)
+    WHERE gi.member_name ENDS WITH '.iam.gserviceaccount.com'
+    OPTIONAL MATCH (resource)<-[ir1:HAS_IAMROLE]-(gi:GCP_IDENTITY)-[ir2:HAS_IAMROLE]->(resource)
+    WHERE ir1.role_name = "roles/iam.serviceAccountUser"
+      AND ir2.role_name = "roles/iam.serviceAccountAdmin"
+      AND gi.member_name ENDS WITH '.iam.gserviceaccount.com'
+    RETURN DISTINCT gi.name as identity_name, resource.name as resource_name
+  )
+  identities = graphdb.query(q).mapped_results
+  if identities.length > 0
+    identities.each do |identity|
+      describe identity.identity_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should not be bound to admin, editor, or owner roles' do
+          expect(identity.resource_name).to be_nil
+        end
+      end
+    end
+  else
+    describe 'No failing identities found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not be bound to admin, editor, or owner roles' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# TODO: IAM and GCP_CLOUDKMS_KEYRING
 control_id = 'darkbit-gcp-64'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (gi:GCP_IDENTITY)
+    OPTIONAL MATCH (resource)<-[ir1:HAS_IAMROLE]-(gi:GCP_IDENTITY)-[ir2:HAS_IAMROLE]->(resource)
+    WHERE ir1.role_name = "roles/iam.serviceAccountUser"
+      AND ir2.role_name = "roles/iam.serviceAccountAdmin"
+    RETURN DISTINCT gi.name as identity_name, resource.name as resource_name
+  )
+  identities = graphdb.query(q).mapped_results
+  if identities.length > 0
+    identities.each do |identity|
+      describe identity.identity_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should not have iam admin and serviceaccountuser to the same resource' do
+          expect(identity.resource_name).to be_nil
+        end
+      end
+    end
+  else
+    describe 'No failing identities found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not have iam admin and serviceaccountuser to the same resource' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# TODO: IAM and GCP_CLOUDKMS_KEYRING
 control_id = 'darkbit-gcp-65'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (gi:GCP_IDENTITY { name: "allUsers"})
+    OPTIONAL MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)<-[ir1:HAS_IAMROLE]-(gi)
+    OPTIONAL MATCH (key:GCP_CLOUDKMS_CRYPTOKEY)<-[ir2:HAS_IAMROLE]-(gi)
+    RETURN project.name as project_name, key.name as key_name, ir1.role_name as project_role, ir2.role_name as key_role
+  )
+  identities = graphdb.query(q).mapped_results
+  if identities.length > 0
+    identities.each do |identity|
+      if identity.project_name.nil? && identity.project_role.nil? && identity.key_name.nil? && identity.key_role.nil?
+        describe 'No allUsers binding found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+          it 'should not have allUsers access to projects or cryptokeys' do
+            expect(true).to eq(true)
+          end
+        end
+      else
+        resource_name = identity.project_name || identity.key_name
+        describe resource_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+          it 'should not have allUsers access to projects or cryptokeys' do
+            expect(resource_name).to be_nil
+          end
+        end
+      end
+    end
+  else
+    describe 'No allUsers binding found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not have allUsers access to projects or cryptokeys' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -1271,32 +1364,82 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: IAM
 control_id = 'darkbit-gcp-67'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (gi:GCP_IDENTITY)-[ir1:HAS_IAMROLE]->(resource)
+    MATCH (gi)-[ir2:HAS_IAMROLE]->(resource)
+    WHERE ir1.role_name = "roles/cloudkms.admin"
+      AND ir2.role_name = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+    RETURN gi.name as identity_name, resource.name as resource_name
+  )
+  identities = graphdb.query(q).mapped_results
+  if identities.length > 0
+    identities.each do |identity|
+      describe identity.identity_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should not have kms admin and cryptokeyencrypeterdecrypter to the same resource' do
+          expect(identity.resource_name).to be_nil
+        end
+      end
+    end
+  else
+    describe 'No failing identities found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not have kms admin and cryptokeyencrypeterdecrypter to the same resource' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# TODO: PROJECT or FOLDER GCP_LOGGING_LOGSINK
+# FUTURE: Traverse PROJECT or FOLDER for any GCP_LOGGING_LOGSINK
 control_id = 'darkbit-gcp-72'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (p:GCP_CLOUDRESOURCEMANAGER_PROJECT)
+    OPTIONAL MATCH (l:GCP_LOGGING_LOGSINK)-[:IN_HIERARCHY]->(p:GCP_CLOUDRESOURCEMANAGER_PROJECT)
+    RETURN p.name as project_name, p.resource_data_name as friendly_name, l.name as sink_name, l.resource_data_filter as sink_filter
+  )
+  projects = graphdb.query(q).mapped_results
+  if projects.length > 0
+    projects.each do |project|
+      describe "#{project.project_name} [#{project.friendly_name}]", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have a full logsink' do
+          expect(project.sink_name).not_to be_nil
+          expect(project.sink_filter).to be_nil
+        end
+      end
+    end
+  else
+    describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have a full logsink' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# TODO: GCP_CLOUDSTORAGE_BUCKET
+# FUTURE: Log sink -> Storage Bucket
 control_id = 'darkbit-gcp-73'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (ls:GCP_LOGGING_LOGSINK)-[:LOGS_TO]->(b:GCP_STORAGE_BUCKET)
+    RETURN b.name as name, b.resource_data_retentionPolicy_retentionPeriod as log_retention, b.resource_data_retentionPolicy_isLocked as bucket_lock
+  )
+  buckets = graphdb.query(q).mapped_results
+  if buckets.length > 0
+    buckets.each do |bucket|
+      describe bucket.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have retention policies and bucket lock enabled' do
+          expect(bucket.log_retention).to be > 0
+          expect(bucket.bucket_lock).to eq('true')
+        end
+      end
+    end
+  else
+    describe 'No GCS Buckets found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have retention policies and bucket lock enabled' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -1584,12 +1727,27 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: GCP_COMPUTE_INSTANCE and GCP_COMPUTE_DISK
 control_id = 'darkbit-gcp-91'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (instance:GCP_COMPUTE_INSTANCE)-[:HAS_DISK]->(disk:GCP_COMPUTE_DISK)
+    WHERE instance.resource_data_labels_goog_gke_node IS NULL
+    RETURN instance.name, disk.resource_data_diskEncryptionKey_kmsKeyName as key_name
+  )
+  gcenodes = graphdb.query(q).mapped_results
+  if gcenodes.length > 0
+    gcenodes.each do |node|
+      describe node.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have CMEK configured for its disks' do
+          expect(node.key_name).not_to be_nil
+        end
+      end
+    end
+  else
+    describe 'No GCE Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have CMEK configured for its disks' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -1904,12 +2062,27 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: GCP_COMPUTE_TARGETHTTPSPROXY
 control_id = 'darkbit-gcp-117'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (ing:K8S_INGRESS)
+    WHERE NOT ing.resource_data_metadata_annotations_ingress_dot_kubernetes_dot_io_slash_https_target_proxy IS NULL
+    RETURN ing.name as name, ing.resource_data_metadata_annotations_networking_dot_gke_dot_io_slash_managed_certificates as cert
+  )
+  ingresses = graphdb.query(q).mapped_results
+  if ingresses.length > 0
+    ingresses.each do |ingress|
+      describe ingress.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have google-managed cert attached' do
+          expect(ingress.cert).not_to be_nil
+        end
+      end
+    end
+  else
+    describe 'No Ingresses found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have google-managed cert attached' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
