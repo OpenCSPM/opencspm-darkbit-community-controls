@@ -1782,7 +1782,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: GCP_APPENGINE_APPLICATION
+# BLOCKED: Requires access to app.yaml GCP_APPENGINE_APPLICATION
 control_id = 'darkbit-gcp-93'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1792,12 +1792,42 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: GCP_STORAGE_BUCKET and IAM
 control_id = 'darkbit-gcp-94'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (gi:GCP_IDENTITY { name: "allUsers" })
+    OPTIONAL MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)<-[ir1:HAS_IAMROLE]-(gi)
+    OPTIONAL MATCH (bucket:GCP_STORAGE_BUCKET)<-[ir2:HAS_IAMROLE]-(gi)
+    RETURN project.name as project_name, bucket.name as bucket_name, ir1.role_name as project_role, ir2.role_name as bucket_role
+    UNION
+    MATCH (gi:GCP_IDENTITY { name: "allAuthenticatedUsers" })
+    OPTIONAL MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)<-[ir1:HAS_IAMROLE]-(gi)
+    OPTIONAL MATCH (bucket:GCP_STORAGE_BUCKET)<-[ir2:HAS_IAMROLE]-(gi)
+    RETURN project.name as project_name, bucket.name as bucket_name, ir1.role_name as project_role, ir2.role_name as bucket_role
+  )
+  identities = graphdb.query(q).mapped_results
+  if identities.length > 0
+    identities.each do |identity|
+      if identity.project_name.nil? && identity.project_role.nil? && identity.bucket_name.nil? && identity.bucket_role.nil?
+        describe 'No allUsers or allAuthenticatedUsers binding found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+          it 'should not have all(Authenticated)Users access to projects or buckets' do
+            expect(true).to eq(true)
+          end
+        end
+      else
+        resource_name = identity.project_name || identity.bucket_name
+        describe resource_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+          it 'should not have all(Authenticated)Users access to projects or buckets' do
+            expect(resource_name).to be_nil
+          end
+        end
+      end
+    end
+  else
+    describe 'No allUsers or allAuthenticatedUsers binding found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not have all(Authenticated)Users access to projects or buckets' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
