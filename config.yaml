@@ -3948,6 +3948,7 @@ controls:
         url: https://cloud.google.com/iam/docs/granting-roles-to-service-accounts
     public: true
     tags:
+      - google cloud
       - cis:
           - gcp-cis1.1
           - gcp-cis1.1-level2
@@ -3956,20 +3957,64 @@ controls:
           - gcp-cis1.1-1.8
       - nist-csf:
           - nist-csf-todo
-      - google cloud
   - id: darkbit-gcp-65
     title: Cloud KMS Keys Should Not Be Public
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description:
+      Granting permissions to `allUsers` or `allAuthenticatedUsers` allows anyone to access KMS keys.
+      Anonymous and/or public access to a Cloud KMS keys should never be allowed.
+    remediation: |-
+      Remove any IAM role bindings for KMS keys for `allUsers` and `allAuthenticatedUsers` using the commands below.
+
+      ```
+      gcloud kms keys remove-iam-policy-binding [key_name] \
+        --keyring=[key_ring_name] \
+        --location=global \
+        --member='allAuthenticatedUsers' \
+        --role='[role]'
+      ```
+
+      and
+
+      ```
+      gcloud kms keys remove-iam-policy-binding [key_name] \
+        --keyring=[key_ring_name] \
+        --location=global \
+        --member='allUsers' \
+        --role='[role]'
+      ```
+    validation: |-
+      Run the following command to list all KMS keys and ensure no roles are bound to `allUsers` 
+      or `allAuthenticatedUsers`.
+
+      ```
+      for j in $(for i in $(gcloud kms keyrings list \
+        --location=global \
+        --format="csv[no-heading](name)")
+        do 
+          gcloud kms keys list \
+            --keyring=$i \
+            --location=global \
+            --format="csv[no-heading](name)"
+        done)
+      do 
+        echo "key: $j"
+        gcloud kms keys get-iam-policy $j \
+          --keyring=$i \
+          --location=global \
+          --filter="bindings.members:allUsers OR bindings.members:allAuthenticatedUsers" \
+          --format="csv[no-heading](bindings.members[],bindings.role[])"
+      done
+      ```
     impact: 10
     nodes:
-      - PLACEHOLDER
+      - GCP_CLOUDKMS_CRYPTOKEY
+      - GCP_CLOUDRESOURCEMANAGER_PROJECT
     refs:
-      - text: TODO
-        url: TODO
+      - text: Remove IAM Policy Bindings
+        url: https://cloud.google.com/sdk/gcloud/reference/kms/keys/remove-iam-policy-binding
     public: true
     tags:
+      - google cloud
       - cis:
           - gcp-cis1.1
           - gcp-cis1.1-level1
