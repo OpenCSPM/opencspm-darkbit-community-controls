@@ -3841,18 +3841,34 @@ controls:
       - google cloud
   - id: darkbit-gcp-62
     title: GCP Service Accounts Should Not Have User-Managed Keys Attached
-    description: TODO
-    remediation: TODO
-    validation: TODO
-    impact: 5
+    description:
+      Anyone who has access to the keys will be able to access resources through the service
+      account. GCP-managed keys are used by Cloud Platform services such as App Engine and
+      Compute Engine. These keys cannot be downloaded. Google will keep the keys and
+      automatically rotate them on an approximately weekly basis. User-managed keys are
+      created, downloadable, and managed by users. They expire 10 years from creation.
+    remediation: Remove user-managed keys from service accounts wherever possible.
+    validation: |-
+      Run the following command to list all service accounts with user-managed keys, and 
+      confirm each service account returns `0 items`.
+
+      ```
+      for i in $(gcloud iam service-accounts list | grep 'iam.gserviceaccount.com' | awk '{print $2}')
+      do
+        echo "sa: $i"
+        gcloud iam service-accounts keys list --iam-account=$i --managed-by=user | grep Z
+      done
+      ```
+    impact: 7
     nodes:
       - GCP_CLOUDRESOURCEMANAGER_PROJECT
       - GCP_IDENTITY
     refs:
-      - text: TODO
-        url: TODO
+      - text: Managing Service Account Keys
+        url: https://cloud.google.com/iam/docs/understanding-service-accounts#managing_service_account_keys
     public: true
     tags:
+      - google cloud
       - cis:
           - gcp-cis1.1
           - gcp-cis1.1-level1
@@ -3861,7 +3877,6 @@ controls:
           - gcp-cis1.1-1.4
       - nist-csf:
           - nist-csf-todo
-      - google cloud
   - id: darkbit-gcp-63
     title: GCP Service Accounts Should Not Be Bound To Admin, Editor, or Owner Roles
     description: TODO

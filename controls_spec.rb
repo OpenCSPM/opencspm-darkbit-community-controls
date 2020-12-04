@@ -289,8 +289,8 @@ control_id = 'darkbit-aws-61'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %(
     MATCH (c:AWS_EKS_CLUSTER)-[l:HAS_LOGGING_TYPE]-(t)
-    RETURN c.name AS name, 
-           l.enabled AS logging_enabled, 
+    RETURN c.name AS name,
+           l.enabled AS logging_enabled,
            t.name AS logging_type
   )
   clusters_map = graphdb.query(q).mapped_results
