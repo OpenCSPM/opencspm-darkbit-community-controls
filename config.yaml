@@ -3847,7 +3847,9 @@ controls:
       Compute Engine. These keys cannot be downloaded. Google will keep the keys and
       automatically rotate them on an approximately weekly basis. User-managed keys are
       created, downloadable, and managed by users. They expire 10 years from creation.
-    remediation: Remove user-managed keys from service accounts wherever possible.
+    remediation:
+      Remove user-managed keys from service accounts wherever possible. Disable
+      service account key creation through the `Disable service account key creation` Organization policy.
     validation: |-
       Run the following command to list all service accounts with user-managed keys, and 
       confirm each service account returns `0 items`.
@@ -3866,6 +3868,11 @@ controls:
     refs:
       - text: Managing Service Account Keys
         url: https://cloud.google.com/iam/docs/understanding-service-accounts#managing_service_account_keys
+      - text: Restricting service accounts
+        url: https://cloud.google.com/resource-manager/docs/organization-policy/restricting-service-accounts
+      - text: Disable service account key creation
+        url: https://console.cloud.google.com/iam-admin/orgpolicies/iam-disableServiceAccountKeyCreation
+      - text:
     public: true
     tags:
       - google cloud
