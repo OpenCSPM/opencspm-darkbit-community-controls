@@ -3886,7 +3886,9 @@ controls:
           - nist-csf-todo
   - id: darkbit-gcp-63
     title: GCP Service Accounts Should Not Be Bound To Admin, Editor, or Owner Roles
-    description: TODO
+    description:
+      Service accounts can perform critical actions without user intervention. It is
+      recommended that service accounts not have Admin, Editor, or Owner permissions.
     remediation: TODO
     validation: TODO
     impact: 7
@@ -3896,8 +3898,11 @@ controls:
     refs:
       - text: Default Compute Service Account
         url: https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#using_the_default_service_account
+      - text: Understanding Service Accounts
+        url: https://cloud.google.com/iam/docs/understanding-service-accounts
     public: true
     tags:
+      - google cloud
       - cis:
           - gcp-cis1.1
           - gcp-cis1.1-level1
@@ -3906,19 +3911,41 @@ controls:
           - gcp-cis1.1-1.5
       - nist-csf:
           - nist-csf-todo
-      - google cloud
   - id: darkbit-gcp-64
     title: Service Account Admin and Service Account User Should Not Be Attached To The Same Identity
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description:
+      As a best practice to ensure separation of duties, no user should have both `Service Account Admin`
+      and `Service Account User` roles assigned at the same time.
+    remediation:
+      Practice separation of duties by ensuring that no single user has both `Service Account Admin` and
+      `Service Account User` roles. Designate separate, limited, and tightly controlled users to act as
+      the `Service Account Admin` role.
+    validation: |-
+      Run the following command to find all users that have both `Service Account Admin` and 
+      `Service Account User` role and confirm that no users are returned.
+
+      ```
+      comm -1 -2 \
+        <(gcloud projects get-iam-policy $PROJECT_ID \
+          --filter=bindings.role:roles/iam.serviceAccountAdmin \
+          --flatten='bindings[]' \
+          --format="csv[no-heading](bindings.members[])" | sort) \
+        <(gcloud projects get-iam-policy $PROJECT_ID \
+          --filter=bindings.role:roles/iam.serviceAccountUser \
+          --flatten='bindings[]' \
+          --format="csv[no-heading](bindings.members[])" | sort)
+      ```
     impact: 9
     nodes:
       - GCP_IDENTITY
       - GCP_IAM_ROLE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Service Accounts
+        url: https://cloud.google.com/iam/docs/service-accounts
+      - text: Understanding Roles
+        url: https://cloud.google.com/iam/docs/understanding-roles
+      - text: Granting Roles to Service Accounts
+        url: https://cloud.google.com/iam/docs/granting-roles-to-service-accounts
     public: true
     tags:
       - cis:
