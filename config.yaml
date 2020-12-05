@@ -4446,28 +4446,6 @@ controls:
       - nist-csf:
           - nist-csf-todo
       - google cloud
-  - id: darkbit-gcp-93
-    title: Google App Engine Applications Should Enforce HTTPS
-    description: TODO
-    remediation: TODO
-    validation: TODO
-    impact: 5
-    nodes:
-      - PLACEHOLDER
-    refs:
-      - text: TODO
-        url: TODO
-    public: true
-    tags:
-      - cis:
-          - gcp-cis1.1
-          - gcp-cis1.1-level2
-          - gcp-cis1.1-not-scored
-          - gcp-cis1.1-4
-          - gcp-cis1.1-4.10
-      - nist-csf:
-          - nist-csf-todo
-      - google cloud
   - id: darkbit-gcp-94
     title: GCS Buckets Should Not Be Public
     description: TODO
@@ -5108,6 +5086,29 @@ controls:
           - gke-cis1.1-5
           - gke-cis1.1-5.8
           - gke-cis1.1-5.8.1
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-128
+    title: Log Metric Filter And Alert Should Notify On Custom Role Changes
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 8
+    nodes:
+      - GCP_IDENTITY
+      - GCP_IAM_ROLE
+    refs:
+      - text: TODO
+        url: TODO
+    public: true
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-2
+          - gcp-cis1.1-2.6
       - nist-csf:
           - nist-csf-todo
       - google cloud

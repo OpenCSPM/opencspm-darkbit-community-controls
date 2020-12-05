@@ -1483,7 +1483,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
     MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)
     OPTIONAL MATCH (sink:GCP_LOGGING_LOGSINK)<-[:HAS_RESOURCE]-(project)
-    WHERE (sink.resource_data_filter CONTAINS "protoPayload.methodName=\"SetIamPolicy\"
+    WHERE (sink.resource_data_filter CONTAINS "protoPayload.methodName=\"SetIamPolicy\""
        AND sink.resource_data_filter CONTAINS "protoPayload.serviceData.policyDelta.auditConfigDeltas:*"
     )
     RETURN project.name as project_name, sink.resource_data_filter as sink_filter
@@ -1512,8 +1512,9 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
     MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)
     OPTIONAL MATCH (sink:GCP_LOGGING_LOGSINK)<-[:HAS_RESOURCE]-(project)
-    WHERE (sink.resource_data_filter CONTAINS ""
-       AND sink.resource_data_filter CONTAINS ""
+    WHERE (sink.resource_data_filter CONTAINS "resource.type=\"gce_firewall_rule\""
+       AND sink.resource_data_filter CONTAINS "jsonPayload.event_subtype=\"compute.firewalls.patch\""
+       AND sink.resource_data_filter CONTAINS "jsonPayload.event_subtype=\"compute.firewalls.insert\""
     )
     RETURN project.name as project_name, sink.resource_data_filter as sink_filter
   )
@@ -1521,14 +1522,14 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   if projects.length > 0
     projects.each do |project|
       describe project.project_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-        it 'should have a logsink filter for  changes' do
+        it 'should have a logsink filter for firewall rule changes' do
           expect(project.sink_filter).not_to be_nil
         end
       end
     end
   else
     describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-      it 'should have a logsink filter for  changes' do
+      it 'should have a logsink filter for firewall rule changes' do
         expect(true).to eq(true)
       end
     end
@@ -1541,8 +1542,9 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
     MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)
     OPTIONAL MATCH (sink:GCP_LOGGING_LOGSINK)<-[:HAS_RESOURCE]-(project)
-    WHERE (sink.resource_data_filter CONTAINS ""
-       AND sink.resource_data_filter CONTAINS ""
+    WHERE (sink.resource_data_filter CONTAINS "resource.type=\"gce_route\""
+       AND sink.resource_data_filter CONTAINS "jsonPayload.event_subtype=\"compute.routes.delete\""
+       AND sink.resource_data_filter CONTAINS "jsonPayload.event_subtype=\"compute.routes.insert\""
     )
     RETURN project.name as project_name, sink.resource_data_filter as sink_filter
   )
@@ -1550,14 +1552,14 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   if projects.length > 0
     projects.each do |project|
       describe project.project_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-        it 'should have a logsink filter for  changes' do
+        it 'should have a logsink filter for route changes' do
           expect(project.sink_filter).not_to be_nil
         end
       end
     end
   else
     describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-      it 'should have a logsink filter for  changes' do
+      it 'should have a logsink filter for route changes' do
         expect(true).to eq(true)
       end
     end
@@ -1570,8 +1572,12 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
     MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)
     OPTIONAL MATCH (sink:GCP_LOGGING_LOGSINK)<-[:HAS_RESOURCE]-(project)
-    WHERE (sink.resource_data_filter CONTAINS ""
-       AND sink.resource_data_filter CONTAINS ""
+    WHERE (sink.resource_data_filter CONTAINS "resource.type=\"gce_network\""
+       AND sink.resource_data_filter CONTAINS "jsonPayload.event_subtype=\"compute.networks.insert\""
+       AND sink.resource_data_filter CONTAINS "jsonPayload.event_subtype=\"compute.networks.patch\""
+       AND sink.resource_data_filter CONTAINS "jsonPayload.event_subtype=\"compute.networks.delete\""
+       AND sink.resource_data_filter CONTAINS "jsonPayload.event_subtype=\"compute.networks.removePeering\""
+       AND sink.resource_data_filter CONTAINS "jsonPayload.event_subtype=\"compute.networks.addPeering\""
     )
     RETURN project.name as project_name, sink.resource_data_filter as sink_filter
   )
@@ -1579,14 +1585,14 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   if projects.length > 0
     projects.each do |project|
       describe project.project_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-        it 'should have a logsink filter for  changes' do
+        it 'should have a logsink filter for network changes' do
           expect(project.sink_filter).not_to be_nil
         end
       end
     end
   else
     describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-      it 'should have a logsink filter for  changes' do
+      it 'should have a logsink filter for network changes' do
         expect(true).to eq(true)
       end
     end
@@ -1599,8 +1605,8 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
     MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)
     OPTIONAL MATCH (sink:GCP_LOGGING_LOGSINK)<-[:HAS_RESOURCE]-(project)
-    WHERE (sink.resource_data_filter CONTAINS ""
-       AND sink.resource_data_filter CONTAINS ""
+    WHERE (sink.resource_data_filter CONTAINS "resource.type=\"gcs_bucket\""
+       AND sink.resource_data_filter CONTAINS "protoPayload.methodName=\"storage.setIamPermissions\""
     )
     RETURN project.name as project_name, sink.resource_data_filter as sink_filter
   )
@@ -1608,14 +1614,14 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   if projects.length > 0
     projects.each do |project|
       describe project.project_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-        it 'should have a logsink filter for  changes' do
+        it 'should have a logsink filter for storage IAM changes' do
           expect(project.sink_filter).not_to be_nil
         end
       end
     end
   else
     describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-      it 'should have a logsink filter for  changes' do
+      it 'should have a logsink filter for storage IAM changes' do
         expect(true).to eq(true)
       end
     end
@@ -1628,23 +1634,21 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
     MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)
     OPTIONAL MATCH (sink:GCP_LOGGING_LOGSINK)<-[:HAS_RESOURCE]-(project)
-    WHERE (sink.resource_data_filter CONTAINS ""
-       AND sink.resource_data_filter CONTAINS ""
-    )
+    WHERE (sink.resource_data_filter CONTAINS "protoPayload.methodName=\"cloudsql.instances.update\"")
     RETURN project.name as project_name, sink.resource_data_filter as sink_filter
   )
   projects = graphdb.query(q).mapped_results
   if projects.length > 0
     projects.each do |project|
       describe project.project_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-        it 'should have a logsink filter for  changes' do
+        it 'should have a logsink filter for cloudsql instance changes' do
           expect(project.sink_filter).not_to be_nil
         end
       end
     end
   else
     describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-      it 'should have a logsink filter for  changes' do
+      it 'should have a logsink filter for cloudsql instance changes' do
         expect(true).to eq(true)
       end
     end
@@ -1930,16 +1934,6 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       it 'should have shielded node configuration enabled' do
         expect(true).to eq(true)
       end
-    end
-  end
-end
-
-# BLOCKED: Requires access to app.yaml GCP_APPENGINE_APPLICATION
-control_id = 'darkbit-gcp-93'
-RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
     end
   end
 end
@@ -2493,6 +2487,37 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   else
     describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not have basic authentication enabled' do
+        expect(true).to eq(true)
+      end
+    end
+  end
+end
+
+# FUTURE: Parse up folder chain and check for alert metrics
+control_id = 'darkbit-gcp-128'
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
+  q = %s(
+    MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)
+    OPTIONAL MATCH (sink:GCP_LOGGING_LOGSINK)<-[:HAS_RESOURCE]-(project)
+    WHERE (sink.resource_data_filter CONTAINS "resource.type=\"iam_role\""
+       AND sink.resource_data_filter CONTAINS "google.iam.admin.v1.CreateRole"
+       AND sink.resource_data_filter CONTAINS "google.iam.admin.v1.DeleteRole"
+       AND sink.resource_data_filter CONTAINS "google.iam.admin.v1.UpdateRole"
+    )
+    RETURN project.name as project_name, sink.resource_data_filter as sink_filter
+  )
+  projects = graphdb.query(q).mapped_results
+  if projects.length > 0
+    projects.each do |project|
+      describe project.project_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have a logsink filter for custom role changes' do
+          expect(project.sink_filter).not_to be_nil
+        end
+      end
+    end
+  else
+    describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have a logsink filter for custom role changes' do
         expect(true).to eq(true)
       end
     end
