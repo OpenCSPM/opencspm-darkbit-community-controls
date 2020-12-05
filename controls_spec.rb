@@ -2210,7 +2210,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
     MATCH (project)-[:HAS_RESOURCE]->(storagesvc:GCP_SERVICEUSAGE_SERVICE { resource_data_name: "containerregistry.googleapis.com"})
     WITH project, bucket
     WHERE bucket.resource_data_name STARTS WITH 'artifacts.' and bucket.resource_data_name ENDS WITH '.appspot.com'
-    MATCH (nodepool:GCP_CONTAINER_NODEPOOL)-[:HAS_SERVICEACCOUNT]->(gi:GCP_IDENTITY)-[av:HAS_ACCESSVIA]->(role:GCP_IAM_IAMROLE)
+    MATCH (nodepool:GCP_CONTAINER_NODEPOOL)-[:HAS_SERVICEACCOUNT]->(gi:GCP_IDENTITY)-[av:HAS_ACCESSVIA]->(role:GCP_IAM_ROLE)
     WITH project, bucket, nodepool, gi, av, role
     OPTIONAL MATCH (nodepool)-[:HAS_OAUTHSCOPE]->(scope:GCP_IAM_OAUTHSCOPE)
     WHERE (scope.name = 'https://www.googleapis.com/auth/devstorage.read_only')
