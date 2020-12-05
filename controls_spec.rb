@@ -1444,72 +1444,209 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: GCP_LOGGING_LOGMETRIC (suboptimal)
+# FUTURE: Parse up folder chain and check for alert metrics
 control_id = 'darkbit-gcp-74'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)
+    OPTIONAL MATCH (sink:GCP_LOGGING_LOGSINK)<-[:HAS_RESOURCE]-(project)
+    WHERE (sink.resource_data_filter CONTAINS "protoPayload.serviceName=\"cloudresourcemanager.googleapis.com\""
+       AND sink.resource_data_filter CONTAINS "ProjectOwnership"
+       AND sink.resource_data_filter CONTAINS "projectOwnerInvitee"
+       AND sink.resource_data_filter CONTAINS "protoPayload.serviceData.policyDelta.bindingDeltas.action=\"REMOVE\""
+       AND sink.resource_data_filter CONTAINS "protoPayload.serviceData.policyDelta.bindingDeltas.action=\"ADD\""
+       AND sink.resource_data_filter CONTAINS "protoPayload.serviceData.policyDelta.bindingDeltas.role=\"roles/owner\""
+    )
+    RETURN project.name as project_name, sink.resource_data_filter as sink_filter
+  )
+  projects = graphdb.query(q).mapped_results
+  if projects.length > 0
+    projects.each do |project|
+      describe project.project_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have a logsink filter for ownership changes' do
+          expect(project.sink_filter).not_to be_nil
+        end
+      end
+    end
+  else
+    describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have a logsink filter for ownership changes' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# TODO: GCP_LOGGING_LOGMETRIC (suboptimal)
+# FUTURE: Parse up folder chain and check for alert metrics
 control_id = 'darkbit-gcp-75'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)
+    OPTIONAL MATCH (sink:GCP_LOGGING_LOGSINK)<-[:HAS_RESOURCE]-(project)
+    WHERE (sink.resource_data_filter CONTAINS "protoPayload.methodName=\"SetIamPolicy\"
+       AND sink.resource_data_filter CONTAINS "protoPayload.serviceData.policyDelta.auditConfigDeltas:*"
+    )
+    RETURN project.name as project_name, sink.resource_data_filter as sink_filter
+  )
+  projects = graphdb.query(q).mapped_results
+  if projects.length > 0
+    projects.each do |project|
+      describe project.project_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have a logsink filter for audit changes' do
+          expect(project.sink_filter).not_to be_nil
+        end
+      end
+    end
+  else
+    describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have a logsink filter for audit changes' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# TODO: GCP_LOGGING_LOGMETRIC (suboptimal)
+# FUTURE: Parse up folder chain and check for alert metrics
 control_id = 'darkbit-gcp-76'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)
+    OPTIONAL MATCH (sink:GCP_LOGGING_LOGSINK)<-[:HAS_RESOURCE]-(project)
+    WHERE (sink.resource_data_filter CONTAINS ""
+       AND sink.resource_data_filter CONTAINS ""
+    )
+    RETURN project.name as project_name, sink.resource_data_filter as sink_filter
+  )
+  projects = graphdb.query(q).mapped_results
+  if projects.length > 0
+    projects.each do |project|
+      describe project.project_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have a logsink filter for  changes' do
+          expect(project.sink_filter).not_to be_nil
+        end
+      end
+    end
+  else
+    describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have a logsink filter for  changes' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# TODO: GCP_LOGGING_LOGMETRIC (suboptimal)
+# FUTURE: Parse up folder chain and check for alert metrics
 control_id = 'darkbit-gcp-77'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)
+    OPTIONAL MATCH (sink:GCP_LOGGING_LOGSINK)<-[:HAS_RESOURCE]-(project)
+    WHERE (sink.resource_data_filter CONTAINS ""
+       AND sink.resource_data_filter CONTAINS ""
+    )
+    RETURN project.name as project_name, sink.resource_data_filter as sink_filter
+  )
+  projects = graphdb.query(q).mapped_results
+  if projects.length > 0
+    projects.each do |project|
+      describe project.project_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have a logsink filter for  changes' do
+          expect(project.sink_filter).not_to be_nil
+        end
+      end
+    end
+  else
+    describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have a logsink filter for  changes' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# TODO: GCP_LOGGING_LOGMETRIC (suboptimal)
+# FUTURE: Parse up folder chain and check for alert metrics
 control_id = 'darkbit-gcp-78'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)
+    OPTIONAL MATCH (sink:GCP_LOGGING_LOGSINK)<-[:HAS_RESOURCE]-(project)
+    WHERE (sink.resource_data_filter CONTAINS ""
+       AND sink.resource_data_filter CONTAINS ""
+    )
+    RETURN project.name as project_name, sink.resource_data_filter as sink_filter
+  )
+  projects = graphdb.query(q).mapped_results
+  if projects.length > 0
+    projects.each do |project|
+      describe project.project_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have a logsink filter for  changes' do
+          expect(project.sink_filter).not_to be_nil
+        end
+      end
+    end
+  else
+    describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have a logsink filter for  changes' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# TODO: GCP_LOGGING_LOGMETRIC (suboptimal)
+# FUTURE: Parse up folder chain and check for alert metrics
 control_id = 'darkbit-gcp-79'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)
+    OPTIONAL MATCH (sink:GCP_LOGGING_LOGSINK)<-[:HAS_RESOURCE]-(project)
+    WHERE (sink.resource_data_filter CONTAINS ""
+       AND sink.resource_data_filter CONTAINS ""
+    )
+    RETURN project.name as project_name, sink.resource_data_filter as sink_filter
+  )
+  projects = graphdb.query(q).mapped_results
+  if projects.length > 0
+    projects.each do |project|
+      describe project.project_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have a logsink filter for  changes' do
+          expect(project.sink_filter).not_to be_nil
+        end
+      end
+    end
+  else
+    describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have a logsink filter for  changes' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# TODO: GCP_LOGGING_LOGMETRIC (suboptimal)
+# FUTURE: Parse up folder chain and check for alert metrics
 control_id = 'darkbit-gcp-80'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)
+    OPTIONAL MATCH (sink:GCP_LOGGING_LOGSINK)<-[:HAS_RESOURCE]-(project)
+    WHERE (sink.resource_data_filter CONTAINS ""
+       AND sink.resource_data_filter CONTAINS ""
+    )
+    RETURN project.name as project_name, sink.resource_data_filter as sink_filter
+  )
+  projects = graphdb.query(q).mapped_results
+  if projects.length > 0
+    projects.each do |project|
+      describe project.project_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have a logsink filter for  changes' do
+          expect(project.sink_filter).not_to be_nil
+        end
+      end
+    end
+  else
+    describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have a logsink filter for  changes' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -1635,12 +1772,27 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: GCP_COMPUTE_INSTANCE GCP_IDENTITY
 control_id = 'darkbit-gcp-85'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (c:GCP_COMPUTE_INSTANCE)-[r:HAS_SERVICEACCOUNT]->(gi:GCP_IDENTITY)
+    WHERE c.resource_data_labels_goog_gke_node IS NULL
+    RETURN c.name as name, gi.resource_data_email as sa_name
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should not have the default ServiceAccount attached' do
+          expect(instance.sa_name).not_to include('-compute@developer.gserviceaccount.com')
+        end
+      end
+    end
+  else
+    describe 'No GCE Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not have the default ServiceAccount attached' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -1966,12 +2118,42 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: GCP_BIGQUERY_DATASET and IAM
 control_id = 'darkbit-gcp-108'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (gi:GCP_IDENTITY { name: "allUsers" })
+    OPTIONAL MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)<-[ir1:HAS_IAMROLE]-(gi)
+    OPTIONAL MATCH (dataset:GCP_BIGQUERY_DATASET)<-[ir2:HAS_IAMROLE]-(gi)
+    RETURN project.name as project_name, dataset.name as dataset_name, ir1.role_name as project_role, ir2.role_name as dataset_role
+    UNION
+    MATCH (gi:GCP_IDENTITY { name: "allAuthenticatedUsers" })
+    OPTIONAL MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)<-[ir1:HAS_IAMROLE]-(gi)
+    OPTIONAL MATCH (dataset:GCP_BIGQUERY_DATASET)<-[ir2:HAS_IAMROLE]-(gi)
+    RETURN project.name as project_name, dataset.name as dataset_name, ir1.role_name as project_role, ir2.role_name as dataset_role
+  )
+  identities = graphdb.query(q).mapped_results
+  if identities.length > 0
+    identities.each do |identity|
+      if identity.project_name.nil? && identity.project_role.nil? && identity.dataset_name.nil? && identity.dataset_role.nil?
+        describe 'No allUsers or allAuthenticatedUsers binding found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+          it 'should not have all(Authenticated)Users access to projects or datasets' do
+            expect(true).to eq(true)
+          end
+        end
+      else
+        resource_name = identity.project_name || identity.dataset_name
+        describe resource_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+          it 'should not have all(Authenticated)Users access to projects or datasets' do
+            expect(resource_name).to be_nil
+          end
+        end
+      end
+    end
+  else
+    describe 'No allUsers or allAuthenticatedUsers binding found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not have all(Authenticated)Users access to projects or datasets' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -2000,22 +2182,66 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: GCP_SERVICEUSAGE_SERVICE and GCP_CONTAINERREGISTRY_IMAGE and GCP_STORAGE_BUCKET
 control_id = 'darkbit-gcp-110'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)-[:HAS_RESOURCE]->(storagesvc:GCP_SERVICEUSAGE_SERVICE { resource_data_name: "containerregistry.googleapis.com"})
+    MATCH (project)-[:HAS_RESOURCE]->(bucket:GCP_STORAGE_BUCKET)
+    WHERE bucket.resource_data_name STARTS WITH 'artifacts.' and bucket.resource_data_name ENDS WITH '.appspot.com'
+    OPTIONAL MATCH (project)-[:HAS_RESOURCE]->(conscansvc:GCP_SERVICEUSAGE_SERVICE { resource_data_name: "containerscanning.googleapis.com"})
+    RETURN project.name as project_name, conscansvc.name as svc_name
+  )
+  projects = graphdb.query(q).mapped_results
+  if projects.length > 0
+    projects.each do |project|
+      describe project.project_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have container vulnerability scanning enabled' do
+          expect(project.svc_name).not_to be_nil
+        end
+      end
+    end
+  else
+    describe 'No Container Registry Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have container vulnerability scanning enabled' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# TODO: GCP_CONTAINER_CLUSTER and IAM and GCP_SERVICEUSAGE_SERVICE and GCP_CONTAINERREGISTRY_IMAGE and GCP_STORAGE_BUCKET
 control_id = 'darkbit-gcp-112'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (bucket:GCP_STORAGE_BUCKET)<-[:HAS_RESOURCE]-(project:GCP_CLOUDRESOURCEMANAGER_PROJECT)
+    MATCH (project)-[:HAS_RESOURCE]->(storagesvc:GCP_SERVICEUSAGE_SERVICE { resource_data_name: "containerregistry.googleapis.com"})
+    WITH project, bucket
+    WHERE bucket.resource_data_name STARTS WITH 'artifacts.' and bucket.resource_data_name ENDS WITH '.appspot.com'
+    MATCH (nodepool:GCP_CONTAINER_NODEPOOL)-[:HAS_SERVICEACCOUNT]->(gi:GCP_IDENTITY)-[av:HAS_ACCESSVIA]->(role:GCP_IAM_IAMROLE)
+    WITH project, bucket, nodepool, gi, av, role
+    OPTIONAL MATCH (nodepool)-[:HAS_OAUTHSCOPE]->(scope:GCP_IAM_OAUTHSCOPE)
+    WHERE (scope.name = 'https://www.googleapis.com/auth/devstorage.read_only')
+    OPTIONAL MATCH (role)-[:HAS_PERMISSION]->(perm:GCP_IAM_PERMISSION { name: "storage.objects.create"})
+    WHERE (av.resource = project.name OR av.resource = bucket.name)
+    RETURN DISTINCT nodepool.name as nodepool_name, scope.name as scope_name, perm.name as perm_name
+  )
+  nodepools = graphdb.query(q).mapped_results
+  if nodepools.length > 0
+    pools = nodepools.group_by { |r| r[:nodepool_name] }.map do |np, perms|
+      writable = (perms.select{|k,v| (k['scope_name'].nil? && k['perm_name'] == 'storage.objects.create') }.length > 0) || false
+      [ np, writable ] 
+    end
+    pools.each do |nodepool|
+      describe nodepool[0], control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have read-only access to GCR' do
+          expect(nodepool[1]).to eq(false)
+        end
+      end
+    end
+  else
+    describe 'No GKE Nodepools found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have read-only access to GCR' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
