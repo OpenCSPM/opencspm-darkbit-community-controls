@@ -4026,15 +4026,34 @@ controls:
       - google cloud
   - id: darkbit-gcp-66
     title: Cloud KMS Keys Should Be Rotated Every 90 Days
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description:
+      Google Cloud KMS stores cryptographic keys in a hierarchical structure designed for
+      useful and elegant access control management. The default key rotation period is `90`
+      days. Key rotation should not be set to a period longer than `90` days. Keys should
+      be rotated frequently to minimize the risk of credential leakage or misuse.
+    remediation: |-
+      Set the rotation period of KMS keys to a value less than or equal to `90` days.
+
+      ```
+      gcloud kms keys update new --keyring=KEY_RING \
+        --location=LOCATION \
+        --next-rotation-time=NEXT_ROTATION_TIME \
+        --rotation-period=ROTATION_PERIOD
+      ```
+    validation: |-
+      Run the following command and verify the rotation period is less than or equal to `90` days.
+
+      ```
+      gcloud kms keys list --keyring=<KEY_RING> \
+        --location=<LOCATION> \
+        --format=json'(rotationPeriod)'
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_CLOUDKMS_CRYPTOKEY
     refs:
-      - text: TODO
-        url: TODO
+      - text: Frequency of Key Rotation
+        url: https://cloud.google.com/kms/docs/key-rotation#frequency_of_key_rotation
     public: true
     tags:
       - cis:
