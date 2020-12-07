@@ -2002,112 +2002,298 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-97'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (sql:GCP_SQLADMIN_INSTANCE)
+    WHERE sql.resource_data_databaseVersion STARTS WITH 'MYSQL'
+    OPTIONAL MATCH (sql)-[flagvalue:HAS_SQLADMIN_DBFLAG]->(flag:GCP_SQLADMIN_DBFLAG)
+    WHERE flag.name = 'local_infile'
+    RETURN sql.name as instance_name, flagvalue.setting_value as setting_value
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have local_infile disabled' do
+          expect(instance.setting_value).to eq('off')
+        end
+      end
+    end
+  else
+    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have local_infile disabled' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-98'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (sql:GCP_SQLADMIN_INSTANCE)
+    WHERE sql.resource_data_databaseVersion STARTS WITH 'POST'
+    OPTIONAL MATCH (sql)-[flagvalue:HAS_SQLADMIN_DBFLAG]->(flag:GCP_SQLADMIN_DBFLAG)
+    WHERE flag.name = 'log_checkpoints'
+    RETURN sql.name as instance_name, flagvalue.setting_value as setting_value
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have log_checkpoints enabled' do
+          expect(instance.setting_value).to eq('on')
+        end
+      end
+    end
+  else
+    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have log_checkpoints enabled' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-99'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (sql:GCP_SQLADMIN_INSTANCE)
+    WHERE sql.resource_data_databaseVersion STARTS WITH 'POST'
+    OPTIONAL MATCH (sql)-[flagvalue:HAS_SQLADMIN_DBFLAG]->(flag:GCP_SQLADMIN_DBFLAG)
+    WHERE flag.name = 'log_connections'
+    RETURN sql.name as instance_name, flagvalue.setting_value as setting_value
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have log_connections enabled' do
+          expect(instance.setting_value).to eq('on')
+        end
+      end
+    end
+  else
+    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have log_connections enabled' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-100'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (sql:GCP_SQLADMIN_INSTANCE)
+    WHERE sql.resource_data_databaseVersion STARTS WITH 'POST'
+    OPTIONAL MATCH (sql)-[flagvalue:HAS_SQLADMIN_DBFLAG]->(flag:GCP_SQLADMIN_DBFLAG)
+    WHERE flag.name = 'log_disconnections'
+    RETURN sql.name as instance_name, flagvalue.setting_value as setting_value
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have log_disconnections enabled' do
+          expect(instance.setting_value).to eq('on')
+        end
+      end
+    end
+  else
+    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have log_disconnections enabled' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-101'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (sql:GCP_SQLADMIN_INSTANCE)
+    WHERE sql.resource_data_databaseVersion STARTS WITH 'POST'
+    OPTIONAL MATCH (sql)-[flagvalue:HAS_SQLADMIN_DBFLAG]->(flag:GCP_SQLADMIN_DBFLAG)
+    WHERE flag.name = 'log_lock_waits'
+    RETURN sql.name as instance_name, flagvalue.setting_value as setting_value
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have log_lock_waits enabled' do
+          expect(instance.setting_value).to eq('on')
+        end
+      end
+    end
+  else
+    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have log_lock_waits enabled' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-102'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (sql:GCP_SQLADMIN_INSTANCE)
+    WHERE sql.resource_data_databaseVersion STARTS WITH 'POST'
+    OPTIONAL MATCH (sql)-[flagvalue:HAS_SQLADMIN_DBFLAG]->(flag:GCP_SQLADMIN_DBFLAG)
+    WHERE flag.name = 'log_min_error_statement'
+    RETURN sql.name as instance_name, flagvalue.setting_value as setting_value
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have log_min_error_statement set to ERROR' do
+          expect(instance.setting_value).to eq('ERROR')
+        end
+      end
+    end
+  else
+    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have log_min_error_statement set to ERROR' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-103'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (sql:GCP_SQLADMIN_INSTANCE)
+    WHERE sql.resource_data_databaseVersion STARTS WITH 'POST'
+    OPTIONAL MATCH (sql)-[flagvalue:HAS_SQLADMIN_DBFLAG]->(flag:GCP_SQLADMIN_DBFLAG)
+    WHERE flag.name = 'log_temp_files'
+    RETURN sql.name as instance_name, flagvalue.setting_value as setting_value
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have log_temp_files enabled' do
+          expect(instance.setting_value).to eq('-1')
+        end
+      end
+    end
+  else
+    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have log_temp_files enabled' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-104'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (sql:GCP_SQLADMIN_INSTANCE)
+    WHERE sql.resource_data_databaseVersion STARTS WITH 'POST'
+    OPTIONAL MATCH (sql)-[flagvalue:HAS_SQLADMIN_DBFLAG]->(flag:GCP_SQLADMIN_DBFLAG)
+    WHERE flag.name = 'log_min_duration_statement'
+    RETURN sql.name as instance_name, flagvalue.setting_value as setting_value
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have log_min_duration_statement disabled' do
+          expect(instance.setting_value).to eq('-1')
+        end
+      end
+    end
+  else
+    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have log_min_duration_statement disabled' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-105'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (sql:GCP_SQLADMIN_INSTANCE)
+    WHERE sql.resource_data_databaseVersion STARTS WITH 'SQLSERVER'
+    OPTIONAL MATCH (sql)-[flagvalue:HAS_SQLADMIN_DBFLAG]->(flag:GCP_SQLADMIN_DBFLAG)
+    WHERE flag.name = 'cross db ownership chaining'
+    RETURN sql.name as instance_name, flagvalue.setting_value as setting_value
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have cross db ownership chaining disabled' do
+          expect(instance.setting_value).to eq('off')
+        end
+      end
+    end
+  else
+    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have cross db ownership chaining disabled' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-106'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (sql:GCP_SQLADMIN_INSTANCE)
+    WHERE sql.resource_data_databaseVersion STARTS WITH 'SQLSERVER'
+    OPTIONAL MATCH (sql)-[flagvalue:HAS_SQLADMIN_DBFLAG]->(flag:GCP_SQLADMIN_DBFLAG)
+    WHERE flag.name = 'contained database authentication'
+    RETURN sql.name as instance_name, flagvalue.setting_value as setting_value
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have contained database authentication disabled' do
+          expect(instance.setting_value).to eq('off')
+        end
+      end
+    end
+  else
+    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have contained database authentication disabled' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# BLOCKED: Needs CloudSQL deep parsing
 control_id = 'darkbit-gcp-107'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (sql:GCP_SQLADMIN_INSTANCE)
+    OPTIONAL MATCH (sql)-[:HAS_SQLMASTERAUTHORIZEDNETWORK]->(an:GCP_SQLADMIN_MASTERAUTHORIZEDNETWORK)
+    WHERE an.cidr_block IS NULL OR an.cidr_block = '0.0.0.0/0'
+    RETURN sql.name as instance_name, an.cidr_block as cidr_block
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.instance_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have not allow connections from all IPs' do
+          expect(instance.cidr_block).not_to eq('0.0.0.0/0')
+        end
+      end
+    end
+  else
+    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have not allow connections from all IPs' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -2459,15 +2645,15 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# BLOCKED: Ability to validate CSCC automatically?
-control_id = 'darkbit-gcp-126'
-RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
-    end
-  end
-end
+## BLOCKED: Ability to validate CSCC automatically?
+#control_id = 'darkbit-gcp-126'
+#RSpec.describe "[#{control_id}] #{titles[control_id]}" do
+#  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+#    it 'should not have a placeholder configuration' do
+#      expect(true).to eq(true)
+#    end
+#  end
+#end
 
 control_id = 'darkbit-gcp-127'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do

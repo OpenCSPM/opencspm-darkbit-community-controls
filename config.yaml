@@ -2973,7 +2973,7 @@ controls:
       IP: (.settings.ipConfiguration.ipv4Enabled)"''` and ensure no entries are listed.'
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_SQLADMIN_INSTANCE
     refs:
       - text: CloudSQL MySQL Private IP
         url: https://cloud.google.com/sql/docs/mysql/configure-private-services-access
@@ -4606,7 +4606,7 @@ controls:
           - nist-csf-todo
       - google cloud
   - id: darkbit-gcp-102
-    title: CloudSQL Instances Running PostgreSQL Should Have "log_min_messages" Set To "ERROR"
+    title: CloudSQL Instances Running PostgreSQL Should Have "log_min_error_statement" Set To "ERROR"
     description: TODO
     remediation: TODO
     validation: TODO
@@ -5043,29 +5043,29 @@ controls:
       - nist-csf:
           - nist-csf-todo
       - google cloud
-  - id: darkbit-gcp-126
-    title: Cloud Security Command Center (CSCC) Should Be Enabled In The Organization
-    description: TODO
-    remediation: TODO
-    validation: TODO
-    impact: 5
-    nodes:
-      - PLACEHOLDER
-    refs:
-      - text: TODO
-        url: TODO
-    public: true
-    tags:
-      - cis:
-          - gke-cis1.1
-          - gke-cis1.1-level1
-          - gke-cis1.1-not-scored
-          - gke-cis1.1-5
-          - gke-cis1.1-5.10
-          - gke-cis1.1-5.10.6
-      - nist-csf:
-          - nist-csf-todo
-      - google cloud
+#  - id: darkbit-gcp-126
+#    title: Cloud Security Command Center (CSCC) Should Be Enabled In The Organization
+#    description: TODO
+#    remediation: TODO
+#    validation: TODO
+#    impact: 5
+#    nodes:
+#      - PLACEHOLDER
+#    refs:
+#      - text: TODO
+#        url: TODO
+#    public: true
+#    tags:
+#      - cis:
+#          - gke-cis1.1
+#          - gke-cis1.1-level1
+#          - gke-cis1.1-not-scored
+#          - gke-cis1.1-5
+#          - gke-cis1.1-5.10
+#          - gke-cis1.1-5.10.6
+#      - nist-csf:
+#          - nist-csf-todo
+#      - google cloud
   - id: darkbit-gcp-127
     title: GKE Clusters Should Not Have Basic Authentication Enabled
     description: TODO
