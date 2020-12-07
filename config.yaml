@@ -4464,16 +4464,63 @@ controls:
       - google cloud
   - id: darkbit-gcp-78
     title: Log Metric Filter And Alert Should Notify On Network Changes
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      A metric filter and alarm should exist for VPC network changes. Monitoring changes 
+      to a VPC will help ensure VPC traffic flow is not being impacted.
+    remediation: |-
+      Create a [logging metric](https://console.cloud.google.com/logs/metrics) with the following
+      advanced filter:
+
+      ```
+      resource.type=gce_network
+        AND jsonPayload.event_subtype="compute.networks.insert"
+        OR jsonPayload.event_subtype="compute.networks.patch"
+        OR jsonPayload.event_subtype="compute.networks.delete"
+        OR jsonPayload.event_subtype="compute.networks.removePeering" 
+        OR jsonPayload.event_subtype="compute.networks.addPeering"
+      ```
+
+      In the Metric Editor menu, fill out the `name` field. Set `Units` to `1` (default)
+      and `Type` to `Counter`. This will ensure that the log metric counts the number
+      of log entries matching the user's advanced logs query.
+
+      Next, [Create an alert from the Metric](https://console.cloud.google.com/logs/metrics) with
+      an alert threshold of `0` to trigger a notification any time VPC networks are changed.
+    validation: |-
+      List the log metrics.
+
+      ```
+      gcloud beta logging metrics list --format json
+      ```
+
+      Ensure that the output contains at least one metrics with the filter:
+
+      ```
+      resource.type=gce_network
+        AND jsonPayload.event_subtype="compute.networks.insert"
+        OR jsonPayload.event_subtype="compute.networks.patch"
+        OR jsonPayload.event_subtype="compute.networks.delete"
+        OR jsonPayload.event_subtype="compute.networks.removePeering" 
+        OR jsonPayload.event_subtype="compute.networks.addPeering"
+      ```
+
+      List the alerting policies.
+
+      ```
+      gcloud alpha monitoring policies list --format json
+      ```
+
+      Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
+      set to `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` set to `true`.
     impact: 8
     nodes:
-      - GCP_IDENTITY
-      - GCP_IAM_ROLE
+      - GCP_LOGGING_LOGSINK
+      - GCP_CLOUDRESOURCEMANAGER_PROJECT
     refs:
-      - text: TODO
-        url: TODO
+      - text: Log Based Metrics
+        url: https://cloud.google.com/logging/docs/logs-based-metrics/
+      - text: Monitoring Alerts
+        url: https://cloud.google.com/monitoring/alerts/
     public: true
     tags:
       - cis:
@@ -5392,29 +5439,29 @@ controls:
       - nist-csf:
           - nist-csf-todo
       - google cloud
-#  - id: darkbit-gcp-126
-#    title: Cloud Security Command Center (CSCC) Should Be Enabled In The Organization
-#    description: TODO
-#    remediation: TODO
-#    validation: TODO
-#    impact: 5
-#    nodes:
-#      - PLACEHOLDER
-#    refs:
-#      - text: TODO
-#        url: TODO
-#    public: true
-#    tags:
-#      - cis:
-#          - gke-cis1.1
-#          - gke-cis1.1-level1
-#          - gke-cis1.1-not-scored
-#          - gke-cis1.1-5
-#          - gke-cis1.1-5.10
-#          - gke-cis1.1-5.10.6
-#      - nist-csf:
-#          - nist-csf-todo
-#      - google cloud
+  #  - id: darkbit-gcp-126
+  #    title: Cloud Security Command Center (CSCC) Should Be Enabled In The Organization
+  #    description: TODO
+  #    remediation: TODO
+  #    validation: TODO
+  #    impact: 5
+  #    nodes:
+  #      - PLACEHOLDER
+  #    refs:
+  #      - text: TODO
+  #        url: TODO
+  #    public: true
+  #    tags:
+  #      - cis:
+  #          - gke-cis1.1
+  #          - gke-cis1.1-level1
+  #          - gke-cis1.1-not-scored
+  #          - gke-cis1.1-5
+  #          - gke-cis1.1-5.10
+  #          - gke-cis1.1-5.10.6
+  #      - nist-csf:
+  #          - nist-csf-todo
+  #      - google cloud
   - id: darkbit-gcp-127
     title: GKE Clusters Should Not Have Basic Authentication Enabled
     description: TODO
