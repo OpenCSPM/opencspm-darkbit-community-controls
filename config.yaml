@@ -4108,16 +4108,28 @@ controls:
       - google cloud
   - id: darkbit-gcp-72
     title: Log Sinks Should Be Configured For All Log Entries
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      For the best visbility into security events, at least one log sink should be configured with no 
+      filters so that it will export all log entries.
+    remediation: |-
+      Create a sink to export all log entries to a Google Cloud Storage bucket.
+
+      ```
+      gcloud logging sinks create <sink-name> storage.googleapis.com/DESTINATION_BUCKET_NAME
+      ```
+    validation: |-
+      Run the following command and verify that at least one sink has an empty `filter`.
+
+      ```
+       gcloud logging sinks list --folder=FOLDER_ID | --organization=ORGANIZATION_ID | --project=PROJECT_ID
+       ```
     impact: 8
     nodes:
       - GCP_IDENTITY
       - GCP_IAM_ROLE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Google Cloud Logging Sinks
+        url: https://cloud.google.com/sdk/gcloud/reference/logging/sinks/list
     public: true
     tags:
       - cis:
