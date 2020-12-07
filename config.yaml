@@ -4200,16 +4200,63 @@ controls:
       - google cloud
   - id: darkbit-gcp-74
     title: Log Metric Filter And Alert Should Notify On Project Ownership Changes
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      In order to prevent unnecessary project ownership assignments to users/service-accounts 
+      and further misuses of projects and resources, all `roles/Owner` assignments should be 
+      monitored. Project ownership has the highest level of privileges on a project. To avoid 
+      misuse of project resources, the project ownership assignment/change actions mentioned 
+      above should be monitored and alerted to concerned recipients.
+    remediation: |-
+      Create a [logging metric](https://console.cloud.google.com/logs/metrics) with the following advanced 
+      filter.
+
+      ```
+      (protoPayload.serviceName="cloudresourcemanager.googleapis.com")
+        AND (ProjectOwnership OR projectOwnerInvitee)
+      OR (protoPayload.serviceData.policyDelta.bindingDeltas.action="REMOVE"
+        AND protoPayload.serviceData.policyDelta.bindingDeltas.role="roles/owner") 
+      OR (protoPayload.serviceData.policyDelta.bindingDeltas.action="ADD"
+        AND protoPayload.serviceData.policyDelta.bindingDeltas.role="roles/owner")
+      ```
+
+      In the `Metric Editor` menu on the right, fill out the name field. Set `Units` 
+      to `1` (default) and the `Type` to `Counter`. This ensures that the log metric 
+      counts the number of log entries matching the advanced logs query.
+    validation: |-
+      Run the following command to list log metrics.
+
+      ```
+      gcloud logging metrics list --format=json
+      ```
+
+      Verify at least one metric has the filter set to:
+
+      ```
+      (protoPayload.serviceName="cloudresourcemanager.googleapis.com")
+        AND (ProjectOwnership OR projectOwnerInvitee)
+      OR (protoPayload.serviceData.policyDelta.bindingDeltas.action="REMOVE"
+        AND protoPayload.serviceData.policyDelta.bindingDeltas.role="roles/owner") 
+      OR (protoPayload.serviceData.policyDelta.bindingDeltas.action="ADD"
+        AND protoPayload.serviceData.policyDelta.bindingDeltas.role="roles/owner")
+      ```
+
+      Run the following command to list alerting policies.
+
+      ```
+      gcloud alpha monitoring policies list --format=json
+      ```
+
+      Ensure `conditions.conditionThreshold.filter` is set to 
+      `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` is set to `true`.
     impact: 8
     nodes:
-      - GCP_IDENTITY
-      - GCP_IAM_ROLE
+      - GCP_LOGGING_LOGSINK
+      - GCP_CLOUDRESOURCEMANAGER_PROJECT
     refs:
-      - text: TODO
-        url: TODO
+      - text: Log Based Metrics
+        url: https://cloud.google.com/logging/docs/logs-based-metrics/
+      - text: Google Cloud Logging
+        url: https://cloud.google.com/logging/docs/reference/tools/gcloud-logging
     public: true
     tags:
       - cis:
