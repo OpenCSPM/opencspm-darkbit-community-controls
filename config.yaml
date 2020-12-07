@@ -2697,7 +2697,7 @@ controls:
       environments or those that hold sensitive data.  When directing to a GCS bucket,
       enable bucket versioning and optionally configure an object lifecycle policy to
       retain the data for the desired period only.
-    validation:
+    validation: |-
       In each project, run `gcloud compute networks subnets list --format=json
       | jq -r '.[] | select(.logConfig.enable | not) | "(.name) (.region)"'` and ensure
       no entries are present.
@@ -2734,7 +2734,7 @@ controls:
       For each firewall rule, assess whether the attached systems requires
       SSH access from any IP address.  If it doesn't, consider reducing the source IP
       ranges to a specific set of subnets or to the bastion host(s) in the environment.
-    validation:
+    validation: |-
       In each project, run `gcloud compute firewall-rules list --format=json
       | jq -r '.[] | select(.sourceRanges) | select(.allowed) | select(.sourceRanges[]
       | contains("0.0.0.0/0")) | "(.name) (.allowed[])"'` and ensure no entries that
@@ -3052,7 +3052,7 @@ controls:
       Remote Desktop access from any IP address.  If it doesn't, consider reducing the
       source IP ranges to a specific set of subnets or to the bastion host(s) in the
       environment.
-    validation:
+    validation: |-
       In each project, run ``gcloud compute firewall-rules list --format=json
       | jq -r '.[] | select(.sourceRanges) | select(.allowed) | select(.sourceRanges[]
       | contains("0.0.0.0/0")) | "(.name) (.allowed[])"' and ensure no entries that
@@ -3134,7 +3134,7 @@ controls:
     remediation:
       Configure the cluster to enabled Network Policy support to allow for
       in-cluster support for NetworkPolicy (firewall rules) resources.
-    validation:
+    validation: |-
       Run `gcloud container clusters describe <clustername> --format=json
       | jq -r 'select(.networkPolicy.enabled==true and .networkPolicy.provider=="CALICO")
       | "(.name)"'` and ensure that the cluster's name is listed.
@@ -3223,7 +3223,7 @@ controls:
       Configure Workload Identity on the cluster and every node pool in the
       cluster with the GKE_METADATA setting enabled.  Alternatively, deploy an egress
       NetworkPolicy blocking egress to 169.254.169.254 for all non-kube-system namespaces.
-    validation:
+    validation: |-
       Run `gcloud container clusters describe <clustername> --format=json
       | jq -r 'select(.workloadIdentityConfig.workloadPool | test("svc.id.goog")) |
       "(.name)"'` and ensure that the cluster's name is listed.
@@ -3329,7 +3329,7 @@ controls:
       at a fundamental level.  Considerations: The nodes must be running the COS or
       COS_CONTAINERD operating system, and enabling this change will require a node
       pool rolling redeployment performed at the next maintenance window.'
-    validation:
+    validation: |-
       Run `gcloud container clusters describe <clustername> --format=json
       | jq -r 'select(.nodePools[].config.shieldedInstanceConfig.enableIntegrityMonitoring==true
       and .nodePools[].config.shieldedInstanceConfig.enableSecureBoot==true) | "(.name)"'`
@@ -3428,7 +3428,7 @@ controls:
       'Configure Intranode Visibility on GKE Clusters running in VPCs with
       Flow logging enabled.  Considerations: VPC Flow logs may increase in size and
       contribute to additional cost.'
-    validation:
+    validation: |-
       Run `gcloud container clusters describe <clustername> --format=json
       | jq -r 'select(.networkConfig.enableIntraNodeVisibility==true) | "(.name)"'`
       and ensure that the cluster's name is listed.
@@ -3471,7 +3471,7 @@ controls:
       logging and monitoring" via the console or by way of the `--enable-stackdriver-kubernetes`
       option to gcloud on all GKE clusters. Existing clusters can have this feature
       enabled in-place with no downtime.
-    validation:
+    validation: |-
       Run `gcloud container clusters describe <clustername> --format=json
       | jq -r 'select(.loggingService=="logging.googleapis.com/kubernetes") | "(.name)"'`
       and ensure that the cluster's name is listed.
@@ -3516,7 +3516,7 @@ controls:
       socket for activities such as image building in-cluster or certain security features,
       COS_CONTAINERD offers an even smaller attack surface than COS.  Considerations:
       changing the image type recreates the nodes in the node pool.'
-    validation:
+    validation: |-
       Run `gcloud container clusters describe <clustername> --format=json
       | jq -r 'select(.nodePools[].config.imageType | test("^COS")) | "(.name)"'` and
       ensure that the cluster's name is listed.
@@ -3841,18 +3841,41 @@ controls:
       - google cloud
   - id: darkbit-gcp-62
     title: GCP Service Accounts Should Not Have User-Managed Keys Attached
-    description: TODO
-    remediation: TODO
-    validation: TODO
-    impact: 5
+    description:
+      Anyone who has access to the keys will be able to access resources through the service
+      account. GCP-managed keys are used by Cloud Platform services such as App Engine and
+      Compute Engine. These keys cannot be downloaded. Google will keep the keys and
+      automatically rotate them on an approximately weekly basis. User-managed keys are
+      created, downloadable, and managed by users. They expire 10 years from creation.
+    remediation:
+      Remove user-managed keys from service accounts wherever possible. Disable
+      service account key creation through the `Disable service account key creation` Organization policy.
+    validation: |-
+      Run the following command to list all service accounts with user-managed keys, and 
+      confirm each service account returns `0 items`.
+
+      ```
+      for i in $(gcloud iam service-accounts list | grep 'iam.gserviceaccount.com' | awk '{print $2}')
+      do
+        echo "sa: $i"
+        gcloud iam service-accounts keys list --iam-account=$i --managed-by=user | grep Z
+      done
+      ```
+    impact: 7
     nodes:
       - GCP_CLOUDRESOURCEMANAGER_PROJECT
       - GCP_IDENTITY
     refs:
-      - text: TODO
-        url: TODO
+      - text: Managing Service Account Keys
+        url: https://cloud.google.com/iam/docs/understanding-service-accounts#managing_service_account_keys
+      - text: Restricting service accounts
+        url: https://cloud.google.com/resource-manager/docs/organization-policy/restricting-service-accounts
+      - text: Disable service account key creation
+        url: https://console.cloud.google.com/iam-admin/orgpolicies/iam-disableServiceAccountKeyCreation
+      - text:
     public: true
     tags:
+      - google cloud
       - cis:
           - gcp-cis1.1
           - gcp-cis1.1-level1
@@ -3861,10 +3884,11 @@ controls:
           - gcp-cis1.1-1.4
       - nist-csf:
           - nist-csf-todo
-      - google cloud
   - id: darkbit-gcp-63
     title: GCP Service Accounts Should Not Be Bound To Admin, Editor, or Owner Roles
-    description: TODO
+    description:
+      Service accounts can perform critical actions without user intervention. It is
+      recommended that service accounts not have Admin, Editor, or Owner permissions.
     remediation: TODO
     validation: TODO
     impact: 7
@@ -3874,8 +3898,11 @@ controls:
     refs:
       - text: Default Compute Service Account
         url: https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#using_the_default_service_account
+      - text: Understanding Service Accounts
+        url: https://cloud.google.com/iam/docs/understanding-service-accounts
     public: true
     tags:
+      - google cloud
       - cis:
           - gcp-cis1.1
           - gcp-cis1.1-level1
@@ -3884,21 +3911,44 @@ controls:
           - gcp-cis1.1-1.5
       - nist-csf:
           - nist-csf-todo
-      - google cloud
   - id: darkbit-gcp-64
     title: Service Account Admin and Service Account User Should Not Be Attached To The Same Identity
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description:
+      As a best practice to ensure separation of duties, no user should have both `Service Account Admin`
+      and `Service Account User` roles assigned at the same time.
+    remediation:
+      Practice separation of duties by ensuring that no single user has both `Service Account Admin` and
+      `Service Account User` roles. Designate separate, limited, and tightly controlled users to act as
+      the `Service Account Admin` role.
+    validation: |-
+      Run the following command to find all users that have both `Service Account Admin` and 
+      `Service Account User` role and confirm that no users are returned.
+
+      ```
+      comm -1 -2 \
+        <(gcloud projects get-iam-policy $PROJECT_ID \
+          --filter=bindings.role:roles/iam.serviceAccountAdmin \
+          --flatten='bindings[]' \
+          --format="csv[no-heading](bindings.members[])" | sort) \
+        <(gcloud projects get-iam-policy $PROJECT_ID \
+          --filter=bindings.role:roles/iam.serviceAccountUser \
+          --flatten='bindings[]' \
+          --format="csv[no-heading](bindings.members[])" | sort)
+      ```
     impact: 9
     nodes:
       - GCP_IDENTITY
       - GCP_IAM_ROLE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Service Accounts
+        url: https://cloud.google.com/iam/docs/service-accounts
+      - text: Understanding Roles
+        url: https://cloud.google.com/iam/docs/understanding-roles
+      - text: Granting Roles to Service Accounts
+        url: https://cloud.google.com/iam/docs/granting-roles-to-service-accounts
     public: true
     tags:
+      - google cloud
       - cis:
           - gcp-cis1.1
           - gcp-cis1.1-level2
@@ -3907,20 +3957,64 @@ controls:
           - gcp-cis1.1-1.8
       - nist-csf:
           - nist-csf-todo
-      - google cloud
   - id: darkbit-gcp-65
     title: Cloud KMS Keys Should Not Be Public
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description:
+      Granting permissions to `allUsers` or `allAuthenticatedUsers` allows anyone to access KMS keys.
+      Anonymous and/or public access to a Cloud KMS keys should never be allowed.
+    remediation: |-
+      Remove any IAM role bindings for KMS keys for `allUsers` and `allAuthenticatedUsers` using the commands below.
+
+      ```
+      gcloud kms keys remove-iam-policy-binding [key_name] \
+        --keyring=[key_ring_name] \
+        --location=global \
+        --member='allAuthenticatedUsers' \
+        --role='[role]'
+      ```
+
+      and
+
+      ```
+      gcloud kms keys remove-iam-policy-binding [key_name] \
+        --keyring=[key_ring_name] \
+        --location=global \
+        --member='allUsers' \
+        --role='[role]'
+      ```
+    validation: |-
+      Run the following command to list all KMS keys and ensure no roles are bound to `allUsers` 
+      or `allAuthenticatedUsers`.
+
+      ```
+      for j in $(for i in $(gcloud kms keyrings list \
+        --location=global \
+        --format="csv[no-heading](name)")
+        do 
+          gcloud kms keys list \
+            --keyring=$i \
+            --location=global \
+            --format="csv[no-heading](name)"
+        done)
+      do 
+        echo "key: $j"
+        gcloud kms keys get-iam-policy $j \
+          --keyring=$i \
+          --location=global \
+          --filter="bindings.members:allUsers OR bindings.members:allAuthenticatedUsers" \
+          --format="csv[no-heading](bindings.members[],bindings.role[])"
+      done
+      ```
     impact: 10
     nodes:
-      - PLACEHOLDER
+      - GCP_CLOUDKMS_CRYPTOKEY
+      - GCP_CLOUDRESOURCEMANAGER_PROJECT
     refs:
-      - text: TODO
-        url: TODO
+      - text: Remove IAM Policy Bindings
+        url: https://cloud.google.com/sdk/gcloud/reference/kms/keys/remove-iam-policy-binding
     public: true
     tags:
+      - google cloud
       - cis:
           - gcp-cis1.1
           - gcp-cis1.1-level1
@@ -3932,15 +4026,34 @@ controls:
       - google cloud
   - id: darkbit-gcp-66
     title: Cloud KMS Keys Should Be Rotated Every 90 Days
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description:
+      Google Cloud KMS stores cryptographic keys in a hierarchical structure designed for
+      useful and elegant access control management. The default key rotation period is `90`
+      days. Key rotation should not be set to a period longer than `90` days. Keys should
+      be rotated frequently to minimize the risk of credential leakage or misuse.
+    remediation: |-
+      Set the rotation period of KMS keys to a value less than or equal to `90` days.
+
+      ```
+      gcloud kms keys update new --keyring=KEY_RING \
+        --location=LOCATION \
+        --next-rotation-time=NEXT_ROTATION_TIME \
+        --rotation-period=ROTATION_PERIOD
+      ```
+    validation: |-
+      Run the following command and verify the rotation period is less than or equal to `90` days.
+
+      ```
+      gcloud kms keys list --keyring=<KEY_RING> \
+        --location=<LOCATION> \
+        --format=json'(rotationPeriod)'
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_CLOUDKMS_CRYPTOKEY
     refs:
-      - text: TODO
-        url: TODO
+      - text: Frequency of Key Rotation
+        url: https://cloud.google.com/kms/docs/key-rotation#frequency_of_key_rotation
     public: true
     tags:
       - cis:
@@ -3954,16 +4067,34 @@ controls:
       - google cloud
   - id: darkbit-gcp-67
     title: Cloud KMS Admin and Cloud KMS Encrypter/Decrypter Should Not Be Attached To The Same Identity
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description:
+      The built-in/predefined IAM role `Cloud KMS Admin` allows the user/identity to create, delete,
+      and manage service account(s). The built-in/predefined IAM role `Cloud KMS CryptoKey
+      Encrypter/Decrypter` allows the user/identity (with adequate privileges on concerned resources)
+      to encrypt and decrypt data at rest using an encryption key(s). As a best practice to ensure
+      separation of duties, no user should have both of these roles assigned at the same time.
+    remediation: |
+      From the console, go to [IAM & Admin/IAM](https://console.cloud.google.com/iam-admin/iam) and for  
+      any users with the `Cloud KMS Admin` role remove any of the following if present: `Cloud KMS 
+      CryptoKey Encrypter/Decrypter`, `Cloud KMS CryptoKey Encrypter`, and `Cloud KMS CryptoKey Decrypter`.
+
+    validation: |-
+      Run the following command to list all users and role assignments.
+
+      ```
+      gcloud projects get-iam-policy PROJECT_ID
+      ```
+
+      Ensure that there are no common users found in the member section for roles `cloudkms.admin` and 
+      any one of `Cloud KMS CryptoKey Encrypter/Decrypter`, `Cloud KMS CryptoKey Encrypter`, 
+      `Cloud KMS CryptoKey Decrypter`.
     impact: 8
     nodes:
       - GCP_IDENTITY
       - GCP_IAM_ROLE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Separation of KMS Duties
+        url: https://cloud.google.com/kms/docs/separation-of-duties
     public: true
     tags:
       - cis:
@@ -3977,16 +4108,30 @@ controls:
       - google cloud
   - id: darkbit-gcp-72
     title: Log Sinks Should Be Configured For All Log Entries
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      For the best visbility into security events, at least one log sink should be configured with no 
+      filters so that it will export all log entries.
+    remediation: |-
+      Create a sink to export all log entries to a Google Cloud Storage bucket.
+
+      ```
+      gcloud logging sinks create <sink-name> storage.googleapis.com/DESTINATION_BUCKET_NAME
+      ```
+    validation: |-
+      Run the following command and verify that at least one sink has an empty `filter`.
+
+      ```
+       gcloud logging sinks list --folder=FOLDER_ID | --organization=ORGANIZATION_ID | --project=PROJECT_ID
+       ```
     impact: 8
     nodes:
       - GCP_IDENTITY
       - GCP_IAM_ROLE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Google Cloud Logging
+        url: https://cloud.google.com/logging/docs/reference/tools/gcloud-logging
+      - text: Using Exported Logs
+        url: https://cloud.google.com/logging/docs/export/using_exported_logs
     public: true
     tags:
       - cis:
@@ -4000,16 +4145,48 @@ controls:
       - google cloud
   - id: darkbit-gcp-73
     title: Logging Buckets Should Have Retention Policies and Bucket Lock Enabled
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Enabling retention policies on log buckets will protect logs stored in cloud 
+      storage buckets from being overwritten or accidentally deleted. Set up retention 
+      policies and configure Bucket Lock on all storage buckets that are used as log sinks.
+    remediation: |-
+      Run the following command to list log sinks that exporting to storage buckets:
+
+      ```
+      gcloud logging sinks list --folder=FOLDER_ID | --organization=ORGANIZATION_ID | --project=PROJECT_ID
+      ```
+
+      For each bucket, set a Retention Policy and enable Bucket Lock
+
+      ```
+      gsutil retention set [TIME_DURATION] gs://[BUCKET_NAME]
+      gsutil retention lock gs://[BUCKET_NAME]
+      ```
+
+      Note that locking a bucket is an irreversible action. Once you lock a bucket, 
+      you cannot remove the retention policy from the bucket or decrease the retention 
+      period for the policy.
+    validation: |-
+      Run the following command to list log sinks that exporting to storage buckets:
+
+      ```
+      gcloud logging sinks list --folder=FOLDER_ID | --organization=ORGANIZATION_ID | --project=PROJECT_ID
+      ```
+
+      For each bucket, verify Retention Policies and Bucket Lock are enabled.
+
+      ```
+      gsutil retention get gs://BUCKET_NAME
+      ```
     impact: 8
     nodes:
-      - GCP_IDENTITY
-      - GCP_IAM_ROLE
+      - GCP_STORAGE_BUCKET
+      - GCP_LOGGING_LOGSINK
     refs:
-      - text: TODO
-        url: TODO
+      - text: Bucket Lock
+        url: https://cloud.google.com/storage/docs/bucket-lock
+      - text: Using Bucket Lock
+        url: https://cloud.google.com/storage/docs/using-bucket-lock
     public: true
     tags:
       - cis:
@@ -4023,16 +4200,63 @@ controls:
       - google cloud
   - id: darkbit-gcp-74
     title: Log Metric Filter And Alert Should Notify On Project Ownership Changes
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      In order to prevent unnecessary project ownership assignments to users/service-accounts 
+      and further misuses of projects and resources, all `roles/Owner` assignments should be 
+      monitored. Project ownership has the highest level of privileges on a project. To avoid 
+      misuse of project resources, the project ownership assignment/change actions mentioned 
+      above should be monitored and alerted to concerned recipients.
+    remediation: |-
+      Create a [logging metric](https://console.cloud.google.com/logs/metrics) with the following advanced 
+      filter.
+
+      ```
+      (protoPayload.serviceName="cloudresourcemanager.googleapis.com")
+        AND (ProjectOwnership OR projectOwnerInvitee)
+      OR (protoPayload.serviceData.policyDelta.bindingDeltas.action="REMOVE"
+        AND protoPayload.serviceData.policyDelta.bindingDeltas.role="roles/owner") 
+      OR (protoPayload.serviceData.policyDelta.bindingDeltas.action="ADD"
+        AND protoPayload.serviceData.policyDelta.bindingDeltas.role="roles/owner")
+      ```
+
+      In the `Metric Editor` menu, fill out the `name` field. Set `Units` 
+      to `1` (default) and the `Type` to `Counter`. This ensures that the log metric 
+      counts the number of log entries matching the advanced logs query.
+    validation: |-
+      Run the following command to list log metrics.
+
+      ```
+      gcloud logging metrics list --format=json
+      ```
+
+      Verify at least one metric has the filter set to:
+
+      ```
+      (protoPayload.serviceName="cloudresourcemanager.googleapis.com")
+        AND (ProjectOwnership OR projectOwnerInvitee)
+      OR (protoPayload.serviceData.policyDelta.bindingDeltas.action="REMOVE"
+        AND protoPayload.serviceData.policyDelta.bindingDeltas.role="roles/owner") 
+      OR (protoPayload.serviceData.policyDelta.bindingDeltas.action="ADD"
+        AND protoPayload.serviceData.policyDelta.bindingDeltas.role="roles/owner")
+      ```
+
+      Run the following command to list alerting policies.
+
+      ```
+      gcloud alpha monitoring policies list --format=json
+      ```
+
+      Ensure `conditions.conditionThreshold.filter` is set to 
+      `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` is set to `true`.
     impact: 8
     nodes:
-      - GCP_IDENTITY
-      - GCP_IAM_ROLE
+      - GCP_LOGGING_LOGSINK
+      - GCP_CLOUDRESOURCEMANAGER_PROJECT
     refs:
-      - text: TODO
-        url: TODO
+      - text: Log Based Metrics
+        url: https://cloud.google.com/logging/docs/logs-based-metrics/
+      - text: Google Cloud Logging
+        url: https://cloud.google.com/logging/docs/reference/tools/gcloud-logging
     public: true
     tags:
       - cis:
@@ -4046,16 +4270,60 @@ controls:
       - google cloud
   - id: darkbit-gcp-75
     title: Log Metric Filter And Alert Should Notify On Audit Configuration Changes
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Admin activity and data access logs produced by cloud audit logging enable security 
+      analysis, resource change tracking, and compliance auditing. Configuring the metric 
+      filter and alerts for audit configuration changes ensures the recommended state of 
+      audit configuration is maintained so that all activities in the project are 
+      auditable at any point in time.
+    remediation: |-
+      Create a [logging metric](https://console.cloud.google.com/logs/metrics) with the following 
+      advanced filter:
+
+      ```
+      protoPayload.methodName="SetIamPolicy" AND 
+      protoPayload.serviceData.policyDelta.auditConfigDeltas:*
+      ```
+
+      In the Metric Editor menu, fill out the `name` field. Set `Units` to `1` (default) 
+      and `Type` to `Counter`. This will ensure that the log metric counts the number 
+      of log entries matching the user's advanced logs query.
+
+      Next, [Create an alert from the Metric](https://console.cloud.google.com/logs/metrics) with 
+      an alert threshold of `0` to trigger a notification any time the project owner is changed.
+    validation: |-
+      List log metrics:
+
+      ```
+      gcloud beta logging metrics list --format json
+      ```
+
+      Ensure that at least one metric has the filter set to:
+
+      ```
+      protoPayload.methodName="SetIamPolicy" AND 
+      protoPayload.serviceData.policyDelta.auditConfigDeltas:*
+      ```
+
+      List alerting policies:
+
+      ```
+      gcloud alpha monitoring policies list --format json
+      ```
+
+      Ensure that the output contains at least one alert policy where 
+      `conditions.conditionThreshold.filter` is set to 
+      `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and 
+      `enabled` is set to `true`.
     impact: 8
     nodes:
-      - GCP_IDENTITY
-      - GCP_IAM_ROLE
+      - GCP_LOGGING_LOGSINK
+      - GCP_CLOUDRESOURCEMANAGER_PROJECT
     refs:
-      - text: TODO
-        url: TODO
+      - text: Log Based Metrics
+        url: https://cloud.google.com/logging/docs/logs-based-metrics/
+      - text: Monitoring Alerts
+        url: https://cloud.google.com/monitoring/alerts/
     public: true
     tags:
       - cis:
@@ -4069,16 +4337,56 @@ controls:
       - google cloud
   - id: darkbit-gcp-76
     title: Log Metric Filter And Alert Should Notify On Firewall Rule Changes
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      A metric filter and alert should exist for VPC network firewall rule changes.
+    remediation: |-
+      Create a [logging metric](https://console.cloud.google.com/logs/metrics) with the following
+      advanced filter:
+
+      ```
+      resource.type="gce_firewall_rule"
+      AND jsonPayload.event_subtype="compute.firewalls.patch"
+      OR jsonPayload.event_subtype="compute.firewalls.insert"
+      ```
+
+      In the Metric Editor menu, fill out the `name` field. Set `Units` to `1` (default)
+      and `Type` to `Counter`. This will ensure that the log metric counts the number
+      of log entries matching the user's advanced logs query.
+
+      Next, [Create an alert from the Metric](https://console.cloud.google.com/logs/metrics) with
+      an alert threshold of `0` to trigger a notification any time firewall rules are changed.
+    validation: |-
+      List the log metrics.
+
+      ```
+      gcloud beta logging metrics list --format json
+      ```
+
+      Ensure that the output contains at least one metrics with the filter:
+
+      ```
+      resource.type="gce_firewall_rule"
+        AND jsonPayload.event_subtype="compute.firewalls.patch"
+        OR jsonPayload.event_subtype="compute.firewalls.insert"
+      ```
+
+      List the alerting policies.
+
+      ```
+      gcloud alpha monitoring policies list --format json
+      ```
+
+      Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
+      set to `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` set to `true`.
     impact: 8
     nodes:
-      - GCP_IDENTITY
-      - GCP_IAM_ROLE
+      - GCP_LOGGING_LOGSINK
+      - GCP_CLOUDRESOURCEMANAGER_PROJECT
     refs:
-      - text: TODO
-        url: TODO
+      - text: Log Based Metrics
+        url: https://cloud.google.com/logging/docs/logs-based-metrics/
+      - text: Monitoring Alerts
+        url: https://cloud.google.com/monitoring/alerts/
     public: true
     tags:
       - cis:
@@ -4092,16 +4400,57 @@ controls:
       - google cloud
   - id: darkbit-gcp-77
     title: Log Metric Filter And Alert Should Notify On Route Changes
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      A metric filter and alert should exist for VPC network route changes. Monitoring changes 
+      to route tables will help ensure that all VPC traffic flows through an expected path.
+    remediation: |-
+      Create a [logging metric](https://console.cloud.google.com/logs/metrics) with the following
+      advanced filter:
+
+      ```
+      resource.type="gce_route"
+        AND jsonPayload.event_subtype="compute.routes.delete" 
+        OR jsonPayload.event_subtype="compute.routes.insert"
+      ```
+
+      In the Metric Editor menu, fill out the `name` field. Set `Units` to `1` (default)
+      and `Type` to `Counter`. This will ensure that the log metric counts the number
+      of log entries matching the user's advanced logs query.
+
+      Next, [Create an alert from the Metric](https://console.cloud.google.com/logs/metrics) with
+      an alert threshold of `0` to trigger a notification any time route tables are changed.
+    validation: |-
+      List the log metrics.
+
+      ```
+      gcloud beta logging metrics list --format json
+      ```
+
+      Ensure that the output contains at least one metrics with the filter:
+
+      ```
+      resource.type="gce_route"
+        AND jsonPayload.event_subtype="compute.routes.delete"
+        OR jsonPayload.event_subtype="compute.routes.insert"
+      ```
+
+      List the alerting policies.
+
+      ```
+      gcloud alpha monitoring policies list --format json
+      ```
+
+      Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
+      set to `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` set to `true`.
     impact: 8
     nodes:
-      - GCP_IDENTITY
-      - GCP_IAM_ROLE
+      - GCP_LOGGING_LOGSINK
+      - GCP_CLOUDRESOURCEMANAGER_PROJECT
     refs:
-      - text: TODO
-        url: TODO
+      - text: Log Based Metrics
+        url: https://cloud.google.com/logging/docs/logs-based-metrics/
+      - text: Monitoring Alerts
+        url: https://cloud.google.com/monitoring/alerts/
     public: true
     tags:
       - cis:
