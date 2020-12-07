@@ -4067,16 +4067,34 @@ controls:
       - google cloud
   - id: darkbit-gcp-67
     title: Cloud KMS Admin and Cloud KMS Encrypter/Decrypter Should Not Be Attached To The Same Identity
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description:
+      The built-in/predefined IAM role `Cloud KMS Admin` allows the user/identity to create, delete,
+      and manage service account(s). The built-in/predefined IAM role `Cloud KMS CryptoKey
+      Encrypter/Decrypter` allows the user/identity (with adequate privileges on concerned resources)
+      to encrypt and decrypt data at rest using an encryption key(s). As a best practice to ensure
+      separation of duties, no user should have both of these roles assigned at the same time.
+    remediation: |
+      From the console, go to [IAM & Admin/IAM](https://console.cloud.google.com/iam-admin/iam) and for  
+      any users with the `Cloud KMS Admin` role remove any of the following if present: `Cloud KMS 
+      CryptoKey Encrypter/Decrypter`, `Cloud KMS CryptoKey Encrypter`, and `Cloud KMS CryptoKey Decrypter`.
+
+    validation: |-
+      Run the following command to list all users and role assignments.
+
+      ```
+      gcloud projects get-iam-policy PROJECT_ID
+      ```
+
+      Ensure that there are no common users found in the member section for roles `cloudkms.admin` and 
+      any one of `Cloud KMS CryptoKey Encrypter/Decrypter`, `Cloud KMS CryptoKey Encrypter`, 
+      `Cloud KMS CryptoKey Decrypter`.
     impact: 8
     nodes:
       - GCP_IDENTITY
       - GCP_IAM_ROLE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Separation of KMS Duties
+        url: https://cloud.google.com/kms/docs/separation-of-duties
     public: true
     tags:
       - cis:
