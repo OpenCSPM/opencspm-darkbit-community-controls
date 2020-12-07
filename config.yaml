@@ -4128,8 +4128,10 @@ controls:
       - GCP_IDENTITY
       - GCP_IAM_ROLE
     refs:
-      - text: Google Cloud Logging Sinks
-        url: https://cloud.google.com/sdk/gcloud/reference/logging/sinks/list
+      - text: Google Cloud Logging
+        url: https://cloud.google.com/logging/docs/reference/tools/gcloud-logging
+      - text: Using Exported Logs
+        url: https://cloud.google.com/logging/docs/export/using_exported_logs
     public: true
     tags:
       - cis:
@@ -4143,16 +4145,48 @@ controls:
       - google cloud
   - id: darkbit-gcp-73
     title: Logging Buckets Should Have Retention Policies and Bucket Lock Enabled
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Enabling retention policies on log buckets will protect logs stored in cloud 
+      storage buckets from being overwritten or accidentally deleted. Set up retention 
+      policies and configure Bucket Lock on all storage buckets that are used as log sinks.
+    remediation: |-
+      Run the following command to list log sinks that exporting to storage buckets:
+
+      ```
+      gcloud logging sinks list --folder=FOLDER_ID | --organization=ORGANIZATION_ID | --project=PROJECT_ID
+      ```
+
+      For each bucket, set a Retention Policy and enable Bucket Lock
+
+      ```
+      gsutil retention set [TIME_DURATION] gs://[BUCKET_NAME]
+      gsutil retention lock gs://[BUCKET_NAME]
+      ```
+
+      Note that locking a bucket is an irreversible action. Once you lock a bucket, 
+      you cannot remove the retention policy from the bucket or decrease the retention 
+      period for the policy.
+    validation: |-
+      Run the following command to list log sinks that exporting to storage buckets:
+
+      ```
+      gcloud logging sinks list --folder=FOLDER_ID | --organization=ORGANIZATION_ID | --project=PROJECT_ID
+      ```
+
+      For each bucket, verify Retention Policies and Bucket Lock are enabled.
+
+      ```
+      gsutil retention get gs://BUCKET_NAME
+      ```
     impact: 8
     nodes:
-      - GCP_IDENTITY
-      - GCP_IAM_ROLE
+      - GCP_STORAGE_BUCKET
+      - GCP_LOGGING_LOGSINK
     refs:
-      - text: TODO
-        url: TODO
+      - text: Bucket Lock
+        url: https://cloud.google.com/storage/docs/bucket-lock
+      - text: Using Bucket Lock
+        url: https://cloud.google.com/storage/docs/using-bucket-lock
     public: true
     tags:
       - cis:
