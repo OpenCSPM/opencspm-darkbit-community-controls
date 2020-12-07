@@ -2697,7 +2697,7 @@ controls:
       environments or those that hold sensitive data.  When directing to a GCS bucket,
       enable bucket versioning and optionally configure an object lifecycle policy to
       retain the data for the desired period only.
-    validation:
+    validation: |-
       In each project, run `gcloud compute networks subnets list --format=json
       | jq -r '.[] | select(.logConfig.enable | not) | "(.name) (.region)"'` and ensure
       no entries are present.
@@ -2734,7 +2734,7 @@ controls:
       For each firewall rule, assess whether the attached systems requires
       SSH access from any IP address.  If it doesn't, consider reducing the source IP
       ranges to a specific set of subnets or to the bastion host(s) in the environment.
-    validation:
+    validation: |-
       In each project, run `gcloud compute firewall-rules list --format=json
       | jq -r '.[] | select(.sourceRanges) | select(.allowed) | select(.sourceRanges[]
       | contains("0.0.0.0/0")) | "(.name) (.allowed[])"'` and ensure no entries that
@@ -3052,7 +3052,7 @@ controls:
       Remote Desktop access from any IP address.  If it doesn't, consider reducing the
       source IP ranges to a specific set of subnets or to the bastion host(s) in the
       environment.
-    validation:
+    validation: |-
       In each project, run ``gcloud compute firewall-rules list --format=json
       | jq -r '.[] | select(.sourceRanges) | select(.allowed) | select(.sourceRanges[]
       | contains("0.0.0.0/0")) | "(.name) (.allowed[])"' and ensure no entries that
@@ -3134,7 +3134,7 @@ controls:
     remediation:
       Configure the cluster to enabled Network Policy support to allow for
       in-cluster support for NetworkPolicy (firewall rules) resources.
-    validation:
+    validation: |-
       Run `gcloud container clusters describe <clustername> --format=json
       | jq -r 'select(.networkPolicy.enabled==true and .networkPolicy.provider=="CALICO")
       | "(.name)"'` and ensure that the cluster's name is listed.
@@ -3223,7 +3223,7 @@ controls:
       Configure Workload Identity on the cluster and every node pool in the
       cluster with the GKE_METADATA setting enabled.  Alternatively, deploy an egress
       NetworkPolicy blocking egress to 169.254.169.254 for all non-kube-system namespaces.
-    validation:
+    validation: |-
       Run `gcloud container clusters describe <clustername> --format=json
       | jq -r 'select(.workloadIdentityConfig.workloadPool | test("svc.id.goog")) |
       "(.name)"'` and ensure that the cluster's name is listed.
@@ -3329,7 +3329,7 @@ controls:
       at a fundamental level.  Considerations: The nodes must be running the COS or
       COS_CONTAINERD operating system, and enabling this change will require a node
       pool rolling redeployment performed at the next maintenance window.'
-    validation:
+    validation: |-
       Run `gcloud container clusters describe <clustername> --format=json
       | jq -r 'select(.nodePools[].config.shieldedInstanceConfig.enableIntegrityMonitoring==true
       and .nodePools[].config.shieldedInstanceConfig.enableSecureBoot==true) | "(.name)"'`
@@ -3428,7 +3428,7 @@ controls:
       'Configure Intranode Visibility on GKE Clusters running in VPCs with
       Flow logging enabled.  Considerations: VPC Flow logs may increase in size and
       contribute to additional cost.'
-    validation:
+    validation: |-
       Run `gcloud container clusters describe <clustername> --format=json
       | jq -r 'select(.networkConfig.enableIntraNodeVisibility==true) | "(.name)"'`
       and ensure that the cluster's name is listed.
@@ -3471,7 +3471,7 @@ controls:
       logging and monitoring" via the console or by way of the `--enable-stackdriver-kubernetes`
       option to gcloud on all GKE clusters. Existing clusters can have this feature
       enabled in-place with no downtime.
-    validation:
+    validation: |-
       Run `gcloud container clusters describe <clustername> --format=json
       | jq -r 'select(.loggingService=="logging.googleapis.com/kubernetes") | "(.name)"'`
       and ensure that the cluster's name is listed.
@@ -3516,7 +3516,7 @@ controls:
       socket for activities such as image building in-cluster or certain security features,
       COS_CONTAINERD offers an even smaller attack surface than COS.  Considerations:
       changing the image type recreates the nodes in the node pool.'
-    validation:
+    validation: |-
       Run `gcloud container clusters describe <clustername> --format=json
       | jq -r 'select(.nodePools[].config.imageType | test("^COS")) | "(.name)"'` and
       ensure that the cluster's name is listed.
@@ -4219,7 +4219,7 @@ controls:
         AND protoPayload.serviceData.policyDelta.bindingDeltas.role="roles/owner")
       ```
 
-      In the `Metric Editor` menu on the right, fill out the name field. Set `Units` 
+      In the `Metric Editor` menu, fill out the `name` field. Set `Units` 
       to `1` (default) and the `Type` to `Counter`. This ensures that the log metric 
       counts the number of log entries matching the advanced logs query.
     validation: |-
@@ -4270,16 +4270,60 @@ controls:
       - google cloud
   - id: darkbit-gcp-75
     title: Log Metric Filter And Alert Should Notify On Audit Configuration Changes
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Admin activity and data access logs produced by cloud audit logging enable security 
+      analysis, resource change tracking, and compliance auditing. Configuring the metric 
+      filter and alerts for audit configuration changes ensures the recommended state of 
+      audit configuration is maintained so that all activities in the project are 
+      auditable at any point in time.
+    remediation: |-
+      Create a [logging metric](https://console.cloud.google.com/logs/metrics) with the following 
+      advanced filter:
+
+      ```
+      protoPayload.methodName="SetIamPolicy" AND 
+      protoPayload.serviceData.policyDelta.auditConfigDeltas:*
+      ```
+
+      In the Metric Editor menu, fill out the `name` field. Set `Units` to `1` (default) 
+      and `Type` to `Counter`. This will ensure that the log metric counts the number 
+      of log entries matching the user's advanced logs query.
+
+      Next, [Create an alert from the Metric](https://console.cloud.google.com/logs/metrics) with 
+      an alert threshold of `0` to trigger a notification every time the project owner is changed.
+    validation: |-
+      List log metrics:
+
+      ```
+      gcloud beta logging metrics list --format json
+      ```
+
+      Ensure that at least one metric has the filter set to :
+
+      ```
+      protoPayload.methodName="SetIamPolicy" AND 
+      protoPayload.serviceData.policyDelta.auditConfigDeltas:*
+      ```
+
+      List alerting policies:
+
+      ```
+      gcloud alpha monitoring policies list --format json
+      ```
+
+      Ensure that the output contains at least one alert policy where 
+      `conditions.conditionThreshold.filter` is set to 
+      `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and 
+      `enabled` is set to `true`.
     impact: 8
     nodes:
-      - GCP_IDENTITY
-      - GCP_IAM_ROLE
+      - GCP_LOGGING_LOGSINK
+      - GCP_CLOUDRESOURCEMANAGER_PROJECT
     refs:
-      - text: TODO
-        url: TODO
+      - text: Log Based Metrics
+        url: https://cloud.google.com/logging/docs/logs-based-metrics/
+      - text: Monitoring Alerts
+        url: https://cloud.google.com/monitoring/alerts/
     public: true
     tags:
       - cis:
