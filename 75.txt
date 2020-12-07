@@ -1,0 +1,67 @@
+  - id: darkbit-gcp-75
+    title: Log Metric Filter And Alert Should Notify On Audit Configuration Changes
+    description: |
+      Admin activity and data access logs produced by cloud audit logging enable security 
+      analysis, resource change tracking, and compliance auditing. Configuring the metric 
+      filter and alerts for audit configuration changes ensures the recommended state of 
+      audit configuration is maintained so that all activities in the project are 
+      auditable at any point in time.
+    remediation: |-
+      Create a [logging metric](https://console.cloud.google.com/logs/metrics) with the following 
+      advanced filter:
+
+      ```
+      protoPayload.methodName="SetIamPolicy" AND 
+      protoPayload.serviceData.policyDelta.auditConfigDeltas:*
+      ```
+
+      In the Metric Editor menu, fill out the `name` field. Set `Units` to `1` (default) 
+      and `Type` to `Counter`. This will ensure that the log metric counts the number 
+      of log entries matching the user's advanced logs query.
+
+      Next, [Create an alert from the Metric](https://console.cloud.google.com/logs/metrics) with 
+      an alert threshold of `0` to trigger a notification every time the project owner is changed.
+    validation: |-
+      List log metrics:
+
+      ```
+      gcloud beta logging metrics list --format json
+      ```
+
+      Ensure that at least one metric has the filter set to :
+
+      ```
+      protoPayload.methodName="SetIamPolicy" AND 
+      protoPayload.serviceData.policyDelta.auditConfigDeltas:*
+      ```
+
+      List alerting policies:
+
+      ```
+      gcloud alpha monitoring policies list --format json
+      ```
+
+      Ensure that the output contains at least one alert policy where 
+      `conditions.conditionThreshold.filter` is set to 
+      `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and 
+      `enabled` is set to `true`.
+    impact: 8
+    nodes:
+      - GCP_LOGGING_LOGSINK
+      - GCP_CLOUDRESOURCEMANAGER_PROJECT
+    refs:
+      - text: Log Based Metrics
+        url: https://cloud.google.com/logging/docs/logs-based-metrics/
+      - text: Monitoring Alerts
+        url: https://cloud.google.com/monitoring/alerts/
+    public: true
+    tags:
+      - cis:
+          - gcp-cis1.1
+          - gcp-cis1.1-level1
+          - gcp-cis1.1-scored
+          - gcp-cis1.1-2
+          - gcp-cis1.1-2.5
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud

@@ -4290,7 +4290,7 @@ controls:
       of log entries matching the user's advanced logs query.
 
       Next, [Create an alert from the Metric](https://console.cloud.google.com/logs/metrics) with 
-      an alert threshold of `0` to trigger a notification every time the project owner is changed.
+      an alert threshold of `0` to trigger a notification any time the project owner is changed.
     validation: |-
       List log metrics:
 
@@ -4298,7 +4298,7 @@ controls:
       gcloud beta logging metrics list --format json
       ```
 
-      Ensure that at least one metric has the filter set to :
+      Ensure that at least one metric has the filter set to:
 
       ```
       protoPayload.methodName="SetIamPolicy" AND 
@@ -4354,7 +4354,7 @@ controls:
       of log entries matching the user's advanced logs query.
 
       Next, [Create an alert from the Metric](https://console.cloud.google.com/logs/metrics) with
-      an alert threshold of `0` to trigger a notification every time firewall rules are changed.
+      an alert threshold of `0` to trigger a notification any time firewall rules are changed.
     validation: |-
       List the log metrics.
 
@@ -4400,16 +4400,57 @@ controls:
       - google cloud
   - id: darkbit-gcp-77
     title: Log Metric Filter And Alert Should Notify On Route Changes
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      A metric filter and alert should exist for VPC network route changes. Monitoring changes 
+      to route tables will help ensure that all VPC traffic flows through an expected path.
+    remediation: |-
+      Create a [logging metric](https://console.cloud.google.com/logs/metrics) with the following
+      advanced filter:
+
+      ```
+      resource.type="gce_route"
+        AND jsonPayload.event_subtype="compute.routes.delete" 
+        OR jsonPayload.event_subtype="compute.routes.insert"
+      ```
+
+      In the Metric Editor menu, fill out the `name` field. Set `Units` to `1` (default)
+      and `Type` to `Counter`. This will ensure that the log metric counts the number
+      of log entries matching the user's advanced logs query.
+
+      Next, [Create an alert from the Metric](https://console.cloud.google.com/logs/metrics) with
+      an alert threshold of `0` to trigger a notification any time route tables are changed.
+    validation: |-
+      List the log metrics.
+
+      ```
+      gcloud beta logging metrics list --format json
+      ```
+
+      Ensure that the output contains at least one metrics with the filter:
+
+      ```
+      resource.type="gce_route"
+        AND jsonPayload.event_subtype="compute.routes.delete"
+        OR jsonPayload.event_subtype="compute.routes.insert"
+      ```
+
+      List the alerting policies.
+
+      ```
+      gcloud alpha monitoring policies list --format json
+      ```
+
+      Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
+      set to `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` set to `true`.
     impact: 8
     nodes:
-      - GCP_IDENTITY
-      - GCP_IAM_ROLE
+      - GCP_LOGGING_LOGSINK
+      - GCP_CLOUDRESOURCEMANAGER_PROJECT
     refs:
-      - text: TODO
-        url: TODO
+      - text: Log Based Metrics
+        url: https://cloud.google.com/logging/docs/logs-based-metrics/
+      - text: Monitoring Alerts
+        url: https://cloud.google.com/monitoring/alerts/
     public: true
     tags:
       - cis:
