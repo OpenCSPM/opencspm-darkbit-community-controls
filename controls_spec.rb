@@ -631,12 +631,27 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# BLOCKED: Needs firewall rule deep parsing
 control_id = 'darkbit-gcp-15'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (range:GCP_COMPUTE_FIREWALLIPRANGE { name: "0.0.0.0/0"})<-[:HAS_SOURCEIPRANGE]-(f:GCP_COMPUTE_FIREWALL)-[rule:HAS_FIREWALLRULE { action: "allow"}]->(proto:GCP_COMPUTE_NETWORKPROTOCOL)
+    WHERE ((rule.from_port <= 22 AND 22 <= rule.to_port) AND (proto.name = 'all' OR proto.name = 'tcp'))
+    RETURN DISTINCT f.name as firewall_name
+  )
+  fws = graphdb.query(q).mapped_results
+  if fws.length > 0
+    fws.each do |fw|
+      describe fw.firewall_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should not allow TCP/22 from 0.0.0.0/0' do
+          expect(fw.firewall_name).to be_nil
+        end
+      end
+    end
+  else
+    describe 'No GCP Firewalls found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not allow TCP/22 from 0.0.0.0/0' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -800,12 +815,27 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# BLOCKED: Needs firewall rule deep parsing
 control_id = 'darkbit-gcp-26'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (range:GCP_COMPUTE_FIREWALLIPRANGE { name: "0.0.0.0/0"})<-[:HAS_SOURCEIPRANGE]-(f:GCP_COMPUTE_FIREWALL)-[rule:HAS_FIREWALLRULE { action: "allow"}]->(proto:GCP_COMPUTE_NETWORKPROTOCOL)
+    WHERE ((rule.from_port <= 3389 AND 3389 <= rule.to_port) AND (proto.name = 'all' OR proto.name = 'tcp'))
+    RETURN DISTINCT f.name as firewall_name
+  )
+  fws = graphdb.query(q).mapped_results
+  if fws.length > 0
+    fws.each do |fw|
+      describe fw.firewall_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should not allow TCP/3389 from 0.0.0.0/0' do
+          expect(fw.firewall_name).to be_nil
+        end
+      end
+    end
+  else
+    describe 'No GCP Firewalls found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not allow TCP/3389 from 0.0.0.0/0' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
