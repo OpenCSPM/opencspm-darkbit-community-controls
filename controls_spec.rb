@@ -2700,16 +2700,6 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-## BLOCKED: Ability to validate CSCC automatically?
-#control_id = 'darkbit-gcp-126'
-#RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-#  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-#    it 'should not have a placeholder configuration' do
-#      expect(true).to eq(true)
-#    end
-#  end
-#end
-
 control_id = 'darkbit-gcp-127'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
