@@ -4975,15 +4975,44 @@ controls:
       - google cloud
   - id: darkbit-gcp-88
     title: OSLogin Should Be Enabled In Compute Projects And GCE Instances Should Not Override Via Metadata
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Enabling osLogin ensures that SSH keys used to connect to instances are mapped with IAM users. Revoking 
+      access to IAM user will revoke all the SSH keys associated with that particular user. This facilitates 
+      centralized and automated SSH key pair management.
+    remediation: |-
+      Configure `oslogin` on the project.
+
+      ```
+      gcloud compute project-info add-metadata \
+        --metadata enable-oslogin=TRUE
+      ```
+
+      And remove instance metadata that overrides the project settings.
+
+      ```
+      gcloud compute instances remove-metadata <INSTANCE_NAME> \
+        --keys=enable-oslogin
+      ```
+    validation: |-
+      Ensure that `oslogin` is enabled on the project.
+
+      ```
+      gcloud compute project-info describe
+      ```
+
+      Verify that the section `commonInstanceMetadata` has a key `enable-oslogin` set to value `TRUE`. Also ensure that 
+      no instance in the project overrides the project setting.
+
+      ```
+      gcloud compute instances describe <INSTANCE_NAME>
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_COMPUTE_INSTANCE
+      - GCP_COMPUTEMETADATAITEM
     refs:
-      - text: TODO
-        url: TODO
+      - text: Setting up OS Login
+        url: https://cloud.google.com/compute/docs/instances/managing-instance-access
     public: true
     tags:
       - cis:
