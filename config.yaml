@@ -4934,15 +4934,34 @@ controls:
       - google cloud
   - id: darkbit-gcp-87
     title: GCE Instances Should Block Project-Wide SSH Keys
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Use instance-specific SSH keys instead of using common/shared project-wide SSH keys to access instances.
+    remediation: |-
+      Block project-wide SSH keys by setting `block-project-ssh-keys` to `true`.
+
+      ```
+      gcloud compute instances add-metadata <INSTANCE_NAME> \
+        --metadata block-project-ssh-keys=TRUE
+      ```
+    validation: |-
+      List all instances in a project.
+
+      ```
+      gcloud compute instances list
+      ```
+
+      For every instance, get the instance metadata and ensure `block-project-ssh-keys` is set to `true`.
+
+      ```
+      gcloud compute instances describe <INSTANCE_NAME>
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_COMPUTE_INSTANCE
+      - GCP_COMPUTEMETADATAITEM
     refs:
-      - text: TODO
-        url: TODO
+      - text: Managing SSH keys in metadata
+        url: https://cloud.google.com/compute/docs/instances/adding-removing-ssh-keys
     public: true
     tags:
       - cis:
