@@ -5704,15 +5704,43 @@ controls:
       - google cloud
   - id: darkbit-gcp-106
     title: CloudSQL Instances Running SQL Server Should Have "contained database authentication" Disabled
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      The database flag `contained database authentication` should be disabled for SQL Server instances. A **contained** 
+      database includes all database settings and metadata required to define the database and has no configuration 
+      dependencies on the instance of the Database Engine where the database is installed. Users can connect to 
+      the database without authenticating a login at the Database Engine level. Isolating the database 
+      from the Database Engine makes it possible to easily move the database to another instance of SQL Server. 
+      Contained databases have some unique threats that should be understood and mitigated by SQL Server Database 
+      Engine administrators. Most of the threats are related to the `USER WITH PASSWORD` authentication process, which 
+      moves the authentication boundary from the Database Engine level to the database level, hence it is 
+      recommended to disable this flag.
+    remediation: |-
+      Disable `contained database authentication` for SQL Server Cloud SQL instances.
+
+      ```
+      gcloud sql instances patch <INSTANCE_NAME> --database-flags "contained database authentication=off"
+      ```
+    validation: |-
+      List SQL Server Cloud SQL instances.
+
+      ```
+      gcloud sql instances list --filter='DATABASE_VERSION:SQLSERVER*'
+      ```
+
+      Ensure `contained database authentication` is `0` for each instance.
+
+      ```
+      gcloud sql instances describe <INSTANCE_NAME> \
+        --format=json | jq '.settings.databaseFlags[] | select(.name=="contained database authentication")|.value'
+      ```
     impact: 8
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Setting a database flag
+        url: https://cloud.google.com/sql/docs/postgres/flags#setting_a_database_flag
+      - text: Security Best Practices with Contained Databases
+        url: https://docs.microsoft.com/en-us/sql/relational-databases/databases/security-best-practices-with-contained-databases
     public: true
     tags:
       - cis:
