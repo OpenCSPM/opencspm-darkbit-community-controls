@@ -5974,15 +5974,34 @@ controls:
       - google cloud
   - id: darkbit-gcp-113
     title: GKE Clusters Nodes Should Disable Legacy Metadata API Access
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Legacy GCE instance metadata APIs for should be disabled for GKE nodes to prevent a pod workload from 
+      being able to extract the node's credentials.
+    remediation: |-
+      The legacy metadata API can only be disabled during node pool creation.
+
+      ```
+      gcloud container node-pools create [POOL_NAME] \ 
+        --cluster [CLUSTER_NAME] \
+        --zone [COMPUTE_ZONE] \
+        --metadata disable-legacy-endpoints=true
+      ```
+    validation: |-
+      Verify a cluster node pool is not using the legacy metadata API.
+
+      ```
+      gcloud container clusters describe $CLUSTER_NAME \ 
+        --zone $COMPUTE_ZONE \
+        --format json | jq .nodePools[].config.metadata
+      ```
+
+      Confirm that `disable-legacy-endpoints` is `true` for all node pools.
     impact: 8
     nodes:
-      - PLACEHOLDER
+      - GCP_CONTAINER_NODEPOOL
     refs:
-      - text: TODO
-        url: TODO
+      - text: Disabling and transitioning from legacy metadata APIs
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/protecting-cluster-metadata#disable-legacy-apis
     public: true
     tags:
       - cis:
