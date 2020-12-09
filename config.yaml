@@ -4552,7 +4552,8 @@ controls:
       of log entries matching the user's advanced logs query.
 
       Next, [Create an alert from the Metric](https://console.cloud.google.com/logs/metrics) with
-      an alert threshold of `0` to trigger a notification any time VPC networks are changed.
+      an alert threshold of `0` to trigger a notification any time permissions on sensitive cloud storage 
+      buckets are changed.
     validation: |-
       List the log metrics.
 
@@ -4597,16 +4598,54 @@ controls:
       - google cloud
   - id: darkbit-gcp-80
     title: Log Metric Filter And Alert Should Notify On SQL Instance Changes
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      A metric filter and alarm should exist for SQL instance configuration changes. Monitoring changes to 
+      SQL instance configuration changes may reduce the time needed to detect and correct misconfigurations 
+      done on the SQL server.
+    remediation: |-
+      Create a [logging metric](https://console.cloud.google.com/logs/metrics) with the following
+      advanced filter:
+
+      ```
+      protoPayload.methodName="cloudsql.instances.update"
+      ```
+
+      In the Metric Editor menu, fill out the `name` field. Set `Units` to `1` (default)
+      and `Type` to `Counter`. This will ensure that the log metric counts the number
+      of log entries matching the user's advanced logs query.
+
+      Next, [Create an alert from the Metric](https://console.cloud.google.com/logs/metrics) with
+      an alert threshold of `0` to trigger a notification any time SQL server configurations are changed.
+    validation: |-
+      List the log metrics.
+
+      ```
+      gcloud beta logging metrics list --format json
+      ```
+
+      Ensure that the output contains at least one metrics with the filter:
+
+      ```
+      protoPayload.methodName="cloudsql.instances.update"
+      ```
+
+      List the alerting policies.
+
+      ```
+      gcloud alpha monitoring policies list --format json
+      ```
+
+      Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
+      set to `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` set to `true`.
     impact: 8
     nodes:
-      - GCP_IDENTITY
-      - GCP_IAM_ROLE
+      - GCP_LOGGING_LOGSINK
+      - GCP_CLOUDRESOURCEMANAGER_PROJECT
     refs:
-      - text: TODO
-        url: TODO
+      - text: Log Based Metrics
+        url: https://cloud.google.com/logging/docs/logs-based-metrics/
+      - text: Monitoring Alerts
+        url: https://cloud.google.com/monitoring/alerts/
     public: true
     tags:
       - cis:
