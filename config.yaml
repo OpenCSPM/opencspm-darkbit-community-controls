@@ -5914,15 +5914,52 @@ controls:
       - google cloud
   - id: darkbit-gcp-112
     title: GKE Clusters Should Have Read-Only Permissions to GCR Registries
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      The Cluster Service Account should have read-only access to GCR. The Cluster Service Account does 
+      not require administrative access to GCR, only requiring pull access to containers to deploy onto 
+      GKE. Restricting permissions follows the principles of least privilege and prevents credentials 
+      from being abused beyond the required role.
+    remediation: |-
+      First, add read access to the Kubernetes Service Account.
+
+      ```
+      gsutil iam ch [TYPE]:[EMAIL-ADDRESS]:objectViewer gs://artifacts.$(gcloud config get-value project).appspot.com
+      ```
+
+      Then remove over-privileged roles (Storage Admin, Storage Object Admin, and Storage Object Creator)
+
+      ```
+      gsutil iam ch -d [TYPE]:[EMAIL-ADDRESS]:[ROLE] gs://artifacts.$(gcloud config get-value project).appspot.com
+      ```
+    validation: |-
+      List GCR bucket permissions and ensure that if the GKE Service Account is listed, the role is 
+      set to `roles/storage.objectViewer`.
+
+      ```
+      gsutil iam get gs://artifacts.$(gcloud config get-value project).appspot.com
+      ```
+
+      If the GKE Service Account has project level permissions that are inherited within the bucket, 
+      ensure that these are not privileged. Your GKE Service Account should not be listed.
+
+      ```
+      gcloud projects get-iam-policy $(gcloud config get-value project) \
+        --flatten="bindings[].members" \
+        --format='table(bindings.members,bindings.role)' \
+        --filter="bindings.role:roles/storage.admin \
+        OR bindings.role:roles/storage.objectAdmin \
+        OR bindings.role:roles/storage.objectCreator \
+        OR bindings.role:roles/storage.legacyBucketOwner \
+        OR bindings.role:roles/storage.legacyBucketWriter \
+        OR bindings.role:roles/storage.legacyObjectOwner"
+ ```
     impact: 8
     nodes:
-      - PLACEHOLDER
+      - GCP_STORAGE_BUCKET
+      - GCP_IAM_ROLE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Configuring access control
+        url: https://cloud.google.com/container-registry/docs/access-control
     public: true
     tags:
       - cis:
