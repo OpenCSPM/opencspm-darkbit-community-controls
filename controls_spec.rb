@@ -783,7 +783,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not be public' do
         expect(true).to eq(true)
       end
@@ -807,7 +807,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should require SSL' do
         expect(true).to eq(true)
       end
@@ -1200,7 +1200,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have automatic backups configured' do
         expect(true).to eq(true)
       end
@@ -2109,7 +2109,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have local_infile disabled' do
         expect(true).to eq(true)
       end
@@ -2136,7 +2136,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have log_checkpoints enabled' do
         expect(true).to eq(true)
       end
@@ -2163,7 +2163,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have log_connections enabled' do
         expect(true).to eq(true)
       end
@@ -2190,7 +2190,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have log_disconnections enabled' do
         expect(true).to eq(true)
       end
@@ -2217,7 +2217,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have log_lock_waits enabled' do
         expect(true).to eq(true)
       end
@@ -2244,7 +2244,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have log_min_error_statement set to ERROR' do
         expect(true).to eq(true)
       end
@@ -2271,7 +2271,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have log_temp_files enabled' do
         expect(true).to eq(true)
       end
@@ -2298,7 +2298,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have log_min_duration_statement disabled' do
         expect(true).to eq(true)
       end
@@ -2325,7 +2325,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have cross db ownership chaining disabled' do
         expect(true).to eq(true)
       end
@@ -2352,7 +2352,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have contained database authentication disabled' do
         expect(true).to eq(true)
       end
@@ -2378,7 +2378,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No CloudSQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have not allow connections from all IPs' do
         expect(true).to eq(true)
       end

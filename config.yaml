@@ -2954,9 +2954,9 @@ controls:
           - nist-csf-pr.pt-1
       - google cloud
   - id: darkbit-gcp-22
-    title: CloudSQL Instances Should Have a Private IP Address
+    title: Cloud SQL Instances Should Have a Private IP Address
     description:
-      By default, CloudSQL instances are assigned a public IPv4 address,
+      By default, Cloud SQL instances are assigned a public IPv4 address,
       and the access list allows any source IP address to attempt to connect and authenticate
       to the database.  This facilitates development and ease of connectivity for troubleshooting,
       but it means an attacker can access the potentially sensitive data in the database
@@ -2966,7 +2966,7 @@ controls:
       directly or to use stolen credentials from any source IP, the instance should
       be configured with a private IP address only. This should be configured during
       creation of the instance and a VPC peering relationship should be configured between
-      the CloudSQL VPC and the VPCs where applications accessing the database reside.
+      the Cloud SQL VPC and the VPCs where applications accessing the database reside.
     validation:
       'In each project, run `gcloud sql instances list --format=json | jq
       -r ''.[] | select(.settings.ipConfiguration.ipv4Enabled==true) | "(.name) Public
@@ -2975,11 +2975,11 @@ controls:
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
-      - text: CloudSQL MySQL Private IP
+      - text: Cloud SQL MySQL Private IP
         url: https://cloud.google.com/sql/docs/mysql/configure-private-services-access
-      - text: CloudSQL PostgreSQL Private IP
+      - text: Cloud SQL PostgreSQL Private IP
         url: https://cloud.google.com/sql/docs/postgres/configure-private-services-access
-      - text: CloudSQL Sqlserver Private IP
+      - text: Cloud SQL SQL Server Private IP
         url: https://cloud.google.com/sql/docs/sqlserver/configure-private-services-access
     public: true
     tags:
@@ -2998,10 +2998,10 @@ controls:
           - nist-csf-pr.ac-5
       - google cloud
   - id: darkbit-gcp-23
-    title: CloudSQL Instances Should Require SSL/TLS
+    title: Cloud SQL Instances Should Require SSL/TLS
     description:
-      By default, CloudSQL instances will accept both SSL/TLS and plaintext
-      database connections.  As CloudSQL instances are provisioned inside a separate
+      By default, Cloud SQL instances will accept both SSL/TLS and plaintext
+      database connections.  As Cloud SQL instances are provisioned inside a separate
       VPC within GCP that the user does not control, this means that database traffic
       will traverse a VPC peering connection without in-transit encryption.  Requiring
       SSL/TLS connections ensures that all connections are encrypted over the wire.
@@ -3011,7 +3011,7 @@ controls:
       applications to connect securely without changing application code, the cloudsql-proxy
       can be used.  It can handle setting up a localhost SSL proxy/tunnel and applications
       can be configured to connect to the database via that tunnel.
-    validation:
+    validation: |
       'In each project, run `gcloud sql instances list --format=json | jq
       -r ''.[] | select(.settings.ipConfiguration.requireSsl==null) | "(.name) SSL:
       (.settings.ipConfiguration.requireSsl)"''` and ensure no entries are listed.'
@@ -3019,11 +3019,11 @@ controls:
     nodes:
       - PLACEHOLDER
     refs:
-      - text: CloudSQL MySQL Require SSL/TLS
+      - text: Cloud SQL MySQL Require SSL/TLS
         url: https://cloud.google.com/sql/docs/mysql/configure-ssl-instance
-      - text: CloudSQL PostgreSQL Require SSL/TLS
+      - text: Cloud SQL PostgreSQL Require SSL/TLS
         url: https://cloud.google.com/sql/docs/postgres/configure-ssl-instance
-      - text: CloudSQL Sqlserver Require SSL/TLS
+      - text: Cloud SQL Sqlserver Require SSL/TLS
         url: https://cloud.google.com/sql/docs/sqlserver/configure-ssl-instance
     public: true
     tags:
@@ -3721,15 +3721,15 @@ controls:
           - nist-csf-pr.ip-1
       - google cloud
   - id: darkbit-gcp-59
-    title: CloudSQL Instance Automatic Backups With Point-in-Time Recovery Should Be Configured
+    title: Cloud SQL Instance Automatic Backups With Point-in-Time Recovery Should Be Configured
     description:
-      By default, CloudSQL instances have automatic backups with point-in-time
+      By default, Cloud SQL instances have automatic backups with point-in-time
       recovery enabled.  It's important that these settings are not disabled to ensure
       that all databases can be restored to a known-good state should a security incident
       occur.  For example, a SQL injection attack that results in the deletion or modification
       of tables in the database.
     remediation:
-      Ensure all CloudSQL instances are configured with automatic backups
+      Ensure all Cloud SQL instances are configured with automatic backups
       during a desired window and point-in-time recovery is enabled.  Existing instances
       can be modified to have these settings take effect, but it requires the instance
       to be restarted.
@@ -3742,11 +3742,11 @@ controls:
     nodes:
       - PLACEHOLDER
     refs:
-      - text: CloudSQL MySQL Backups
+      - text: Cloud SQL MySQL Backups
         url: https://cloud.google.com/sql/docs/mysql/backup-recovery/backups
-      - text: CloudSQL PostgreSQL Backups
+      - text: Cloud SQL PostgreSQL Backups
         url: https://cloud.google.com/sql/docs/postgres/backup-recovery/backups
-      - text: CloudSQL Sqlserver Backups
+      - text: Cloud SQL Sqlserver Backups
         url: https://cloud.google.com/sql/docs/sqlserver/backup-recovery/backups
     public: true
     tags:
@@ -5295,7 +5295,7 @@ controls:
           - nist-csf-todo
       - google cloud
   - id: darkbit-gcp-97
-    title: CloudSQL Instances Running MySQL Should Have "local_infile" Disabled
+    title: Cloud SQL Instances Running MySQL Should Have "local_infile" Disabled
     description: |
       Not providing an administrative password at the time of MySQL instance creation allows anyone to 
       connect to the SQL database instance with administrative privileges. The root password should be 
@@ -5340,7 +5340,7 @@ controls:
           - nist-csf-todo
       - google cloud
   - id: darkbit-gcp-98
-    title: CloudSQL Instances Running PostgreSQL Should Have "log_checkpoints" Enabled
+    title: Cloud SQL Instances Running PostgreSQL Should Have "log_checkpoints" Enabled
     description: |
       Enabling `log_checkpoints` causes checkpoints and restart points to be logged in the server log. 
       Useful statistics are included in the log messages, including the number of buffers written and the 
@@ -5384,7 +5384,7 @@ controls:
           - nist-csf-todo
       - google cloud
   - id: darkbit-gcp-99
-    title: CloudSQL Instances Running PostgreSQL Should Have "log_connections" Enabled
+    title: Cloud SQL Instances Running PostgreSQL Should Have "log_connections" Enabled
     description: |
       The `log_connections` setting should be enabled. PostgreSQL does not log attempted connections by 
       default. Enabling the log_connections setting will create log entries for each attempted 
@@ -5431,7 +5431,7 @@ controls:
           - nist-csf-todo
       - google cloud
   - id: darkbit-gcp-100
-    title: CloudSQL Instances Running PostgreSQL Should Have "log_disconnections" Enabled
+    title: Cloud SQL Instances Running PostgreSQL Should Have "log_disconnections" Enabled
     description: |
       The `log_connections` setting should be enabled. PostgreSQL does not log session details such as 
       duration and session end by default. Enabling the log_disconnections setting will create log entries 
@@ -5477,7 +5477,7 @@ controls:
           - nist-csf-todo
       - google cloud
   - id: darkbit-gcp-101
-    title: CloudSQL Instances Running PostgreSQL Should Have "log_lock_waits" Enabled
+    title: Cloud SQL Instances Running PostgreSQL Should Have "log_lock_waits" Enabled
     description: |
       The `log_lock_waits` setting should be enabled. The deadlock timeout defines the time to wait 
       on a lock before checking for any conditions. Frequent run overs on deadlock timeout can be an 
@@ -5523,7 +5523,7 @@ controls:
           - nist-csf-todo
       - google cloud
   - id: darkbit-gcp-102
-    title: CloudSQL Instances Running PostgreSQL Should Have "log_min_error_statement" Set To "ERROR"
+    title: Cloud SQL Instances Running PostgreSQL Should Have "log_min_error_statement" Set To "ERROR"
     description: |
       The `log_min_error_statement` setting should be enabled to aid troubleshooting and forensic analysis. The
       `log_min_error_statement` flag defines the minimum message severity level that is considered as an error 
@@ -5567,7 +5567,7 @@ controls:
           - nist-csf-todo
       - google cloud
   - id: darkbit-gcp-103
-    title: CloudSQL Instances Running PostgreSQL Should Have "log_temp_files" Enabled
+    title: Cloud SQL Instances Running PostgreSQL Should Have "log_temp_files" Enabled
     description: |
       PostgreSQL instances should have `log_temp_files` enabled to aid in troubleshooting. PostgreSQL will create a 
       temporary file for actions such as sorting, hashing and temporary query results when these operations exceed 
@@ -5614,7 +5614,7 @@ controls:
           - nist-csf-todo
       - google cloud
   - id: darkbit-gcp-104
-    title: CloudSQL Instances Running PostgreSQL Should Have "log_min_duration_statement" Disabled
+    title: Cloud SQL Instances Running PostgreSQL Should Have "log_min_duration_statement" Disabled
     description: |
       SQL statements may include sensitive information that should not be recorded in logs. The `log_min_duration_statement` 
       flag defines the minimum amount of execution time of a statement in milliseconds where the total duration of 
@@ -5658,7 +5658,7 @@ controls:
           - nist-csf-todo
       - google cloud
   - id: darkbit-gcp-105
-    title: CloudSQL Instances Running SQL Server Should Have "cross db ownership chaining" Disabled
+    title: Cloud SQL Instances Running SQL Server Should Have "cross db ownership chaining" Disabled
     description: |
       The database flag `set cross db ownership chaining` should be disabled for SQL Server instances. This server 
       option allows you to control cross-database ownership chaining at the database level or to allow 
@@ -5703,7 +5703,7 @@ controls:
           - nist-csf-todo
       - google cloud
   - id: darkbit-gcp-106
-    title: CloudSQL Instances Running SQL Server Should Have "contained database authentication" Disabled
+    title: Cloud SQL Instances Running SQL Server Should Have "contained database authentication" Disabled
     description: |
       The database flag `contained database authentication` should be disabled for SQL Server instances. A **contained** 
       database includes all database settings and metadata required to define the database and has no configuration 
@@ -5754,16 +5754,38 @@ controls:
           - nist-csf-todo
       - google cloud
   - id: darkbit-gcp-107
-    title: CloudSQL Instances Should Have Restrictive Authorized Networks Configured
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    title: Cloud SQL Instances Should Have Restrictive Authorized Networks Configured
+    description: |
+      Cloud SQL instances should only accept connections from trusted networks or IP addresses and restrict 
+      access otherwise.
+    remediation: |
+      Ensure Cloud SQL instances have `authorized-networks` defined.
+
+      ```
+      gcloud sql instances patch <INSTANCE_NAME> \
+        --authorized-networks=<CIDR_1>,<CIDR_2>,<CIDR_N>
+      ```
+    validation: |-
+      List all Cloud SQL database instances.
+
+      ```
+      gcloud sql instances list
+      ```
+
+      Get detailed configuration for every Cloud SQL database instance and ensure that the section 
+      `settings: ipConfiguration : authorizedNetworks` does not have any parameter value containing `0.0.0.0/0`.
+
+      ```
+      gcloud sql instances describe <INSTANCE_NAME>
+      ```
     impact: 8
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Configuring public IP connectivity for MySQL
+        url: https://cloud.google.com/sql/docs/mysql/configure-ip
+      - text: Configuring public IP connectivity for PostgreSQL
+        url: https://cloud.google.com/sql/docs/postgres/configure-ip
     public: true
     tags:
       - cis:
