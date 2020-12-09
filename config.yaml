@@ -5524,15 +5524,36 @@ controls:
       - google cloud
   - id: darkbit-gcp-102
     title: CloudSQL Instances Running PostgreSQL Should Have "log_min_error_statement" Set To "ERROR"
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      The `log_min_error_statement` setting should be enabled to aid troubleshooting and forensic analysis. The
+      `log_min_error_statement` flag defines the minimum message severity level that is considered as an error 
+      statement. Messages for error statements are logged with the SQL statement.
+    remediation: |-
+      Enable `log_min_error_statement` for PostgreSQL Cloud SQL instances.
+
+      ```
+      gcloud sql instances patch <INSTANCE_NAME> \
+        --database-flags log_min_error_statement=on
+      ```
+    validation: |-
+      List PostgreSQL Cloud SQL instances.
+
+      ```
+      gcloud sql instances list --filter='DATABASE_VERSION:POSTGRES*'
+      ```
+
+      Ensure `log_min_error_statement` are `on` for each instance.
+
+      ```
+      gcloud sql instances describe <INSTANCE_NAME> \
+        --format=json | jq '.settings.databaseFlags[] | select(.name=="log_min_error_statement")|.value'
+      ```
     impact: 8
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Setting a database flag
+        url: https://cloud.google.com/sql/docs/postgres/flags#setting_a_database_flag
     public: true
     tags:
       - cis:
