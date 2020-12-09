@@ -5838,15 +5838,31 @@ controls:
       - google cloud
   - id: darkbit-gcp-109
     title: GKE Clusters Should Not Have Client Certificate Authentication Enabled
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Disable client certificates, which require certificate rotation, for authentication. 
+      Instead, use another authentication method like OpenID Connect.
+    remediation: |-
+      There is no way to remove a client certificate from an existing cluster. Create a new cluster 
+      with no client certificate.
+
+      ```
+      gcloud container clusters create [CLUSTER_NAME] \
+        --no-issue-client-certificate
+      ```
+    validation: |-
+      Verify that a client certificate has not been issued.
+
+      ```
+      gcloud container clusters describe $CLUSTER_NAME \
+        --zone $COMPUTE_ZONE \
+        --format json | jq '.masterAuth.clientKey'
+      ```
     impact: 8
     nodes:
-      - PLACEHOLDER
+      - GCP_CONTAINER_CLUSTER
     refs:
-      - text: TODO
-        url: TODO
+      - text: Leave legacy client authentication methods disabled
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#restrict_authn_methods
     public: true
     tags:
       - cis:
