@@ -4694,12 +4694,31 @@ controls:
       - google cloud
   - id: darkbit-gcp-82
     title: Cloud DNS Domains Should Have DNSSEC Enabled
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Cloud DNS domains should have Domain Name System Security Extensions (DNSSEC) enabled. DNSSEC in 
+      Cloud DNS enables domain owners to take easy steps to protect their domains against DNS hijacking 
+      and man-in-the-middle and other attacks.
+    remediation: |-
+      Enabled DNSSEC for any Managed Zones without DNSSEC enabled.
+
+      ```
+      gcloud dns managed-zones update <ZONE_NAME> --dnssec-state on
+      ```
+    validation: |-
+      List all Managed Zones in a project.
+
+      ```
+      gcloud dns managed-zones list
+      ```
+
+      For each zone with `public` visibility, get its metadata and esure that the `dnssecConfig.state` property is `on`.
+
+      ```
+      gcloud dns managed-zones describe <ZONE_NAME>
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_DNS_MANAGEDZONE
     refs:
       - text: Enabling Cloud DNS DNSSEC
         url: https://cloud.google.com/dns/dnssec-config#enabling
