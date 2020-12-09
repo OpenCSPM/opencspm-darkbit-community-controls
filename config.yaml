@@ -5659,15 +5659,37 @@ controls:
       - google cloud
   - id: darkbit-gcp-105
     title: CloudSQL Instances Running SQL Server Should Have "cross db ownership chaining" Disabled
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      The database flag `set cross db ownership chaining` should be disabled for SQL Server instances. This server 
+      option allows you to control cross-database ownership chaining at the database level or to allow 
+      cross-database ownership chaining for all databases. Enabling `cross db ownership` is not recommended 
+      unless all of the databases hosted by the instance of SQL Server must participate in cross-database 
+      ownership chaining and you are aware of the security implications of this setting
+    remediation: |-
+      Disable `cross db ownership chaining` for SQL Server Cloud SQL instances.
+
+      ```
+      gcloud sql instances patch <INSTANCE_NAME> --database-flags "cross db ownership chaining=off"
+      ```
+    validation: |-
+      List SQL Server Cloud SQL instances.
+
+      ```
+      gcloud sql instances list --filter='DATABASE_VERSION:SQLSERVER*'
+      ```
+
+      Ensure `cross db ownership chaining` is `off` for each instance.
+
+      ```
+      gcloud sql instances describe <INSTANCE_NAME> \
+        --format=json | jq '.settings.databaseFlags[] | select(.name=="cross db ownership chaining")|.value'
+      ```
     impact: 8
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Setting a database flag
+        url: https://cloud.google.com/sql/docs/postgres/flags#setting_a_database_flag
     public: true
     tags:
       - cis:
