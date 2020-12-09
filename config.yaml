@@ -5146,16 +5146,59 @@ controls:
       - google cloud
   - id: darkbit-gcp-92
     title: GCE Instances Should Be Shielded Nodes
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Launch compute instances Shielded VM enabled to defend against against advanced threats 
+      and ensure that the boot loader and firmware on VMs are signed and untampered.
+    remediation: |-
+      You can only enable Shielded VM options on instances that have Shielded VM support. Consider implementing 
+      an Organization policy constraint to require Shielded VMs. For a list of Shielded VM public images, run 
+      the gcloud compute images list command with the following flags:
+
+      ```
+      gcloud compute images list --project gce-uefi-images --no-standard-images
+      ```
+
+      To update an instance to enabled Shielded VM, first stop the VM:
+
+      ```
+      gcloud compute instances stop <INSTANCE_NAME>
+      ```
+
+      Then update the instance.
+
+      ```
+      gcloud compute instances update <INSTANCE_NAME> \
+        --shielded-vtpm \
+        --shielded-vm-integrity-monitoring
+      ```
+
+      Optionally, also enable secure boot.
+
+      ```
+      gcloud compute instances update <INSTANCE_NAME> \
+        --shielded-vm-secure-boot
+      ```
+
+      Then restart the instance.
+
+      ```
+      gcloud compute instances start <INSTANCE_NAME>
+      ```
+    validation: |-
+      List instances in a project and ensure `shieldedInstanceConfig` configuration is present and 
+      that configuration has the `enableIntegrityMonitoring` and `enableVtpm` set to `true`. 
+
+      ```
+      gcloud compute instances describe <INSTANCE_NAME>
+      ```
     impact: 5
     nodes:
       - GCP_COMPUTE_INSTANCE
-      - GCP_COMPUTE_DISK
     refs:
-      - text: TODO
-        url: TODO
+      - text: Organization policy constraints for Shielded VM
+        url: https://cloud.google.com/security/shielded-cloud/shielded-vm#organization-policy-constraint
+      - text: Modifying Shielded VM options
+        url: https://cloud.google.com/compute/docs/instances/modifying-shielded-vm
     public: true
     tags:
       - cis:
