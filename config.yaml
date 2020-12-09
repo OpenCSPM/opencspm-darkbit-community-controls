@@ -5252,15 +5252,37 @@ controls:
       - google cloud
   - id: darkbit-gcp-95
     title: GCS Buckets Should Have Uniform IAM Access Configured
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Cloud Storage has uniform bucket- level access. Using this feature disables ACLs for all Cloud 
+      Storage resources: access to Cloud Storage resources then is granted exclusively through Cloud 
+      IAM. Enabling uniform bucket-level access guarantees that if a Storage bucket is not publicly 
+      accessible, no object in the bucket is publicly accessible either.
+    remediation: |-
+      Enable `uniformbucketlevelaccess` for buckets.
+
+      ```
+      gsutil uniformbucketlevelaccess set on gs://<BUCKET_NAME>/
+      ```
+    validation: |-
+      List all buckets in a project.
+
+      ```
+      gsutil ls
+      ```
+
+      For each bucket, verify that uniform bucket-level access is enabled.
+
+      ```
+      gsutil uniformbucketlevelaccess get gs://<BUCKET_NAME>/
+      ```
     impact: 8
     nodes:
-      - PLACEHOLDER
+      - GCP_STORAGE_BUCKET
     refs:
-      - text: TODO
-        url: TODO
+      - text: Uniform bucket-level access
+        url: https://cloud.google.com/storage/docs/uniform-bucket-level-access
+      - text: Organization policy constraints for Cloud Storage
+        url: https://cloud.google.com/storage/docs/org-policy-constraints#uniform-bucket
     public: true
     tags:
       - cis:
