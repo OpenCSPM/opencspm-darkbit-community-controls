@@ -5880,15 +5880,26 @@ controls:
       - google cloud
   - id: darkbit-gcp-110
     title: GCR Image Vulnerability Scanning Should Be Enabled
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Container images stored in GCR should be scanned for vulnerabilities.
+    remediation: |-
+      Enable the container scanning API.
+
+      ```
+      gcloud services enable containerscanning.googleapis.com
+      ```
+    validation: |-
+      List enabled APIs and confirm that `Container Scanning API` is listed in the output.
+
+      ```
+      gcloud services list --enabled --filter=containerregistry
+      ```
     impact: 8
     nodes:
-      - PLACEHOLDER
+      - GCP_CLOUDRESOURCEMANAGER_PROJECT
     refs:
-      - text: TODO
-        url: TODO
+      - text: Container analysis and vulnerability scanning
+        url: https://cloud.google.com/container-registry/docs/container-analysis
     public: true
     tags:
       - cis:
