@@ -5385,15 +5385,37 @@ controls:
       - google cloud
   - id: darkbit-gcp-99
     title: CloudSQL Instances Running PostgreSQL Should Have "log_connections" Enabled
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      The `log_connections` setting should be enabled. PostgreSQL does not log attempted connections by 
+      default. Enabling the log_connections setting will create log entries for each attempted 
+      connection as well as successful completion of client authentication which can be useful in 
+      troubleshooting issues and to determine any unusual connection attempts to the server.
+    remediation: |-
+      Enable `log_connections` for PostgreSQL Cloud SQL instances.
+
+      ```
+      gcloud sql instances patch <INSTANCE_NAME> \
+        --database-flags log_connections=on
+      ```
+    validation: |-
+      List PostgreSQL Cloud SQL instances.
+
+      ```
+      gcloud sql instances list --filter='DATABASE_VERSION:POSTGRES*'
+      ```
+
+      Ensure `log_connections` are `on` for each instance.
+
+      ```
+      gcloud sql instances describe <INSTANCE_NAME> \
+        --format=json | jq '.settings.databaseFlags[] | select(.name=="log_connections")|.value'
+      ```
     impact: 8
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Setting a database flag
+        url: https://cloud.google.com/sql/docs/postgres/flags#setting_a_database_flag
     public: true
     tags:
       - cis:
