@@ -4879,15 +4879,48 @@ controls:
       - google cloud
   - id: darkbit-gcp-86
     title: GCE Instances Should Not Have The "cloud-platform" OAuth2 Scope Assigned
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      The principle of least privilege should be implemented to help prevent potential privilege escalation. Instances 
+      should not have the `Compute Engine default service account` assigned with Scope `Allow full access to all Cloud APIs`.
+    remediation: |-
+      For any instances that have full access scope, stop the instance:
+
+      ```
+      gcloud compute instances stop <INSTANCE_NAME>
+      ```
+
+      Update the instance scopes.
+
+      ```
+      gcloud compute instances set-service-account <INSTANCE_NAME> \
+        --service-account=<SERVICE_ACCOUNT> \
+        --scopes [<SCOPE1>, <SCOPE2>...]
+      ```
+
+      Restart the instance.
+
+      ```
+      gcloud compute instances start <INSTANCE_NAME>
+      ```
+    validation: |-
+      List GCE instances in a project.
+
+      ```
+      gcloud compute instances list
+      ```
+
+      Get the details of each instance and ensure `serviceAccount`.`scopes` does not include `https://www.googleapis.com/auth/cloud-platform`.
+
+      ```
+      gcloud compute instances describe <INSTANCE_NAME> --zone <ZONE> | grep -v "gke-"
+      ```
     impact: 5
     nodes:
       - GCP_COMPUTE_INSTANCE
+      - GCP_IAM_OAUTHSCOPE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Creating and enabling service accounts for instances
+        url: https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances
     public: true
     tags:
       - cis:
