@@ -5067,15 +5067,26 @@ controls:
       - google cloud
   - id: darkbit-gcp-90
     title: GCE Instances Should Not Have IP Forwarding Enabled
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Instances not involved in routing network traffic should have IP forwarding disabled.
+    remediation: |-
+      Confirm that instances with IP forwarding enabled can safely be shut down without impact other 
+      applications or services. Then shut those instances down and replace them with instances that have 
+      `IP forwarding` set to `off`.
+    validation: |-
+      List instances and verify that none have `CAN_IP_FORWARD` set to `true` unless they need to route 
+      network traffic.
+
+      ```
+      gcloud compute instances list \
+        --format='table(name,canIpForward)'
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_COMPUTE_INSTANCE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Enabling IP forwarding for instances
+        url: https://cloud.google.com/vpc/docs/using-routes#canipforward
     public: true
     tags:
       - cis:
