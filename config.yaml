@@ -5568,15 +5568,39 @@ controls:
       - google cloud
   - id: darkbit-gcp-103
     title: CloudSQL Instances Running PostgreSQL Should Have "log_temp_files" Enabled
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      PostgreSQL instances should have `log_temp_files` enabled to aid in troubleshooting. PostgreSQL will create a 
+      temporary file for actions such as sorting, hashing and temporary query results when these operations exceed 
+      `work_mem`. The `log_temp_files` flag controls logging names and the file size when it is deleted. Configuring 
+      `log_temp_files` to `0` causes all temporary file information to be logged, while positive values log only 
+      files whose size is greater than or equal to the specified number of kilobytes. A value of `-1` disables 
+      temporary file information logging.
+    remediation: |-
+      Enable `log_temp_files` for PostgreSQL Cloud SQL instances.
+
+      ```
+      gcloud sql instances patch <INSTANCE_NAME> \
+        --database-flags log_temp_files=on
+      ```
+    validation: |-
+      List PostgreSQL Cloud SQL instances.
+
+      ```
+      gcloud sql instances list --filter='DATABASE_VERSION:POSTGRES*'
+      ```
+
+      Ensure `log_temp_files` are `on` for each instance.
+
+      ```
+      gcloud sql instances describe <INSTANCE_NAME> \
+        --format=json | jq '.settings.databaseFlags[] | select(.name=="log_temp_files")|.value'
+      ```
     impact: 8
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Setting a database flag
+        url: https://cloud.google.com/sql/docs/postgres/flags#setting_a_database_flag
     public: true
     tags:
       - cis:
