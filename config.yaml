@@ -5359,7 +5359,7 @@ controls:
       gcloud sql instances list --filter='DATABASE_VERSION:POSTGRES*'
       ```
 
-      Ensure `log_checkpoints` are `on` for each instance.
+      Ensure `log_checkpoints` is `on` for each instance.
 
       ```
       gcloud sql instances describe <INSTANCE_NAME> \
@@ -5406,7 +5406,7 @@ controls:
       gcloud sql instances list --filter='DATABASE_VERSION:POSTGRES*'
       ```
 
-      Ensure `log_connections` are `on` for each instance.
+      Ensure `log_connections` is `on` for each instance.
 
       ```
       gcloud sql instances describe <INSTANCE_NAME> \
@@ -5452,7 +5452,7 @@ controls:
       gcloud sql instances list --filter='DATABASE_VERSION:POSTGRES*'
       ```
 
-      Ensure `log_disconnections` are `on` for each instance.
+      Ensure `log_disconnections` is `on` for each instance.
 
       ```
       gcloud sql instances describe <INSTANCE_NAME> \
@@ -5498,7 +5498,7 @@ controls:
       gcloud sql instances list --filter='DATABASE_VERSION:POSTGRES*'
       ```
 
-      Ensure `log_lock_waits` are `on` for each instance.
+      Ensure `log_lock_waits` is `on` for each instance.
 
       ```
       gcloud sql instances describe <INSTANCE_NAME> \
@@ -5542,7 +5542,7 @@ controls:
       gcloud sql instances list --filter='DATABASE_VERSION:POSTGRES*'
       ```
 
-      Ensure `log_min_error_statement` are `on` for each instance.
+      Ensure `log_min_error_statement` is `on` for each instance.
 
       ```
       gcloud sql instances describe <INSTANCE_NAME> \
@@ -5589,7 +5589,7 @@ controls:
       gcloud sql instances list --filter='DATABASE_VERSION:POSTGRES*'
       ```
 
-      Ensure `log_temp_files` are `on` for each instance.
+      Ensure `log_temp_files` is `on` for each instance.
 
       ```
       gcloud sql instances describe <INSTANCE_NAME> \
@@ -5615,15 +5615,36 @@ controls:
       - google cloud
   - id: darkbit-gcp-104
     title: CloudSQL Instances Running PostgreSQL Should Have "log_min_duration_statement" Disabled
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      SQL statements may include sensitive information that should not be recorded in logs. The `log_min_duration_statement` 
+      flag defines the minimum amount of execution time of a statement in milliseconds where the total duration of 
+      the statement is logged. Ensure that `log_min_duration_statement` is disabled by setting the value to `-1`.
+    remediation: |-
+      Enable `log_min_duration_statement` for PostgreSQL Cloud SQL instances.
+
+      ```
+      gcloud sql instances patch <INSTANCE_NAME> \
+        --database-flags log_min_duration_statement=on
+      ```
+    validation: |-
+      List PostgreSQL Cloud SQL instances.
+
+      ```
+      gcloud sql instances list --filter='DATABASE_VERSION:POSTGRES*'
+      ```
+
+      Ensure `log_min_duration_statement` is `-1` for each instance.
+
+      ```
+      gcloud sql instances describe <INSTANCE_NAME> \
+        --format=json | jq '.settings.databaseFlags[] | select(.name=="log_min_duration_statement")|.value'
+      ```
     impact: 8
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Setting a database flag
+        url: https://cloud.google.com/sql/docs/postgres/flags#setting_a_database_flag
     public: true
     tags:
       - cis:
