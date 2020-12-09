@@ -5212,15 +5212,33 @@ controls:
       - google cloud
   - id: darkbit-gcp-94
     title: GCS Buckets Should Not Be Public
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Cloud Storage bucket should not allow anonymous or public access.
+    remediation: |-
+      Remove anonymous and public access from buckets.
+
+      ```
+      gsutil iam ch -d allUsers gs://<BUCKET_NAME>
+      gsutil iam ch -d allAuthenticatedUsers gs://<BUCKET_NAME>
+      ```
+    validation: |-
+      List all buckets in a project.
+
+      ```
+      gsutil ls
+      ```
+
+      Check the IAM Policy for each bucket and ensure no role contains `allUsers` or `allAuthenticatedUsers`.
+
+      ```
+      gsutil iam get gs://<BUCKET_NAME>
+      ```
     impact: 8
     nodes:
-      - PLACEHOLDER
+      - GCP_STORAGE_BUCKET
     refs:
-      - text: TODO
-        url: TODO
+      - text: Making data public
+        url: https://cloud.google.com/storage/docs/access-control/making-data-public
     public: true
     tags:
       - cis:
