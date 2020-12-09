@@ -1288,16 +1288,19 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
     MATCH (gi:GCP_IDENTITY)
     WHERE gi.member_name ENDS WITH '.iam.gserviceaccount.com'
-    OPTIONAL MATCH (resource)<-[ir1:HAS_IAMROLE]-(gi:GCP_IDENTITY)-[ir2:HAS_IAMROLE]->(resource)
-    WHERE ir1.role_name = "roles/iam.serviceAccountUser"
-      AND ir2.role_name = "roles/iam.serviceAccountAdmin"
+    OPTIONAL MATCH (resource)<-[ir1:HAS_IAMROLE]-(gi:GCP_IDENTITY)
+    WHERE (ir1.role_name = "roles/owner"
+         OR ir1.role_name = "roles/editor"
+         OR ir1.role_name CONTAINS 'Admin'
+         OR ir1.role_name CONTAINS 'admin'
+      )
       AND gi.member_name ENDS WITH '.iam.gserviceaccount.com'
-    RETURN DISTINCT gi.name as identity_name, resource.name as resource_name
+    RETURN DISTINCT gi.name as identity_name, ir1.role_name as role_name, resource.name as resource_name
   )
   identities = graphdb.query(q).mapped_results
   if identities.length > 0
     identities.each do |identity|
-      describe identity.identity_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe "#{identity.identity_name}: #{identity.role_name}->#{identity.resource_name}", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should not be bound to admin, editor, or owner roles' do
           expect(identity.resource_name).to be_nil
         end
