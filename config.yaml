@@ -5301,10 +5301,10 @@ controls:
       connect to the SQL database instance with administrative privileges. The root password should be 
       set to ensure only authorized users have these privileges.
     remediation: |-
-      Set the `root` MySQL password.
+      Set the MySQL administrative password.
 
       ```
-      gcloud sql users set-password <ROOT_USER_NAME> <AUTHORIZED_HOST_IP> \
+      gcloud sql users set-password <ROOT_USERNAME> <AUTHORIZED_HOST_IP> \
         --instance=<INSTANCE_NAME> \
         --password=<PASSWORD>
       ```
@@ -5341,15 +5341,36 @@ controls:
       - google cloud
   - id: darkbit-gcp-98
     title: CloudSQL Instances Running PostgreSQL Should Have "log_checkpoints" Enabled
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Enabling `log_checkpoints` causes checkpoints and restart points to be logged in the server log. 
+      Useful statistics are included in the log messages, including the number of buffers written and the 
+      time spent writing them.
+    remediation: |-
+      Enable `log_checkpoints` for PostgreSQL Cloud SQL instances.
+
+      ```
+      gcloud sql instances patch <INSTANCE_NAME> \
+        --database-flags log_checkpoints=on
+      ```
+    validation: |-
+      List PostgreSQL Cloud SQL instances.
+
+      ```
+      gcloud sql instances list --filter='DATABASE_VERSION:POSTGRES*'
+      ```
+
+      Ensure `log_checkpoints` are `on` for each instance.
+
+      ```
+      gcloud sql instances describe <INSTANCE_NAME> \
+        --format=json | jq '.settings.databaseFlags[] | select(.name=="log_checkpoints")|.value'
+      ```
     impact: 8
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Setting a database flag
+        url: https://cloud.google.com/sql/docs/postgres/flags#setting_a_database_flag
     public: true
     tags:
       - cis:
