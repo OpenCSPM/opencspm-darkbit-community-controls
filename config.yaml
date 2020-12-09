@@ -5100,15 +5100,39 @@ controls:
       - google cloud
   - id: darkbit-gcp-91
     title: Business Critical GCE Instances Should Have CSEK Encrypted Disks
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      If you provide your Customer-Supplied Encryption Key (CSEK), Compute Engine uses your key to protect the 
+      Google-generated keys used to encrypt and decrypt your data. Only users who can provide 
+      the correct key can use resources protected by a customer-supplied encryption key.
+    remediation: |-
+      Create compute instances with a CSEK.
+
+      ```
+      gcloud compute instances create <INSTANCE_NAME> \
+        --csek-key-file <key-file.json>
+      ```
+
+      Encrypt standalone persistent disks.
+
+      ```
+      gcloud compute disks create <DISK_NAME> \
+        --csek-key-file <key-file.json>
+      ```
+    validation: |-
+      Verify Compute Engine disks are encrypted with CSEKs.
+
+      ```
+      gcloud compute disks describe <DISK_NAME> \
+        --zone=ZONE \
+        --format="json(diskEncryptionKey,name)"
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_COMPUTE_INSTANCE
+      - GCP_COMPUTE_DISK
     refs:
-      - text: TODO
-        url: TODO
+      - text: Encrypt persistent disks with your own keys
+        url: https://cloud.google.com/compute/docs/disks/customer-supplied-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
     public: true
     tags:
       - cis:
@@ -5127,7 +5151,8 @@ controls:
     validation: TODO
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_COMPUTE_INSTANCE
+      - GCP_COMPUTE_DISK
     refs:
       - text: TODO
         url: TODO
