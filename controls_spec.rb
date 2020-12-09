@@ -720,19 +720,26 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# BLOCKED: Project auditLogConfig relationship
 control_id = 'darkbit-gcp-20'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
-    MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)
-    RETURN project.name as name
+   MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)
+   OPTIONAL MATCH (project)-[r:HAS_AUDITCONFIG]->(svc:GCP_CLOUDRESOURCEMANAGER_PROJECTAUDITSERVICE)
+   WHERE svc.name = 'allServices'
+   RETURN project.name as project_name, r.log_type as log_type, r.exempted_members as exempted_members
   )
   projects = graphdb.query(q).mapped_results
   if projects.length > 0
-    projects.each do |project|
-      describe project.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    configs = projects.group_by { |r| r[:project_name] }.map do |np, configs|
+      log_types = configs.group_by{ |s| s[:log_type] }.map {|k,v| k }.sort
+      exempted_members = configs.group_by{ |s| s[:exempted_members] }.map {|k,v| k }.compact
+      [ np, log_types, exempted_members ]
+    end
+    configs.each do |config|
+      describe config[0], control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have audit logging configured' do
-          expect(project.name).to be_nil
+          expect(config[1]).to eq(["1", "2", "3"])
+          expect(config[2]).to eq([])
         end
       end
     end
@@ -1828,32 +1835,80 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# BLOCKED: Parsing of metadata keys GCP_COMPUTE_INSTANCE
 control_id = 'darkbit-gcp-87'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (gce:GCP_COMPUTE_INSTANCE)
+    OPTIONAL MATCH (gce)-[itemvalue:HAS_METADATAITEM]->(item:GCP_COMPUTEMETADATAITEM)
+    WHERE item.name = 'block-project-ssh-keys'
+    RETURN gce.name as instance_name, itemvalue.value as setting
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.instance_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should block project ssh keys' do
+          expect(instance.setting).to eq('true')
+        end
+      end
+    end
+  else
+    describe 'No Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should block project ssh keys' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# BLOCKED: Parsing of metadata keys GCP_COMPUTE_INSTANCE
 control_id = 'darkbit-gcp-88'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (gce:GCP_COMPUTE_INSTANCE)
+    OPTIONAL MATCH (gce)-[itemvalue:HAS_METADATAITEM]->(item:GCP_COMPUTEMETADATAITEM)
+    WHERE item.name = 'enable-oslogin'
+    RETURN gce.name as instance_name, itemvalue.value as setting
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.instance_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should enable oslogin' do
+          expect(instance.setting).to eq('TRUE').or be_truthy
+        end
+      end
+    end
+  else
+    describe 'No Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should enable oslogin' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
 
-# BLOCKED: Parsing of metadata keys GCP_COMPUTE_INSTANCE
 control_id = 'darkbit-gcp-89'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (gce:GCP_COMPUTE_INSTANCE)
+    OPTIONAL MATCH (gce)-[itemvalue:HAS_METADATAITEM]->(item:GCP_COMPUTEMETADATAITEM)
+    WHERE item.name = 'serial-port-enable'
+    RETURN gce.name as instance_name, itemvalue.value as setting
+  )
+  instances = graphdb.query(q).mapped_results
+  if instances.length > 0
+    instances.each do |instance|
+      describe instance.instance_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should block serial port access' do
+          expect(instance.setting).to eq('0')
+        end
+      end
+    end
+  else
+    describe 'No Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should block serial port access' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -2644,16 +2699,6 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
     end
   end
 end
-
-## BLOCKED: Ability to validate CSCC automatically?
-#control_id = 'darkbit-gcp-126'
-#RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-#  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-#    it 'should not have a placeholder configuration' do
-#      expect(true).to eq(true)
-#    end
-#  end
-#end
 
 control_id = 'darkbit-gcp-127'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
