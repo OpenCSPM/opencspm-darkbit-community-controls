@@ -5799,15 +5799,32 @@ controls:
       - google cloud
   - id: darkbit-gcp-108
     title: BigQuery Datasets Should Not Be Public
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      BigQuery datasets should not allow anonymous or public access.
+    remediation: |-
+      Get the dataset information.
+
+      ```
+      bq show --format=prettyjson <PROJECT_ID>:<DATASET_NAME> > PATH_TO_FILE
+      ```
+
+      Edit the file to remove any occurrences of `allUsers` or `allAuthenticatedUsers`. Then update the dataset.
+
+      ```
+      bq update --source PATH_TO_FILE <PROJECT_ID>:<DATASET_NAME>
+      ```
+    validation: |-
+      List datasets and ensure that `allUsers` and `allAuthenticatedUsers` have not been granted access.
+
+      ```
+      bq show <PROJECT_ID>:<DATASET_NAME>
+      ```
     impact: 8
     nodes:
-      - PLACEHOLDER
+      - GCP_BIGQUERY_DATASET
     refs:
-      - text: TODO
-        url: TODO
+      - text: Controlling access to datasets
+        url: https://cloud.google.com/bigquery/docs/dataset-access-controls
     public: true
     tags:
       - cis:
