@@ -5389,7 +5389,9 @@ controls:
       The `log_connections` setting should be enabled. PostgreSQL does not log attempted connections by 
       default. Enabling the log_connections setting will create log entries for each attempted 
       connection as well as successful completion of client authentication which can be useful in 
-      troubleshooting issues and to determine any unusual connection attempts to the server.
+      troubleshooting issues and to determine any unusual connection attempts to the server. The 
+      `log_disconnections` and `log_connections` work hand in hand and generally, the pair should be 
+      enabled/disabled together.
     remediation: |-
       Enable `log_connections` for PostgreSQL Cloud SQL instances.
 
@@ -5430,15 +5432,38 @@ controls:
       - google cloud
   - id: darkbit-gcp-100
     title: CloudSQL Instances Running PostgreSQL Should Have "log_disconnections" Enabled
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      The `log_connections` setting should be enabled. PostgreSQL does not log session details such as 
+      duration and session end by default. Enabling the log_disconnections setting will create log entries 
+      at the end of each session which can be useful in troubleshooting issues and determine any unusual 
+      activity across a time period. The `log_disconnections` and `log_connections` work hand in hand and 
+      generally, the pair should be enabled/disabled together.
+    remediation: |-
+      Enable `log_disconnections` for PostgreSQL Cloud SQL instances.
+
+      ```
+      gcloud sql instances patch <INSTANCE_NAME> \
+        --database-flags log_disconnections=on
+      ```
+    validation: |-
+      List PostgreSQL Cloud SQL instances.
+
+      ```
+      gcloud sql instances list --filter='DATABASE_VERSION:POSTGRES*'
+      ```
+
+      Ensure `log_disconnections` are `on` for each instance.
+
+      ```
+      gcloud sql instances describe <INSTANCE_NAME> \
+        --format=json | jq '.settings.databaseFlags[] | select(.name=="log_disconnections")|.value'
+      ```
     impact: 8
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Setting a database flag
+        url: https://cloud.google.com/sql/docs/postgres/flags#setting_a_database_flag
     public: true
     tags:
       - cis:
