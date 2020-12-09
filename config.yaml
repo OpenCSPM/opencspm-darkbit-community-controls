@@ -3175,7 +3175,7 @@ controls:
       Configure the master authorized networks on the GKE cluster to be restricted
       to a known set of IP ranges for API Server access.  In environments with bastion
       hosts or VPNs, their internal subnet range or security groups are commonly used.
-    validation:
+    validation: |-
       Run `gcloud container clusters describe <clustername> --format=json
       | jq -r 'select(.masterAuthorizedNetworksConfig.enabled==true) | select(.masterAuthorizedNetworksConfig.cidrBlocks[].cidrBlock!="0.0.0.0/0")
       | "(.name)"'` and ensure that the cluster's name is listed.
@@ -3280,7 +3280,7 @@ controls:
       * https://www.googleapis.com/auth/trace.append
 
       Consideration: Changing the service account or the OAuth Scopes will result in a rolling redeployment of the Node Pool.
-    validation:
+    validation: |-
       Run `gcloud container clusters describe <clustername> --format=json
       | jq -r 'select(.nodePools[].config.serviceAccount | test("-compute@developer.gserviceaccount.com")
       | not) | "(.name)"'` and ensure that the cluster's name is listed.
@@ -3388,7 +3388,7 @@ controls:
       * Use a dedicated /28 subnet for the control plane IP space that does not overlap anywhere and is not part of 172.17.0.0/16.
       * Private control planes leverage VPC peering and count toward VPC peering quota.
       * Modifications to the VPC peering or firewall rules from the control plane to the worker nodes can break the cluster.
-    validation:
+    validation: |-
       Run `gcloud container clusters describe <clustername> --format=json
       | jq -r 'select(.privateClusterConfig.enablePrivateEndpoint==true) | "(.name)"'`
       and ensure that the cluster's name is listed.
@@ -3610,7 +3610,7 @@ controls:
       or to existing clusters with the `--enable-autoupgrade` feature set.  It's strongly
       recommended to validate that all workloads can handle the upgrade process smoothly
       in a development cluster before enabling this setting in production.
-    validation:
+    validation: |-
       Run `gcloud container clusters describe <clustername> --format=json
       | jq -r 'select(.nodePools[].management.autoUpgrade==true) | "(.name)"'` and ensure
       that the cluster's name is listed.
@@ -3649,7 +3649,7 @@ controls:
       During cluster creation, specify a VPC Subnet that supports Alias IP
       ranges and secondary ranges for Pods and Services.  This can only be done at cluster
       creation time.
-    validation:
+    validation: |-
       Run `gcloud container clusters describe <clustername> --format=json
       | jq -r 'select(.ipAllocationPolicy.useIpAliases==true) | "(.name)"'` and ensure
       that the cluster's name is listed.
@@ -3694,7 +3694,7 @@ controls:
       in-place, ensure that all the required RBAC RoleBindings and ClusterRoleBindings
       are present first.  This should be performed in a development environment before
       applying this process to production clusters.
-    validation:
+    validation: |-
       Run `gcloud container clusters describe <clustername> --format=json
       | jq -r 'select(.legacyAbac.enabled | not) | "(.name)"'` and ensure that the cluster's
       name is listed.
@@ -4464,16 +4464,63 @@ controls:
       - google cloud
   - id: darkbit-gcp-78
     title: Log Metric Filter And Alert Should Notify On Network Changes
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      A metric filter and alarm should exist for VPC network changes. Monitoring changes 
+      to a VPC will help ensure VPC traffic flow is not being impacted.
+    remediation: |-
+      Create a [logging metric](https://console.cloud.google.com/logs/metrics) with the following
+      advanced filter:
+
+      ```
+      resource.type=gce_network
+        AND jsonPayload.event_subtype="compute.networks.insert"
+        OR jsonPayload.event_subtype="compute.networks.patch"
+        OR jsonPayload.event_subtype="compute.networks.delete"
+        OR jsonPayload.event_subtype="compute.networks.removePeering" 
+        OR jsonPayload.event_subtype="compute.networks.addPeering"
+      ```
+
+      In the Metric Editor menu, fill out the `name` field. Set `Units` to `1` (default)
+      and `Type` to `Counter`. This will ensure that the log metric counts the number
+      of log entries matching the user's advanced logs query.
+
+      Next, [Create an alert from the Metric](https://console.cloud.google.com/logs/metrics) with
+      an alert threshold of `0` to trigger a notification any time VPC networks are changed.
+    validation: |-
+      List the log metrics.
+
+      ```
+      gcloud beta logging metrics list --format json
+      ```
+
+      Ensure that the output contains at least one metrics with the filter:
+
+      ```
+      resource.type=gce_network
+        AND jsonPayload.event_subtype="compute.networks.insert"
+        OR jsonPayload.event_subtype="compute.networks.patch"
+        OR jsonPayload.event_subtype="compute.networks.delete"
+        OR jsonPayload.event_subtype="compute.networks.removePeering" 
+        OR jsonPayload.event_subtype="compute.networks.addPeering"
+      ```
+
+      List the alerting policies.
+
+      ```
+      gcloud alpha monitoring policies list --format json
+      ```
+
+      Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
+      set to `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` set to `true`.
     impact: 8
     nodes:
-      - GCP_IDENTITY
-      - GCP_IAM_ROLE
+      - GCP_LOGGING_LOGSINK
+      - GCP_CLOUDRESOURCEMANAGER_PROJECT
     refs:
-      - text: TODO
-        url: TODO
+      - text: Log Based Metrics
+        url: https://cloud.google.com/logging/docs/logs-based-metrics/
+      - text: Monitoring Alerts
+        url: https://cloud.google.com/monitoring/alerts/
     public: true
     tags:
       - cis:
@@ -4487,16 +4534,57 @@ controls:
       - google cloud
   - id: darkbit-gcp-79
     title: Log Metric Filter And Alert Should Notify On Cloud Storage IAM Changes
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      A metric filter and alarm should exist for Cloud Storage Bucket IAM changes. Monitoring changes to 
+      cloud storage bucket permissions may reduce the time needed to detect and correct permissions on 
+      sensitive cloud storage buckets and objects inside the bucket.
+    remediation: |-
+      Create a [logging metric](https://console.cloud.google.com/logs/metrics) with the following
+      advanced filter:
+
+      ```
+      resource.type=gcs_bucket
+        AND protoPayload.methodName="storage.setIamPermissions"
+      ```
+
+      In the Metric Editor menu, fill out the `name` field. Set `Units` to `1` (default)
+      and `Type` to `Counter`. This will ensure that the log metric counts the number
+      of log entries matching the user's advanced logs query.
+
+      Next, [Create an alert from the Metric](https://console.cloud.google.com/logs/metrics) with
+      an alert threshold of `0` to trigger a notification any time permissions on sensitive cloud storage 
+      buckets are changed.
+    validation: |-
+      List the log metrics.
+
+      ```
+      gcloud beta logging metrics list --format json
+      ```
+
+      Ensure that the output contains at least one metrics with the filter:
+
+      ```
+      resource.type=gcs_bucket
+        AND protoPayload.methodName="storage.setIamPermissions"
+      ```
+
+      List the alerting policies.
+
+      ```
+      gcloud alpha monitoring policies list --format json
+      ```
+
+      Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
+      set to `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` set to `true`.
     impact: 8
     nodes:
-      - GCP_IDENTITY
-      - GCP_IAM_ROLE
+      - GCP_LOGGING_LOGSINK
+      - GCP_CLOUDRESOURCEMANAGER_PROJECT
     refs:
-      - text: TODO
-        url: TODO
+      - text: Log Based Metrics
+        url: https://cloud.google.com/logging/docs/logs-based-metrics/
+      - text: Monitoring Alerts
+        url: https://cloud.google.com/monitoring/alerts/
     public: true
     tags:
       - cis:
@@ -4510,16 +4598,54 @@ controls:
       - google cloud
   - id: darkbit-gcp-80
     title: Log Metric Filter And Alert Should Notify On SQL Instance Changes
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      A metric filter and alarm should exist for SQL instance configuration changes. Monitoring changes to 
+      SQL instance configuration changes may reduce the time needed to detect and correct misconfigurations 
+      done on the SQL server.
+    remediation: |-
+      Create a [logging metric](https://console.cloud.google.com/logs/metrics) with the following
+      advanced filter:
+
+      ```
+      protoPayload.methodName="cloudsql.instances.update"
+      ```
+
+      In the Metric Editor menu, fill out the `name` field. Set `Units` to `1` (default)
+      and `Type` to `Counter`. This will ensure that the log metric counts the number
+      of log entries matching the user's advanced logs query.
+
+      Next, [Create an alert from the Metric](https://console.cloud.google.com/logs/metrics) with
+      an alert threshold of `0` to trigger a notification any time SQL server configurations are changed.
+    validation: |-
+      List the log metrics.
+
+      ```
+      gcloud beta logging metrics list --format json
+      ```
+
+      Ensure that the output contains at least one metrics with the filter:
+
+      ```
+      protoPayload.methodName="cloudsql.instances.update"
+      ```
+
+      List the alerting policies.
+
+      ```
+      gcloud alpha monitoring policies list --format json
+      ```
+
+      Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
+      set to `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` set to `true`.
     impact: 8
     nodes:
-      - GCP_IDENTITY
-      - GCP_IAM_ROLE
+      - GCP_LOGGING_LOGSINK
+      - GCP_CLOUDRESOURCEMANAGER_PROJECT
     refs:
-      - text: TODO
-        url: TODO
+      - text: Log Based Metrics
+        url: https://cloud.google.com/logging/docs/logs-based-metrics/
+      - text: Monitoring Alerts
+        url: https://cloud.google.com/monitoring/alerts/
     public: true
     tags:
       - cis:
@@ -4533,15 +4659,28 @@ controls:
       - google cloud
   - id: darkbit-gcp-81
     title: Legacy VPC Networks Should Not Be Present
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      There are several disadvantages to using legacy networks. Legacy networks have a single network 
+      IPv4 prefix range and a single gateway IP address for the whole network. The network is global 
+      in scope and spans all cloud regions. Subnetworks cannot be created in a legacy network and are 
+      unable to switch from legacy to auto or custom subnet networks. Legacy networks can have an 
+      impact for high network traffic projects and are subject to a single point of contention or failure.
+    remediation: |-
+      For each project with `legacy` mode networks, create a new non-legacy network and delete the legacy network.
+    validation: |-
+      List the networks configured for each project and confirm that none list networks in `legacy` mode.
+
+      ```
+      gcloud compute networks list
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_COMPUTE_NETWORK
     refs:
-      - text: TODO
-        url: TODO
+      - text: Deleting a legacy network
+        url: https://cloud.google.com/vpc/docs/using-legacy#deleting_a_legacy_network
+      - text: Creating a legacy network
+        url: https://cloud.google.com/vpc/docs/using-legacy#creating_a_legacy_network
     public: true
     tags:
       - cis:
@@ -4555,12 +4694,31 @@ controls:
       - google cloud
   - id: darkbit-gcp-82
     title: Cloud DNS Domains Should Have DNSSEC Enabled
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Cloud DNS domains should have Domain Name System Security Extensions (DNSSEC) enabled. DNSSEC in 
+      Cloud DNS enables domain owners to take easy steps to protect their domains against DNS hijacking 
+      and man-in-the-middle and other attacks.
+    remediation: |-
+      Enable DNSSEC for any Managed Zones without DNSSEC enabled.
+
+      ```
+      gcloud dns managed-zones update <ZONE_NAME> --dnssec-state on
+      ```
+    validation: |-
+      List all Managed Zones in a project.
+
+      ```
+      gcloud dns managed-zones list
+      ```
+
+      For each zone with `public` visibility, get its metadata and esure that the `dnssecConfig.state` property is `on`.
+
+      ```
+      gcloud dns managed-zones describe <ZONE_NAME>
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_DNS_MANAGEDZONE
     refs:
       - text: Enabling Cloud DNS DNSSEC
         url: https://cloud.google.com/dns/dnssec-config#enabling
@@ -4577,15 +4735,38 @@ controls:
       - google cloud
   - id: darkbit-gcp-83
     title: Cloud DNS Domains Should Not Use RSASHA1 For The Key Signing Key
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Legacy insecure key signing algorithms should not be used for Cloud DNS Domains.
+    remediation: |-
+      If it is necessary to change the settings for a Managed Zone where it has been enabled, DNSSEC must be 
+      turned off and re-enabled with different settings. To turn off DNSSEC, run the following command:
+
+      ```
+      gcloud dns managed-zones update <ZONE_NAME> --dnssec-state off
+      ```
+
+      Update the key-signing algorithm for a Managed Zone.
+
+      ```
+      gcloud dns managed-zones update <ZONE_NAME> \
+        --dnssec-state on \
+        --ksk-algorithm ECDSAP256SHA256 --ksk-key-length 256 \
+        --zsk-algorithm ECDSAP256SHA256 --zsk-key-length 256 \
+        --denial-of-existence NSEC
+      ```
+    validation: |-
+      List Managed Zones and ensure SHA1 is not configured.
+
+      ```
+      gcloud dns managed-zones describe <ZONE_NAME> \
+        --format="json(dnsName,dnssecConfig.state,dnssecConfig.defaultKeySpecs)"
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_DNS_MANAGEDZONE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Using Advanced DNSSEC
+        url: https://cloud.google.com/dns/dnssec-advanced#advanced_signing_options
     public: true
     tags:
       - cis:
@@ -4599,15 +4780,38 @@ controls:
       - google cloud
   - id: darkbit-gcp-84
     title: Cloud DNS Domains Should Not Use RSASHA1 For The Zone Signing Key
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Legacy insecure key signing algorithms should not be used for Cloud DNS Domains.
+    remediation: |-
+      If it is necessary to change the settings for a Managed Zone where it has been enabled, DNSSEC must be 
+      turned off and re-enabled with different settings. To turn off DNSSEC, run the following command:
+
+      ```
+      gcloud dns managed-zones update <ZONE_NAME> --dnssec-state off
+      ```
+
+      Update the zone-signing algorithm for a Managed Zone.
+
+      ```
+      gcloud dns managed-zones update <ZONE_NAME> \
+        --dnssec-state on \
+        --ksk-algorithm ECDSAP256SHA256 --ksk-key-length 256 \
+        --zsk-algorithm ECDSAP256SHA256 --zsk-key-length 256 \
+        --denial-of-existence NSEC
+      ```
+    validation: |-
+      List Managed Zones and ensure SHA1 is not configured.
+
+      ```
+      gcloud dns managed-zones describe <ZONE_NAME> \
+        --format="json(dnsName,dnssecConfig.state,dnssecConfig.defaultKeySpecs)"
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_DNS_MANAGEDZONE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Using Advanced DNSSEC
+        url: https://cloud.google.com/dns/dnssec-advanced#advanced_signing_options
     public: true
     tags:
       - cis:
@@ -4621,15 +4825,47 @@ controls:
       - google cloud
   - id: darkbit-gcp-85
     title: GCE Instances Should Not Have The Default Compute Service Account Attached
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      GCE instances should not use the default Compute Engine service account because it has the Editor role on the Project.
+    remediation: |-
+      For any instances with the Default Compute Service Account attached, stop the instance.
+
+      ```
+      gcloud compute instances stop <INSTANCE_NAME>
+      ```
+
+      Update the instance to use a non-default Service Account.
+
+      ```
+      gcloud compute instances set-service-account <INSTANCE_NAME> \
+        --service-account=<SERVICE_ACCOUNT>
+      ```
+
+      Restart the instance.
+
+      ```
+      gcloud compute instances start <INSTANCE_NAME>
+      ```
+
+    validation: |-
+      List instances in the the project.
+
+      ```
+      gcloud compute instances list
+      ```
+
+      Get the details of each instance and ensure that none of the Service Accounts end with `-compute@developer.gserviceaccount.com`.
+
+      ```
+      gcloud compute instances describe <INSTANCE_NAME> --zone <ZONE>
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_COMPUTE_INSTANCE
+      - GCP_IDENTITY
     refs:
-      - text: TODO
-        url: TODO
+      - text: Creating and enabling service accounts for instances
+        url: https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances
     public: true
     tags:
       - cis:
@@ -4643,15 +4879,48 @@ controls:
       - google cloud
   - id: darkbit-gcp-86
     title: GCE Instances Should Not Have The "cloud-platform" OAuth2 Scope Assigned
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      The principle of least privilege should be implemented to help prevent potential privilege escalation. Instances 
+      should not have the `Compute Engine default service account` assigned with Scope `Allow full access to all Cloud APIs`.
+    remediation: |-
+      For any instances that have full access scope, stop the instance:
+
+      ```
+      gcloud compute instances stop <INSTANCE_NAME>
+      ```
+
+      Update the instance scopes.
+
+      ```
+      gcloud compute instances set-service-account <INSTANCE_NAME> \
+        --service-account=<SERVICE_ACCOUNT> \
+        --scopes [<SCOPE1>, <SCOPE2>...]
+      ```
+
+      Restart the instance.
+
+      ```
+      gcloud compute instances start <INSTANCE_NAME>
+      ```
+    validation: |-
+      List GCE instances in a project.
+
+      ```
+      gcloud compute instances list
+      ```
+
+      Get the details of each instance and ensure `serviceAccount`.`scopes` does not include `https://www.googleapis.com/auth/cloud-platform`.
+
+      ```
+      gcloud compute instances describe <INSTANCE_NAME> --zone <ZONE> | grep -v "gke-"
+      ```
     impact: 5
     nodes:
       - GCP_COMPUTE_INSTANCE
+      - GCP_IAM_OAUTHSCOPE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Creating and enabling service accounts for instances
+        url: https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances
     public: true
     tags:
       - cis:
@@ -4665,15 +4934,34 @@ controls:
       - google cloud
   - id: darkbit-gcp-87
     title: GCE Instances Should Block Project-Wide SSH Keys
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Use instance-specific SSH keys instead of using common/shared project-wide SSH keys to access instances.
+    remediation: |-
+      Block project-wide SSH keys by setting `block-project-ssh-keys` to `true`.
+
+      ```
+      gcloud compute instances add-metadata <INSTANCE_NAME> \
+        --metadata block-project-ssh-keys=TRUE
+      ```
+    validation: |-
+      List all instances in a project.
+
+      ```
+      gcloud compute instances list
+      ```
+
+      For every instance, get the instance metadata and ensure `block-project-ssh-keys` is set to `true`.
+
+      ```
+      gcloud compute instances describe <INSTANCE_NAME>
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_COMPUTE_INSTANCE
+      - GCP_COMPUTEMETADATAITEM
     refs:
-      - text: TODO
-        url: TODO
+      - text: Managing SSH keys in metadata
+        url: https://cloud.google.com/compute/docs/instances/adding-removing-ssh-keys
     public: true
     tags:
       - cis:
@@ -4687,15 +4975,44 @@ controls:
       - google cloud
   - id: darkbit-gcp-88
     title: OSLogin Should Be Enabled In Compute Projects And GCE Instances Should Not Override Via Metadata
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Enabling osLogin ensures that SSH keys used to connect to instances are mapped with IAM users. Revoking 
+      access to IAM user will revoke all the SSH keys associated with that particular user. This facilitates 
+      centralized and automated SSH key pair management.
+    remediation: |-
+      Configure `oslogin` on the project.
+
+      ```
+      gcloud compute project-info add-metadata \
+        --metadata enable-oslogin=TRUE
+      ```
+
+      And remove instance metadata that overrides the project settings.
+
+      ```
+      gcloud compute instances remove-metadata <INSTANCE_NAME> \
+        --keys=enable-oslogin
+      ```
+    validation: |-
+      Ensure that `oslogin` is enabled on the project.
+
+      ```
+      gcloud compute project-info describe
+      ```
+
+      Verify that the section `commonInstanceMetadata` has a key `enable-oslogin` set to value `TRUE`. Also ensure that 
+      no instance in the project overrides the project setting.
+
+      ```
+      gcloud compute instances describe <INSTANCE_NAME>
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_COMPUTE_INSTANCE
+      - GCP_COMPUTEMETADATAITEM
     refs:
-      - text: TODO
-        url: TODO
+      - text: Setting up OS Login
+        url: https://cloud.google.com/compute/docs/instances/managing-instance-access
     public: true
     tags:
       - cis:
