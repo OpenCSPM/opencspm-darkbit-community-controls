@@ -4659,15 +4659,28 @@ controls:
       - google cloud
   - id: darkbit-gcp-81
     title: Legacy VPC Networks Should Not Be Present
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      There are several disadvantages to using legacy networks. Legacy networks have a single network 
+      IPv4 prefix range and a single gateway IP address for the whole network. The network is global 
+      in scope and spans all cloud regions. Subnetworks cannot be created in a legacy network and are 
+      unable to switch from legacy to auto or custom subnet networks. Legacy networks can have an 
+      impact for high network traffic projects and are subject to a single point of contention or failure.
+    remediation: |-
+      For each project with `legacy` mode networks, create a new non-legacy network and delete the legacy network.
+    validation: |-
+      List the networks configured for each project and confirm that none list networks in `legacy` mode.
+
+      ```
+      gcloud compute networks list
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_COMPUTE_NETWORK
     refs:
-      - text: TODO
-        url: TODO
+      - text: Deleting a legacy network
+        url: https://cloud.google.com/vpc/docs/using-legacy#deleting_a_legacy_network
+      - text: Creating a legacy network
+        url: https://cloud.google.com/vpc/docs/using-legacy#creating_a_legacy_network
     public: true
     tags:
       - cis:
