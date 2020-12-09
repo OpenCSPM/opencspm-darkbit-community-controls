@@ -4758,7 +4758,7 @@ controls:
       List Managed Zones and ensure SHA1 is not configured.
 
       ```
-      gcloud dns managed-zones describe <ZONE+NAME> \
+      gcloud dns managed-zones describe <ZONE_NAME> \
         --format="json(dnsName,dnssecConfig.state,dnssecConfig.defaultKeySpecs)"
       ```
     impact: 5
@@ -4780,15 +4780,38 @@ controls:
       - google cloud
   - id: darkbit-gcp-84
     title: Cloud DNS Domains Should Not Use RSASHA1 For The Zone Signing Key
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Legacy insecure key signing algorithms should not be used for Cloud DNS Domains.
+    remediation: |-
+      If it is necessary to change the settings for a Managed Zone where it has been enabled, DNSSEC must be 
+      turned off and re-enabled with different settings. To turn off DNSSEC, run the following command:
+
+      ```
+      gcloud dns managed-zones update <ZONE_NAME> --dnssec-state off
+      ```
+
+      Update the zone-signing algorithm for a Managed Zone.
+
+      ```
+      gcloud dns managed-zones update <ZONE_NAME> \
+        --dnssec-state on \
+        --ksk-algorithm ECDSAP256SHA256 --ksk-key-length 256 \
+        --zsk-algorithm ECDSAP256SHA256 --zsk-key-length 256 \
+        --denial-of-existence NSEC
+      ```
+    validation: |-
+      List Managed Zones and ensure SHA1 is not configured.
+
+      ```
+      gcloud dns managed-zones describe <ZONE_NAME> \
+        --format="json(dnsName,dnssecConfig.state,dnssecConfig.defaultKeySpecs)"
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_DNS_MANAGEDZONE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Using Advanced DNSSEC
+        url: https://cloud.google.com/dns/dnssec-advanced#advanced_signing_options
     public: true
     tags:
       - cis:
