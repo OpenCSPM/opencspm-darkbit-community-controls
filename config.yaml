@@ -4825,15 +4825,47 @@ controls:
       - google cloud
   - id: darkbit-gcp-85
     title: GCE Instances Should Not Have The Default Compute Service Account Attached
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      GCE instances should not use the default Compute Engine service account because it has the Editor role on the Project.
+    remediation: |-
+      For any instances with the Default Compute Service Account attached, stop the instance.
+
+      ```
+      gcloud compute instances stop <INSTANCE_NAME>
+      ```
+
+      Update the instance to use a non-default Service Account.
+
+      ```
+      gcloud compute instances set-service-account <INSTANCE_NAME> \
+        --service-account=<SERVICE_ACCOUNT>
+      ```
+
+      Restart the instance.
+
+      ```
+      gcloud compute instances start <INSTANCE_NAME>
+      ```
+
+    validation: |-
+      List instances in the the project.
+
+      ```
+      gcloud compute instances list
+      ```
+
+      Get the details of each instance and ensure that none of the Service Accounts end with `-compute@developer.gserviceaccount.com`.
+
+      ```
+      gcloud compute instances describe <INSTANCE_NAME> --zone <ZONE>
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_COMPUTE_INSTANCE
+      - GCP_IDENTITY
     refs:
-      - text: TODO
-        url: TODO
+      - text: Creating and enabling service accounts for instances
+        url: https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances
     public: true
     tags:
       - cis:
