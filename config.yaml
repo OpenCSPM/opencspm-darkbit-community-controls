@@ -5952,7 +5952,7 @@ controls:
         OR bindings.role:roles/storage.legacyBucketOwner \
         OR bindings.role:roles/storage.legacyBucketWriter \
         OR bindings.role:roles/storage.legacyObjectOwner"
- ```
+      ```
     impact: 8
     nodes:
       - GCP_STORAGE_BUCKET
