@@ -5026,15 +5026,34 @@ controls:
       - google cloud
   - id: darkbit-gcp-89
     title: GCE Instances Should Not Be Available Via Serial Console
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Tnteractive serial console support should be disabled. The interactive serial console does not support 
+      IP-based access restrictions such as IP allowlists. If you enable the interactive serial console on an 
+      instance, clients can attempt to connect to that instance from any IP address. This allows anybody to 
+      connect to that instance if they know the correct SSH key, username, project ID, zone, and instance name.
+    remediation: |-
+      Disable the virtual serial console.
+
+      ```
+      gcloud compute instances add-metadata <INSTANCE_NAME> \
+        --zone=<ZONE> \
+        --metadata=serial-port-enable=false
+      ```
+    validation: |-
+      Check instance metadata. The `serial-port-enable` should either be missing or set to `0`,
+
+      ```
+      gcloud compute instances describe <vmName> \
+        --zone=<ZONE> \
+        --format="json(metadata.items[].key,metadata.items[].value)"
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_COMPUTE_INSTANCE
+      - GCP_COMPUTEMETADATAITEM
     refs:
-      - text: TODO
-        url: TODO
+      - text: Interacting with the serial console
+        url: https://cloud.google.com/compute/docs/instances/interacting-with-serial-console
     public: true
     tags:
       - cis:
