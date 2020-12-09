@@ -5296,15 +5296,37 @@ controls:
       - google cloud
   - id: darkbit-gcp-97
     title: CloudSQL Instances Running MySQL Should Have "local_infile" Disabled
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Not providing an administrative password at the time of MySQL instance creation allows anyone to 
+      connect to the SQL database instance with administrative privileges. The root password should be 
+      set to ensure only authorized users have these privileges.
+    remediation: |-
+      Set the `root` MySQL password.
+
+      ```
+      gcloud sql users set-password <ROOT_USER_NAME> <AUTHORIZED_HOST_IP> \
+        --instance=<INSTANCE_NAME> \
+        --password=<PASSWORD>
+      ```
+    validation: |-
+      List all MySQL instances.
+
+      ```
+      gcloud sql instances list --filter='DATABASE_VERSION:MYSQL*'
+      ```
+
+      Try to connect to the instance from an `authorized network` and confirm that the server does not 
+      offer a `mysql prompt`.
+
+      ```
+      mysql -u root -h <INSTANCE_IP>
+      ```
     impact: 8
     nodes:
-      - PLACEHOLDER
+      - GCP_SQLADMIN_INSTANCE
     refs:
-      - text: TODO
-        url: TODO
+      - text: Creating and managing MySQL users
+        url: https://cloud.google.com/sql/docs/mysql/create-manage-users
     public: true
     tags:
       - cis:
@@ -5324,7 +5346,7 @@ controls:
     validation: TODO
     impact: 8
     nodes:
-      - PLACEHOLDER
+      - GCP_SQLADMIN_INSTANCE
     refs:
       - text: TODO
         url: TODO
@@ -5347,7 +5369,7 @@ controls:
     validation: TODO
     impact: 8
     nodes:
-      - PLACEHOLDER
+      - GCP_SQLADMIN_INSTANCE
     refs:
       - text: TODO
         url: TODO
@@ -5370,7 +5392,7 @@ controls:
     validation: TODO
     impact: 8
     nodes:
-      - PLACEHOLDER
+      - GCP_SQLADMIN_INSTANCE
     refs:
       - text: TODO
         url: TODO
@@ -5393,7 +5415,7 @@ controls:
     validation: TODO
     impact: 8
     nodes:
-      - PLACEHOLDER
+      - GCP_SQLADMIN_INSTANCE
     refs:
       - text: TODO
         url: TODO
@@ -5416,7 +5438,7 @@ controls:
     validation: TODO
     impact: 8
     nodes:
-      - PLACEHOLDER
+      - GCP_SQLADMIN_INSTANCE
     refs:
       - text: TODO
         url: TODO
@@ -5439,7 +5461,7 @@ controls:
     validation: TODO
     impact: 8
     nodes:
-      - PLACEHOLDER
+      - GCP_SQLADMIN_INSTANCE
     refs:
       - text: TODO
         url: TODO
@@ -5462,7 +5484,7 @@ controls:
     validation: TODO
     impact: 8
     nodes:
-      - PLACEHOLDER
+      - GCP_SQLADMIN_INSTANCE
     refs:
       - text: TODO
         url: TODO
@@ -5485,7 +5507,7 @@ controls:
     validation: TODO
     impact: 8
     nodes:
-      - PLACEHOLDER
+      - GCP_SQLADMIN_INSTANCE
     refs:
       - text: TODO
         url: TODO
@@ -5508,7 +5530,7 @@ controls:
     validation: TODO
     impact: 8
     nodes:
-      - PLACEHOLDER
+      - GCP_SQLADMIN_INSTANCE
     refs:
       - text: TODO
         url: TODO
@@ -5531,7 +5553,7 @@ controls:
     validation: TODO
     impact: 8
     nodes:
-      - PLACEHOLDER
+      - GCP_SQLADMIN_INSTANCE
     refs:
       - text: TODO
         url: TODO
