@@ -1737,7 +1737,7 @@ controls:
       for i in $(aws kms list-aliases --region $AWS_REGION --query 'Aliases[*].TargetKeyId' --output text); do \
         aws kms get-key-rotation-status \
         --region $AWS_REGION \
-        --key-id $i | jq -r --arg ARN $i '"($ARN) (.KeyRotationEnabled)"'
+        --key-id $i | jq -r --arg ARN $i '"\($ARN) \(.KeyRotationEnabled)"'
       done
       ```
     impact: 5
