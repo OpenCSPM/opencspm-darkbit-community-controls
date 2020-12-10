@@ -6058,15 +6058,30 @@ controls:
       - google cloud
   - id: darkbit-gcp-115
     title: GKE Cluster Nodes Should Not Have Public IP Addresses
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Disable public IP addresses for cluster nodes, so that they only have private IP addresses. Disabling 
+      public IP addresses on cluster nodes restricts access to only internal networks, forcing attackers to 
+      obtain local network access before attempting to compromise the underlying Kubernetes hosts.
+    remediation: |-
+      Private Nodes can only be configured during cluster creation. To create a cluster with Private Nodes 
+      enabled, include the `--enable-private-nodes` flag within the cluster create command.
+
+      ```
+      gcloud container clusters create [CLUSTER_NAME] --enable-private-nodes
+      ```
+    validation: |-
+      Describe GKE clusters and confirm `enablePrivateNodes` is `true`.
+
+      ```
+      gcloud container clusters describe $CLUSTER_NAME \
+        --format json | jq '.privateClusterConfig.enablePrivateNodes'
+      ```
     impact: 8
     nodes:
-      - PLACEHOLDER
+      - GCP_CONTAINER_CLUSTER
     refs:
-      - text: TODO
-        url: TODO
+      - text: Creating a private GKE cluster
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters
     public: true
     tags:
       - cis:
