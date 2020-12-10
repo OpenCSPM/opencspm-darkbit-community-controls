@@ -6364,15 +6364,30 @@ controls:
       - google cloud
   - id: darkbit-gcp-127
     title: GKE Clusters Should Not Have Basic Authentication Enabled
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Disable Basic Authentication (basic auth) for API server authentication as it uses static passwords 
+      which need to be rotated.
+    remediation: |-
+      Disable Basic Authentication by removing the status password.
+
+      ```
+      gcloud container clusters update [CLUSTER_NAME] \ 
+        --no-enable-basic-auth
+      ```
+    validation: |-
+      Describe GKE clusters and ensure `masterAuth` `username` and `password` are `false`.
+
+      ```
+      gcloud container clusters describe $CLUSTER_NAME \
+        --zone $COMPUTE_ZONE \
+        --format json | jq '.masterAuth.password and .masterAuth.username'
+      ```
     impact: 9
     nodes:
-      - PLACEHOLDER
+      - GCP_CONTAINER_CLUSTER
     refs:
-      - text: TODO
-        url: TODO
+      - text: Legacy client authentication methods
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#restrict_authn_methods
     public: true
     tags:
       - cis:
@@ -6392,8 +6407,8 @@ controls:
     validation: TODO
     impact: 8
     nodes:
-      - GCP_IDENTITY
-      - GCP_IAM_ROLE
+      - GCP_LOGGING_LOGSINK
+      - GCP_CLOUDRESOURCEMANAGER_PROJECT
     refs:
       - text: TODO
         url: TODO
