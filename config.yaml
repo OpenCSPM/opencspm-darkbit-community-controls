@@ -6159,7 +6159,7 @@ controls:
       set to `Enabled`.
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_CONTAINER_CLUSTER
     refs:
       - text: Google Groups for GKE
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control#google-groups-for-gke
@@ -6177,15 +6177,58 @@ controls:
       - google cloud
   - id: darkbit-gcp-122
     title: GKE Cluster Node Boot And Persistent Disks Should Be Encrypted With Customer Managed Encryption Keys (CMEK)
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      GCE persistent disks are encrypted at rest by default using envelope encryption with keys managed by Google. 
+      Customer-Managed Encryption Keys (CMEK) should be used to encrypt node boot and dynamically provisioned attached 
+      Google Compute Engine Persistent Disks (PDs) using keys managed within Cloud Key Management Service (Cloud KMS).
+    remediation: |-
+      Disk encryption cannot be changed after cluster creations. Create a new cluster using a CMEK for the node boot disk.
+
+      ```
+      gcloud beta container clusters create [CLUSTER_NAME] \
+        --disk-type [DISK_TYPE] \
+        --boot-disk-kms-key projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKey s/[KEY_NAME]
+      ```
+
+      Create node pools using a CMEK for the node boot disk.
+
+      ```
+      gcloud beta container node-pools create [CLUSTER_NAME] \
+        --disk-type [DISK_TYPE] \
+        --boot-disk-kms-key projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKey s/[KEY_NAME]
+      ```
+    validation: |-
+      Verify node boot disks are encrypted with a CMEK by examining node pool details. 
+      Confirm `diskType` is either`pd-standard` or `pd-ssd` and `bootDiskKmsKey` specifies a CMEK.
+
+      ```
+      gcloud beta container node-pools describe [NODE_POOL_NAME] \ 
+        --cluster [CLUSTER_NAME]
+      ```
+
+      Verify attached disks are encrypted with a CMEK by examining GCE disks. First, list Persistent Volumes.
+
+      ``
+      kubectl get pv -o json | jq '.items[].metadata.name'
+      ```
+
+      For each volume, confirm that `kmsKeyName` contains a value.
+
+      ```
+      gcloud compute disks describe [PV_NAME] \
+        --zone [COMPUTE-ZONE] \
+        --format json | jq '.diskEncryptionKey.kmsKeyName'
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_CONTAINER_CLUSTER
+      - GCP_COMPUTE_INSTANCE
+      - GCP_COMPUTE_DISK
     refs:
-      - text: TODO
-        url: TODO
+      - text: Using customer-managed encryption keys (CMEK)
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/using-cmek
+      - text: Protecting GCE Resources with Cloud KMS Keys
+        url: https://cloud.google.com/compute/docs/disks/customer-managed-encryption
     public: true
     tags:
       - cis:
