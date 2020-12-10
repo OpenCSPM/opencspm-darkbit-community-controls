@@ -6243,15 +6243,26 @@ controls:
       - google cloud
   - id: darkbit-gcp-123
     title: Alpha GKE Clusters Should Not Be Used In Production
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Alpha clusters should not be used in production as they are not covered by an SLA and are not production-ready. 
+      They have all Kubernetes API features enabled, but are not covered by the GKE SLA, do not receive security 
+      updates, have node auto-upgrade and node auto-repair disabled, cannot be upgraded, and are also deleted after 30 days.
+    remediation: |-
+      Alpha clusters cannot be disabled. A new cluster must be created without the `--enable-kubernetes-alpha` option.
+    validation: |-
+      Describe GKE clusters and ensure none are `true` for Alpha clusters.
+
+      ```
+      gcloud container clusters describe $CLUSTER_NAME \ 
+        --zone $COMPUTE-ZONE \
+        --format json | jq '.enableKubernetesAlpha'
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_CONTAINER_CLUSTER
     refs:
-      - text: TODO
-        url: TODO
+      - text: Alpha clusters
+        url: https://cloud.google.com/kubernetes-engine/docs/concepts/alpha-clusters
     public: true
     tags:
       - cis:
