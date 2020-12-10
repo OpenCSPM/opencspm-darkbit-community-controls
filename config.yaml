@@ -6140,15 +6140,29 @@ controls:
       - google cloud
   - id: darkbit-gcp-121
     title: GKE Clusters Should Support Google Groups In RBAC Bindings
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Leverage Google Groups and Cloud IAM to assign Kubernetes user roles to a collection of users, 
+      instead of to individual emails using only Cloud IAM.
+    remediation: |-
+      The security group can only be specified during cluster creation. Follow the setup 
+      [instructions](https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control#google-groups-for-gke) 
+      for Google Groups for GKE. Then create a cluster specifying the security group.
+
+      ```
+      gcloud beta container clusters create my-cluster \ 
+        --security-group="gke-security-groups@[yourdomain.com]"
+      ```
+
+      Then create `Roles`, `ClusterRoles`, `RoleBindings`, and `ClusterRoleBindings` that reference your Google Groups.
+    validation: |-
+      Examine GKE [clusters](https://console.cloud.google.com/kubernetes/list) and confirm `Google Groups for RBAC` is 
+      set to `Enabled`.
     impact: 5
     nodes:
       - PLACEHOLDER
     refs:
-      - text: TODO
-        url: TODO
+      - text: Google Groups for GKE
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control#google-groups-for-gke
     public: true
     tags:
       - cis:
