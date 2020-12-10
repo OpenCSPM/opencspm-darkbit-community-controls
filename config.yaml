@@ -6319,15 +6319,37 @@ controls:
       - google cloud
   - id: darkbit-gcp-125
     title: GKE Clusters Should Enable Binary Authorization
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Binary Authorization should be used to help enforce supply-chain security by only allowing 
+      images with verifiable cryptographically signed metadata into the cluster.
+    remediation: |-
+      Update the cluster to enable Binary Authorization.
+
+      ```
+      gcloud container cluster update [CLUSTER_NAME] \ 
+        --zone [COMPUTE-ZONE] \
+        --enable-binauthz
+      ```
+
+      Then create a [Binary Authorization Policy](https://cloud.google.com/binary-authorization/docs/policy-yaml-reference) and import it.
+
+      ```
+      gcloud container binauthz policy import [policy_file.yaml]
+      ```
+    validation: -
+      Describe GKE clusters and confirm `enabled` is `true` for `binaryAuthorization`.
+
+      ```
+      gcloud container clusters describe $CLUSTER_NAME \ 
+        --zone $COMPUTE_ZONE \
+        --format json | jq .binaryAuthorization
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_CONTAINER_CLUSTER
     refs:
-      - text: TODO
-        url: TODO
+      - text: Binary Authorization
+        url: https://cloud.google.com/binary-authorization/
     public: true
     tags:
       - cis:
