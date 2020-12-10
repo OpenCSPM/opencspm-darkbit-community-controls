@@ -634,7 +634,7 @@ end
 control_id = 'darkbit-gcp-15'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
-    MATCH (range:GCP_COMPUTE_FIREWALLIPRANGE { name: "0.0.0.0/0"})<-[:HAS_SOURCEIPRANGE]-(f:GCP_COMPUTE_FIREWALL { direction: "INGRESS" })-[rule:HAS_FIREWALLRULE { action: "allow"}]->(proto:GCP_COMPUTE_NETWORKPROTOCOL)
+    MATCH (range:GCP_COMPUTE_FIREWALLIPRANGE { name: "0.0.0.0/0"})<-[:HAS_SOURCEIPRANGE]-(f:GCP_COMPUTE_FIREWALL { resource_data_direction: "INGRESS" })-[rule:HAS_FIREWALLRULE { action: "allow"}]->(proto:GCP_COMPUTE_NETWORKPROTOCOL)
     WHERE ((rule.from_port <= 22 AND 22 <= rule.to_port) AND (proto.name = 'all' OR proto.name = 'tcp'))
     RETURN DISTINCT f.name as firewall_name
   )
@@ -818,7 +818,7 @@ end
 control_id = 'darkbit-gcp-26'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
-    MATCH (range:GCP_COMPUTE_FIREWALLIPRANGE { name: "0.0.0.0/0"})<-[:HAS_SOURCEIPRANGE]-(f:GCP_COMPUTE_FIREWALL { direction: "INGRESS" })-[rule:HAS_FIREWALLRULE { action: "allow"}]->(proto:GCP_COMPUTE_NETWORKPROTOCOL)
+    MATCH (range:GCP_COMPUTE_FIREWALLIPRANGE { name: "0.0.0.0/0"})<-[:HAS_SOURCEIPRANGE]-(f:GCP_COMPUTE_FIREWALL { resource_data_direction: "INGRESS" })-[rule:HAS_FIREWALLRULE { action: "allow"}]->(proto:GCP_COMPUTE_NETWORKPROTOCOL)
     WHERE ((rule.from_port <= 3389 AND 3389 <= rule.to_port) AND (proto.name = 'all' OR proto.name = 'tcp'))
     RETURN DISTINCT f.name as firewall_name
   )
