@@ -14,6 +14,10 @@ controls:
       '{print $1 " " $11 " " $16}'` to get a list of `user`, `access_key_1_last_used_date`,
       and `access_key_2_last_used_date`. Ensure all dates are within 90 days.
     impact: 5
+    effort: 2
+    platform: AWS
+    category: Identity and Access Management
+    resource: IAM
     nodes:
       - AWS_IAM_USER
     refs:
@@ -84,6 +88,10 @@ controls:
       '{print $1 " "$4" "$8}' | grep " true "` to get list of `user`,
       `password_enabled`, `mfa_enabled`.  Ensure all are `true`.
     impact: 9
+    effort: 2
+    platform: AWS
+    category: Identity and Access Management
+    resource: IAM
     nodes:
       - AWS_IAM_USER
     refs:
