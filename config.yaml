@@ -6096,15 +6096,36 @@ controls:
       - google cloud
   - id: darkbit-gcp-117
     title: HTTPS Load Balancers Should Use Google-Managed SSL Certificates
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Traffic to HTTPS load balancers should be encrypted using Google-managed SSL certificates. Encrypting 
+      traffic between users and your Kubernetes workload is fundamental to protecting data sent over the web.
+    remediation: |-
+      Identify any workloads exposed publicly using Services of `type:LoadBalancer`.
+
+      ```
+      kubectl get svc -A -o json | jq '.items[] | select(.spec.type=="LoadBalancer")'
+      ```
+
+      Replace each Service with an Ingress using a Google-managed SSL Certificate.
+    validation: |-
+      Confirm there are no workloads exposed publicly using Services of `type:LoadBalancer`.
+
+      ```
+      kubectl get svc -A -o json | jq '.items[] | select(.spec.type=="LoadBalancer")'
+      ```
+
+      Inspect ingresses and confirm the annotation `networking.gke.io/managed-certificates` is present.
+
+      ```
+      kubectl get ingress -A -o json | jq .items[] | jq \
+        '{name: .metadata.name, annotations: .metadata.annotations, namespace: .metadata.namespace, status: .status}'
+      ```
     impact: 8
     nodes:
-      - PLACEHOLDER
+      - K8S_INGRESS
     refs:
-      - text: TODO
-        url: TODO
+      - text: Using Google-managed SSL certificates
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/managed-certs
     public: true
     tags:
       - cis:
