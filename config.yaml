@@ -6276,16 +6276,35 @@ controls:
           - nist-csf-todo
       - google cloud
   - id: darkbit-gcp-124
-    title: GKE Sandbox (Gvisor) Should Be Enabled For Untrusted Workloads
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    title: GKE Sandbox (gVisor) Should Be Enabled For Untrusted Workloads
+    description: |
+      GKE Sandbox should be used to restrict untrusted workloads as an additional layer of protection w
+      hen running in a multi-tenant environment.
+    remediation: |-
+      GKE Sanbox can only be enabled during cluster creation.
+
+      ```
+      gcloud container node-pools create [NODE_POOL_NAME] \ 
+        --zone=[COMPUTE-ZONE] \
+        --cluster=[CLUSTER_NAME] \ 
+        --image-type=cos_containerd \
+        --sandbox type=gvisor
+      ```
+    validation: |-
+      Describe cluster node pools and confirm that `sandboxType` is `gvisor`.
+
+      ```
+      gcloud container node-pools describe [NODE_POOL_NAME] \ 
+        --zone [COMPUTE-ZONE] \
+        --cluster [CLUSTER_NAME] \
+        --format json | jq '.config.sandboxConfig'
+      ```
     impact: 5
     nodes:
-      - PLACEHOLDER
+      - GCP_CONTAINER_NODEPOOL
     refs:
-      - text: TODO
-        url: TODO
+      - text: Harden workload isolation with GKE Sandbox
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/sandbox-pods
     public: true
     tags:
       - cis:

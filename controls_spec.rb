@@ -2695,14 +2695,14 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   if nps.length > 0
     nps.each do |np|
       describe np.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-        it 'should have Gvisor enabled' do
+        it 'should have gVisor enabled' do
           expect(np.sandbox_type).to eq('GVISOR')
         end
       end
     end
   else
     describe 'No GKE Nodepools found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-      it 'should have Gvisor enabled' do
+      it 'should have gVisor enabled' do
         expect(true).to eq(true)
       end
     end
