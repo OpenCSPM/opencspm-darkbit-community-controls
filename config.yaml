@@ -6336,7 +6336,7 @@ controls:
       ```
       gcloud container binauthz policy import [policy_file.yaml]
       ```
-    validation: -
+    validation: |-
       Describe GKE clusters and confirm `enabled` is `true` for `binaryAuthorization`.
 
       ```
