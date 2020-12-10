@@ -6016,15 +6016,34 @@ controls:
       - google cloud
   - id: darkbit-gcp-114
     title: GKE Clusters Should Use Stable Or Regular Release Channels
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      Clusters should be subscribed to the Regular or Stable Release Channel to automate version upgrades to 
+      the GKE cluster and to reduce version management complexity to the number of features and level of stability 
+      required. Release Channels signal a graduating level of stability and production-readiness. These are based on 
+      observed performance of GKE clusters running that version and represent experience and confidence in the 
+      cluster version.
+    remediation: |-
+      Cluster Release Channels are only configurable during creation of the cluster.
+
+      ```
+      gcloud beta container clusters create [CLUSTER_NAME] \ 
+        --zone [COMPUTE_ZONE] \
+        --release-channel [RELEASE_CHANNEL]
+      ```
+    validation: |-
+      Describe GKE clusters and confirm that `regular` or `stable` release channels are used.
+
+      ```
+      gcloud beta container clusters describe [CLUSTER_NAME] \ 
+        --zone [COMPUTE_ZONE] \
+        --format json | jq .releaseChannel.channel
+      ```
     impact: 8
     nodes:
-      - PLACEHOLDER
+      - GCP_CONTAINER_CLUSTER
     refs:
-      - text: TODO
-        url: TODO
+      - text: GKE Release Channels
+        url: https://cloud.google.com/kubernetes-engine/docs/concepts/release-channels
     public: true
     tags:
       - cis:
