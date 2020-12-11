@@ -594,7 +594,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Bindings found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not have iam.serviceAccountUser or iam.serviceAccountTokenCreator bound at the project level' do
         expect(true).to eq(true)
       end
@@ -623,7 +623,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Subnets found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have full VPC Flow logging enabled' do
         expect(true).to eq(true)
       end
@@ -648,7 +648,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GCP Firewalls found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not allow TCP/22 from 0.0.0.0/0' do
         expect(true).to eq(true)
       end
@@ -675,7 +675,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have a private IP' do
         expect(true).to eq(true)
       end
@@ -700,7 +700,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No VPCs found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not be a default VPC' do
         expect(true).to eq(true)
       end
@@ -727,7 +727,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No SA Keys found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not be older than 90 days' do
         expect(true).to eq(true)
       end
@@ -759,7 +759,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have audit logging configured' do
         expect(true).to eq(true)
       end
@@ -783,7 +783,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not be public' do
         expect(true).to eq(true)
       end
@@ -807,7 +807,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should require SSL' do
         expect(true).to eq(true)
       end
@@ -832,7 +832,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GCP Firewalls found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not allow TCP/3389 from 0.0.0.0/0' do
         expect(true).to eq(true)
       end
@@ -859,7 +859,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No HTTPS or SSL Proxies found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have an SSL Policy configured' do
         expect(true).to eq(true)
       end
@@ -883,7 +883,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have Network Policy configured' do
         expect(true).to eq(true)
       end
@@ -910,7 +910,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should restrict access to the API' do
         expect(true).to eq(true)
       end
@@ -934,7 +934,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have Workload Identity configured' do
         expect(true).to eq(true)
       end
@@ -958,7 +958,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE NodePools found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not have the default ServiceAccount attached' do
         expect(true).to eq(true)
       end
@@ -982,7 +982,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have Shielded Nodes configured' do
         expect(true).to eq(true)
       end
@@ -1006,7 +1006,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have a Private Master Endpoint configured' do
         expect(true).to eq(true)
       end
@@ -1030,7 +1030,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have IntraNode Visibility configured' do
         expect(true).to eq(true)
       end
@@ -1054,7 +1054,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have GCP Logging configured' do
         expect(true).to eq(true)
       end
@@ -1078,7 +1078,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE NodePools found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should use COS or COS_CONTAINERD' do
         expect(true).to eq(true)
       end
@@ -1102,7 +1102,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE NodePools found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have autorepair enabled' do
         expect(true).to eq(true)
       end
@@ -1126,7 +1126,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE NodePools found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have autoupgrade enabled' do
         expect(true).to eq(true)
       end
@@ -1150,7 +1150,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have Subnet IP Alias Ranges configured' do
         expect(true).to eq(true)
       end
@@ -1174,7 +1174,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not have legacy Abac configured' do
         expect(true).to eq(true)
       end
@@ -1200,7 +1200,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have automatic backups configured' do
         expect(true).to eq(true)
       end
@@ -1225,7 +1225,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Binding found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not have Editor bound to the default service account' do
         expect(true).to eq(true)
       end
@@ -1249,7 +1249,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should encrypt secrets at rest in Etcd' do
         expect(true).to eq(true)
       end
@@ -1275,7 +1275,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No User-Managed SA Keys found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not have user-managed keys' do
         expect(true).to eq(true)
       end
@@ -1307,7 +1307,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No failing identities found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not be bound to admin, editor, or owner roles' do
         expect(true).to eq(true)
       end
@@ -1334,7 +1334,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No failing identities found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not have iam admin and serviceaccountuser to the same resource' do
         expect(true).to eq(true)
       end
@@ -1354,7 +1354,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   if identities.length > 0
     identities.each do |identity|
       if identity.project_name.nil? && identity.project_role.nil? && identity.key_name.nil? && identity.key_role.nil?
-        describe 'No allUsers binding found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
           it 'should not have allUsers access to projects or cryptokeys' do
             expect(true).to eq(true)
           end
@@ -1369,7 +1369,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No allUsers binding found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not have allUsers access to projects or cryptokeys' do
         expect(true).to eq(true)
       end
@@ -1396,7 +1396,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No KMS Keys found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not be older than 90 days' do
         expect(true).to eq(true)
       end
@@ -1423,7 +1423,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No failing identities found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not have kms admin and cryptokeyencrypeterdecrypter to the same resource' do
         expect(true).to eq(true)
       end
@@ -1450,7 +1450,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have a full logsink' do
         expect(true).to eq(true)
       end
@@ -1476,7 +1476,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GCS Buckets found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have retention policies and bucket lock enabled' do
         expect(true).to eq(true)
       end
@@ -1509,7 +1509,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have a logsink filter for ownership changes' do
         expect(true).to eq(true)
       end
@@ -1538,7 +1538,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have a logsink filter for audit changes' do
         expect(true).to eq(true)
       end
@@ -1568,7 +1568,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have a logsink filter for firewall rule changes' do
         expect(true).to eq(true)
       end
@@ -1598,7 +1598,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have a logsink filter for route changes' do
         expect(true).to eq(true)
       end
@@ -1631,7 +1631,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have a logsink filter for network changes' do
         expect(true).to eq(true)
       end
@@ -1660,7 +1660,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have a logsink filter for storage IAM changes' do
         expect(true).to eq(true)
       end
@@ -1687,7 +1687,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have a logsink filter for cloudsql instance changes' do
         expect(true).to eq(true)
       end
@@ -1712,7 +1712,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No VPCs found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not be a legacy VPC' do
         expect(true).to eq(true)
       end
@@ -1736,7 +1736,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No DNS Zones found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have DNSSEC enabled' do
         expect(true).to eq(true)
       end
@@ -1772,7 +1772,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No DNS Zones found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not have RSASHA1 for the Signing Key' do
         expect(true).to eq(true)
       end
@@ -1808,7 +1808,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No DNS Zones found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not have RSASHA1 for the Signing Key' do
         expect(true).to eq(true)
       end
@@ -1833,7 +1833,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GCE Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not have the default ServiceAccount attached' do
         expect(true).to eq(true)
       end
@@ -1860,7 +1860,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not have cloud-platform oauth scope assigned' do
         expect(true).to eq(true)
       end
@@ -1886,7 +1886,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should block project ssh keys' do
         expect(true).to eq(true)
       end
@@ -1912,7 +1912,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should enable oslogin' do
         expect(true).to eq(true)
       end
@@ -1938,7 +1938,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should block serial port access' do
         expect(true).to eq(true)
       end
@@ -1963,7 +1963,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not have ip forwarding enabled' do
         expect(true).to eq(true)
       end
@@ -1988,7 +1988,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GCE Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have CMEK configured for its disks' do
         expect(true).to eq(true)
       end
@@ -2018,7 +2018,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have shielded node configuration enabled' do
         expect(true).to eq(true)
       end
@@ -2043,7 +2043,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   if identities.length > 0
     identities.each do |identity|
       if identity.project_name.nil? && identity.project_role.nil? && identity.bucket_name.nil? && identity.bucket_role.nil?
-        describe 'No allUsers or allAuthenticatedUsers binding found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
           it 'should not have all(Authenticated)Users access to projects or buckets' do
             expect(true).to eq(true)
           end
@@ -2058,7 +2058,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No allUsers or allAuthenticatedUsers binding found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not have all(Authenticated)Users access to projects or buckets' do
         expect(true).to eq(true)
       end
@@ -2082,7 +2082,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GCS Buckets found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have uniform IAM access configured' do
         expect(true).to eq(true)
       end
@@ -2109,7 +2109,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have local_infile disabled' do
         expect(true).to eq(true)
       end
@@ -2136,7 +2136,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have log_checkpoints enabled' do
         expect(true).to eq(true)
       end
@@ -2163,7 +2163,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have log_connections enabled' do
         expect(true).to eq(true)
       end
@@ -2190,7 +2190,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have log_disconnections enabled' do
         expect(true).to eq(true)
       end
@@ -2217,7 +2217,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have log_lock_waits enabled' do
         expect(true).to eq(true)
       end
@@ -2244,7 +2244,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have log_min_error_statement set to ERROR' do
         expect(true).to eq(true)
       end
@@ -2271,7 +2271,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have log_temp_files enabled' do
         expect(true).to eq(true)
       end
@@ -2298,7 +2298,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have log_min_duration_statement disabled' do
         expect(true).to eq(true)
       end
@@ -2325,7 +2325,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have cross db ownership chaining disabled' do
         expect(true).to eq(true)
       end
@@ -2352,7 +2352,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have contained database authentication disabled' do
         expect(true).to eq(true)
       end
@@ -2378,7 +2378,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Cloud SQL Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have not allow connections from all IPs' do
         expect(true).to eq(true)
       end
@@ -2403,7 +2403,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   if identities.length > 0
     identities.each do |identity|
       if identity.project_name.nil? && identity.project_role.nil? && identity.dataset_name.nil? && identity.dataset_role.nil?
-        describe 'No allUsers or allAuthenticatedUsers binding found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
           it 'should not have all(Authenticated)Users access to projects or datasets' do
             expect(true).to eq(true)
           end
@@ -2418,7 +2418,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No allUsers or allAuthenticatedUsers binding found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not have all(Authenticated)Users access to projects or datasets' do
         expect(true).to eq(true)
       end
@@ -2442,7 +2442,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not have client certificate authentication enabled' do
         expect(true).to eq(true)
       end
@@ -2469,7 +2469,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Container Registry Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have container vulnerability scanning enabled' do
         expect(true).to eq(true)
       end
@@ -2506,7 +2506,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE Nodepools found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have read-only access to GCR' do
         expect(true).to eq(true)
       end
@@ -2530,7 +2530,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE NodePools found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have legacy metadata endpoints disabled' do
         expect(true).to eq(true)
       end
@@ -2554,7 +2554,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should use stable or regular channel' do
         expect(true).to eq(true)
       end
@@ -2578,7 +2578,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have private nodes configured' do
         expect(true).to eq(true)
       end
@@ -2603,7 +2603,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Ingresses found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have google-managed cert attached' do
         expect(true).to eq(true)
       end
@@ -2627,7 +2627,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have google groups RBAC integration configured' do
         expect(true).to eq(true)
       end
@@ -2652,7 +2652,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE Node Instances found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have CMEK configured for its disks' do
         expect(true).to eq(true)
       end
@@ -2676,7 +2676,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not run alpha clusters' do
         expect(true).to eq(true)
       end
@@ -2701,7 +2701,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE Nodepools found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have gVisor enabled' do
         expect(true).to eq(true)
       end
@@ -2725,7 +2725,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have binary authorization enabled' do
         expect(true).to eq(true)
       end
@@ -2749,7 +2749,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No GKE Clusters found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should not have basic authentication enabled' do
         expect(true).to eq(true)
       end
@@ -2780,7 +2780,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       end
     end
   else
-    describe 'No Projects found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have a logsink filter for custom role changes' do
         expect(true).to eq(true)
       end
