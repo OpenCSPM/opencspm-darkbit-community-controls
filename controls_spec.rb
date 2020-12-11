@@ -1,12 +1,14 @@
 require 'yaml'
 require 'date'
 
+NARF = 'No affected resources found'
 config_file = YAML.load(File.read(File.expand_path(File.dirname(__FILE__) + '/config.yaml')))
 control_pack = config_file['id']
 titles = Hash[config_file['controls'].map { |control| [control['id'], control['title']] }]
 
 # AWS
 control_id = 'darkbit-aws-9'
+opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %(
     MATCH (u:AWS_IAM_USER)
@@ -19,11 +21,15 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
     key_1_age = Time.parse(user.key_1_last_used) rescue Time.now.utc # rubocop:disable Style/RescueModifier
     key_2_age = Time.parse(user.key_2_last_used) rescue Time.now.utc # rubocop:disable Style/RescueModifier
 
-    describe user.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe(user.name, opts) do
       it 'should not have infrequently used access keys' do
         expect(key_1_age).to be > 90.days.ago
         expect(key_2_age).to be > 90.days.ago
       end
+    end
+  end.empty? && describe(NARF, opts) do
+    it 'should not have infrequently used access keys' do
+      expect(true).to eq(true)
     end
   end
 end
