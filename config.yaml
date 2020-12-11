@@ -185,10 +185,10 @@ controls:
       is `true`, `RequireLowercaseCharacters` is `true`, `ExpirePasswords` is `true`,
       `MaxPasswordAge` is `<= 90`, and `PasswordReusePrevention` is `>= 5`.
     impact: 5
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: IAM
     nodes:
       - AWS_IAM_PASSWORD_POLICY
     refs:
@@ -286,10 +286,10 @@ controls:
       "^<root_account>" | awk -F, '{print $1 " "$9 " "$14}'` and ensure both columns
       show `false` for `access_key_1_active` and `access_key_2_active`, respectively.
     impact: 5
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: IAM
     nodes:
       - AWS_IAM_USER
     refs:
@@ -390,10 +390,10 @@ controls:
       run `aws iam list-virtual-mfa-devices --assignment-status Assigned --query 'VirtualMFADevices[*].SerialNumber'
       --output json | grep root-account-mfa-device` and verify no results are returned.
     impact: 5
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: IAM
     nodes:
       - AWS_IAM_USER
       - AWS_IAM_MFA_DEVICE
@@ -461,10 +461,10 @@ controls:
       Run `aws iam list-entities-for-policy --policy-arn arn:aws:iam::aws:policy/AWSSupportAccess` 
       and ensure at least one user, group, or role entry is present.
     impact: 2
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: IAM
     nodes:
       - AWS_IAM_MANAGED_POLICY
     refs:
@@ -495,10 +495,10 @@ controls:
       IAM Role.
     validation: N/A
     impact: 2
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: IAM
     nodes:
       - PLACEHOLDER
     refs:
@@ -599,10 +599,10 @@ controls:
       'AttachedPolicies[*].PolicyArn' --output text)";echo "$i $POLS $ATT"; done` and
       ensure each user has no entries listed.
     impact: 2
-    effort: 
+    effort: 5
     platform: AWS
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: IAM
     nodes:
       - PLACEHOLDER
     refs:
@@ -730,10 +730,10 @@ controls:
         and (.UserIdGroupPairs==[])) | "\($group.GroupId) \($group.GroupName)"'
       ```
     impact: 5
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Network Access Control
+    resource: Security Groups
     nodes:
       - PLACEHOLDER
     refs:
@@ -835,10 +835,10 @@ controls:
       --query 'FlowLogs[?FlowLogStatus=="ACTIVE"].FlowLogId' --output text); echo
       "$i: $f"; done` for each region and ensure each VPC has an associated flow log id.
     impact: 2
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Networking and Content Delivery
+    resource: VPC
     nodes:
       - AWS_VPC
       - AWS_FLOW_LOG
@@ -924,10 +924,10 @@ controls:
       block.  `endpointPrivateAccess` should be `true`.  Or, if `endpointPublicAccess`
       is `true`, `publicAccessCidrs` should be set to something other than `0.0.0.0/0`.
     impact: 8
-    effort: 
+    effort: 5
     platform: AWS
-    category: 
-    resource: 
+    category: Network Access Control
+    resource: EKS
     nodes:
       - PLACEHOLDER
     refs:
@@ -979,10 +979,10 @@ controls:
        curl -s https://169.254.169.254/latest/meta-data/iam/security-credentials
       ```
     impact: 9
-    effort: 
+    effort: 5
     platform: AWS
-    category: 
-    resource: 
+    category: Network Access Control
+    resource: EKS
     nodes:
       - PLACEHOLDER
     refs:
@@ -1021,10 +1021,10 @@ controls:
       --query "repositories[]" --output json | jq -r '.[] | "(.repositoryArn) (.imageScanningConfiguration.scanOnPush)"'
       | grep "false$"` and ensure no entries are present.
     impact: 5
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Containers
+    resource: ECR
     nodes:
       - AWS_ECR_REPOSITORY
     refs:
@@ -1069,10 +1069,10 @@ controls:
       done
       ```
     impact: 8
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Storage
+    resource: S3
     nodes:
       - AWS_S3_BUCKET
     refs:
@@ -1191,10 +1191,10 @@ controls:
       done` and verify that each bucket has a policy defined that includes `"aws:SecureTransport":"true"`
       on the `"Allow"` Effect.'
     impact: 2
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Storage
+    resource: S3
     nodes:
       - PLACEHOLDER
     refs:
@@ -1280,10 +1280,10 @@ controls:
 
       Run `aws ec2 describe-volumes --region <region> --query 'Volumes[*]' --output json | jq -r '.[] | select(.Encrypted!=true) | "(.VolumeId) (.SnapshotId)"'` for reach region and ensure no entries are present.
     impact: 2
-    effort: 
+    effort: 9
     platform: AWS
-    category: 
-    resource: 
+    category: Storage
+    resource: EC2
     nodes:
       - PLACEHOLDER
     refs:
@@ -1353,10 +1353,10 @@ controls:
       Run `aws eks describe-cluster` and look for the presence of the `encryptionConfig`
       block.
     impact: 3
-    effort: 
+    effort: 8
     platform: AWS
-    category: 
-    resource: 
+    category: Containers
+    resource: EKS
     nodes:
       - PLACEHOLDER
     refs:
@@ -1395,10 +1395,10 @@ controls:
 
       Run `aws cloudtrail describe-trails --region us-east-1 --query 'trailList[*]' --output json --no-include-shadow-trails | jq -r '.[] | "(.TrailARN) (.IsMultiRegionTrail)"'` and ensure each one is `true`.
     impact: 8
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Management and Governance
+    resource: CloudTrail
     nodes:
       - PLACEHOLDER
     refs:
@@ -1518,10 +1518,10 @@ controls:
       In each region, run `aws configservice get-status --region <region>`
       and verify the `recorder` is `ON` and the `last status` is `SUCCESS`.
     impact: 5
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Management and Governance
+    resource: Config
     nodes:
       - PLACEHOLDER
     refs:
@@ -1575,10 +1575,10 @@ controls:
       eks describe-cluster` and review the `clusterLogging` types that are `enabled`.  All
       should be listed as `enabled` and none should be listed as `disabled`.
     impact: 9
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: EKS
     nodes:
       - PLACEHOLDER
     refs:
@@ -1617,10 +1617,10 @@ controls:
       --trail-name $i --output json | jq -r '.trailList[] | "(.TrailARN) (.LogFileValidationEnabled)"';
       done` and ensure all cloudtrails are `true`.
     impact: 5
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: CloudTrail
     nodes:
       - AWS_CLOUDTRAIL_TRAIL
     refs:
@@ -1705,10 +1705,10 @@ controls:
       done
       ```
     impact: 9
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: S3
     nodes:
       - AWS_S3_BUCKET
     refs:
@@ -1829,10 +1829,10 @@ controls:
       done
       ```
     impact: 5
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Management and Governance
+    resource: KMS
     nodes:
       - AWS_KMS_KEY
     refs:
@@ -1873,7 +1873,7 @@ controls:
           - nist-csf-pr.ds-1
       - aws
   - id: darkbit-aws-108
-    title: AWS <root> Account Should Not Be Routinely Used
+    title: AWS <Root> Account Should Not Be Routinely Used
     description:
       With the creation of an AWS account, a `root` user is created that
       cannot be disabled or deleted. That user has unrestricted access
@@ -1889,10 +1889,10 @@ controls:
       and confirm the root account password and access keys have not been recently 
       used.
     impact: 8
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: IAM
     nodes:
       - AWS_IAM_USER
     refs:
@@ -1917,10 +1917,10 @@ controls:
     remediation: TODO
     validation: TODO
     impact: 8
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: IAM
     nodes:
       - AWS_IAM_USER
     refs:
@@ -1942,10 +1942,10 @@ controls:
     remediation: TODO
     validation: TODO
     impact: 8
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: IAM
     nodes:
       - PLACEHOLDER
     refs:
@@ -1984,10 +1984,10 @@ controls:
     remediation: TODO
     validation: TODO
     impact: 8
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: IAM
     nodes:
       - PLACEHOLDER
     refs:
@@ -2009,10 +2009,10 @@ controls:
     remediation: TODO
     validation: TODO
     impact: 5
-    effort: 
+    effort: 8
     platform: AWS
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: IAM
     nodes:
       - PLACEHOLDER
     refs:
@@ -2033,10 +2033,10 @@ controls:
     remediation: TODO
     validation: TODO
     impact: 5
-    effort: 
+    effort: 5
     platform: AWS
-    category: 
-    resource: 
+    category: Storage
+    resource: S3
     nodes:
       - PLACEHOLDER
     refs:
@@ -2096,10 +2096,10 @@ controls:
     remediation: TODO
     validation: TODO
     impact: 5
-    effort: 
+    effort: 8
     platform: AWS
-    category: 
-    resource: 
+    category: Storage
+    resource: EC2
     nodes:
       - PLACEHOLDER
     refs:
@@ -2148,10 +2148,10 @@ controls:
     remediation: TODO
     validation: TODO
     impact: 5
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: CloudTrail
     nodes:
       - PLACEHOLDER
     refs:
@@ -2173,10 +2173,10 @@ controls:
     remediation: TODO
     validation: TODO
     impact: 5
-    effort: 
+    effort: 5
     platform: AWS
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: CloudWatch
     nodes:
       - PLACEHOLDER
     refs:
@@ -2277,10 +2277,10 @@ controls:
     remediation: TODO
     validation: TODO
     impact: 5
-    effort: 
+    effort: 9
     platform: AWS
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: CloudTrail
     nodes:
       - PLACEHOLDER
     refs:
@@ -2334,10 +2334,10 @@ controls:
     remediation: TODO
     validation: TODO
     impact: 5
-    effort: 
+    effort: 4
     platform: AWS
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: S3
     nodes:
       - PLACEHOLDER
     refs:
@@ -2422,10 +2422,10 @@ controls:
     remediation: TODO
     validation: TODO
     impact: 5
-    effort: 
+    effort: 5
     platform: AWS
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: S3
     nodes:
       - PLACEHOLDER
     refs:
@@ -2510,10 +2510,10 @@ controls:
     remediation: TODO
     validation: TODO
     impact: 5
-    effort: 
+    effort: 2
     platform: AWS
-    category: 
-    resource: 
+    category: Network Access Control
+    resource: Network ACL
     nodes:
       - PLACEHOLDER
     refs:
@@ -2535,10 +2535,10 @@ controls:
     remediation: TODO
     validation: TODO
     impact: 5
-    effort: 
+    effort: 7
     platform: AWS
-    category: 
-    resource: 
+    category: Network Access Control
+    resource: Security Groups
     nodes:
       - PLACEHOLDER
     refs:
@@ -2622,10 +2622,10 @@ controls:
     remediation: TODO
     validation: TODO
     impact: 8
-    effort: 
+    effort: 5
     platform: AWS
-    category: 
-    resource: 
+    category: Management and Governance
+    resource: EKS
     nodes:
       - PLACEHOLDER
     refs:
@@ -2663,10 +2663,10 @@ controls:
     remediation: TODO
     validation: TODO
     impact: 8
-    effort: 
+    effort: 8
     platform: AWS
-    category: 
-    resource: 
+    category: Network Access Control
+    resource: EKS
     nodes:
       - PLACEHOLDER
     refs:
@@ -2689,10 +2689,10 @@ controls:
     remediation: TODO
     validation: TODO
     impact: 8
-    effort: 
+    effort: 3
     platform: AWS
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: ECR
     nodes:
       - PLACEHOLDER
     refs:
@@ -2715,10 +2715,10 @@ controls:
     remediation: TODO
     validation: TODO
     impact: 8
-    effort: 
+    effort: 8
     platform: AWS
-    category: 
-    resource: 
+    category: Networking and Content Delivery
+    resource: EKS
     nodes:
       - PLACEHOLDER
     refs:
@@ -2741,10 +2741,10 @@ controls:
     remediation: TODO
     validation: TODO
     impact: 8
-    effort: 
+    effort: 4
     platform: AWS
-    category: 
-    resource: 
+    category: Networking and Content Delivery
+    resource: EKS
     nodes:
       - PLACEHOLDER
     refs:
@@ -2767,10 +2767,10 @@ controls:
     remediation: TODO
     validation: TODO
     impact: 8
-    effort: 
+    effort: 7
     platform: AWS
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: EKS
     nodes:
       - PLACEHOLDER
     refs:
@@ -2793,10 +2793,10 @@ controls:
     remediation: TODO
     validation: TODO
     impact: 8
-    effort: 
+    effort: 8
     platform: AWS
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: Fargate
     nodes:
       - PLACEHOLDER
     refs:
