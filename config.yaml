@@ -2840,10 +2840,10 @@ controls:
       for each project and ensure no results are displayed. Perform the same for
       `iam.serviceAccountTokenCreator`.
     impact: 5
-    effort: 
+    effort: 2
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: IAM
     nodes:
       - GCP_IDENTITY
       - GCP_CLOUDRESOURCEMANAGER_PROJECT
@@ -2882,10 +2882,10 @@ controls:
       | jq -r '.[] | select(.logConfig.enable | not) | "(.name) (.region)"'` and ensure
       no entries are present.
     impact: 7
-    effort: 
+    effort: 4
     platform: GCP
-    category: 
-    resource: 
+    category: Networking and Content Delivery
+    resource: VPC
     nodes:
       - GCP_COMPUTE_SUBNETWORK
     refs:
@@ -2924,10 +2924,10 @@ controls:
       | contains("0.0.0.0/0")) | "(.name) (.allowed[])"'` and ensure no entries that
       permit `IPProtocol` of `tcp` and `ports` of `22`.
     impact: 8
-    effort: 
+    effort: 4
     platform: GCP
-    category: 
-    resource: 
+    category: Network Access Control
+    resource: Firewall
     nodes:
       - PLACEHOLDER
     refs:
@@ -2969,10 +2969,10 @@ controls:
       .accessConfigs[] | select(.type=="ONE_TO_ONE_NAT") | "($instance.name): (.natIP)"''`
       and ensure that no entries with public IPs exist.'
     impact: 5
-    effort: 
+    effort: 8
     platform: GCP
-    category: 
-    resource: 
+    category: Networking and Content Delivery
+    resource: GCE
     nodes:
       - GCP_COMPUTE_INSTANCE
     refs:
@@ -3011,11 +3011,11 @@ controls:
       In each project, run `gcloud compute networks list --format=json | jq
       -r 'select(.[]) | .[] | select(.name=="default") | .name'` and ensure no entries
       are listed.
-    impact: 2
-    effort: 
+    impact: 3
+    effort: 8
     platform: GCP
-    category: 
-    resource: 
+    category: Networking and Content Delivery
+    resource: VPC
     nodes:
       - PLACEHOLDER
     refs:
@@ -3068,10 +3068,10 @@ controls:
       validAfterTime and validBeforeTime values for each key to ensure they are not
       valid for longer than 90 days.'
     impact: 2
-    effort: 
+    effort: 6
     platform: GCP
-    category: 
-    resource: 
+    category: Management and Governance
+    resource: ServiceAccount
     nodes:
       - PLACEHOLDER
     refs:
@@ -3126,10 +3126,10 @@ controls:
             },
           ]`.
     impact: 8
-    effort: 
+    effort: 4
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: Project
     nodes:
       - PLACEHOLDER
     refs:
@@ -3176,10 +3176,10 @@ controls:
       -r ''.[] | select(.settings.ipConfiguration.ipv4Enabled==true) | "(.name) Public
       IP: (.settings.ipConfiguration.ipv4Enabled)"''` and ensure no entries are listed.'
     impact: 5
-    effort: 
+    effort: 9
     platform: GCP
-    category: 
-    resource: 
+    category: Networking and Content Delivery
+    resource: Cloud SQL
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
@@ -3224,10 +3224,10 @@ controls:
       -r ''.[] | select(.settings.ipConfiguration.requireSsl==null) | "(.name) SSL:
       (.settings.ipConfiguration.requireSsl)"''` and ensure no entries are listed.'
     impact: 5
-    effort: 
+    effort: 7
     platform: GCP
-    category: 
-    resource: 
+    category: Networking and Content Delivery
+    resource: Cloud SQL
     nodes:
       - PLACEHOLDER
     refs:
@@ -3270,10 +3270,10 @@ controls:
       | contains("0.0.0.0/0")) | "(.name) (.allowed[])"' and ensure no entries that
       permit `IPProtocol` of `tcp` and `ports` of `3389`.
     impact: 7
-    effort: 
+    effort: 4
     platform: GCP
-    category: 
-    resource: 
+    category: Network Access Control
+    resource: Firewall
     nodes:
       - PLACEHOLDER
     refs:
@@ -3315,10 +3315,10 @@ controls:
       target-ssl-proxies list --format=json | jq -r '.[] | select(.sslPolicy | not)
       | "(.name) (.selfLink)"'` and ensure they do not return any entries.
     impact: 3
-    effort: 
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Networking and Content Delivery
+    resource: Load Balancer
     nodes:
       - PLACEHOLDER
     refs:
@@ -3359,10 +3359,10 @@ controls:
       | jq -r 'select(.networkPolicy.enabled==true and .networkPolicy.provider=="CALICO")
       | "(.name)"'` and ensure that the cluster's name is listed.
     impact: 9
-    effort: 
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Network Access Control
+    resource: GKE
     nodes:
       - GCP_CONTAINER_CLUSTER
     refs:
@@ -3404,10 +3404,10 @@ controls:
       | jq -r 'select(.masterAuthorizedNetworksConfig.enabled==true) | select(.masterAuthorizedNetworksConfig.cidrBlocks[].cidrBlock!="0.0.0.0/0")
       | "(.name)"'` and ensure that the cluster's name is listed.
     impact: 9
-    effort: 
+    effort: 5
     platform: GCP
-    category: 
-    resource: 
+    category: Network Access Control
+    resource: GKE
     nodes:
       - GCP_CONTAINER_CLUSTER
     refs:
@@ -3456,10 +3456,10 @@ controls:
       | jq -r 'select(.workloadIdentityConfig.workloadPool | test("svc.id.goog")) |
       "(.name)"'` and ensure that the cluster's name is listed.
     impact: 9
-    effort: 
+    effort: 5
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: GKE
     nodes:
       - GCP_CONTAINER_CLUSTER
     refs:
@@ -3517,10 +3517,10 @@ controls:
       | jq -r 'select(.nodePools[].config.serviceAccount | test("-compute@developer.gserviceaccount.com")
       | not) | "(.name)"'` and ensure that the cluster's name is listed.
     impact: 9
-    effort: 
+    effort: 6
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: GKE
     nodes:
       - GCP_CONTAINER_NODEPOOL
       - GCP_IDENTITY
@@ -3571,10 +3571,10 @@ controls:
       and .nodePools[].config.shieldedInstanceConfig.enableSecureBoot==true) | "(.name)"'`
       and ensure that the cluster's name is listed.
     impact: 9
-    effort: 
+    effort: 6
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: GKE
     nodes:
       - GCP_CONTAINER_CLUSTER
     refs:
@@ -3633,10 +3633,10 @@ controls:
       | jq -r 'select(.privateClusterConfig.enablePrivateEndpoint==true) | "(.name)"'`
       and ensure that the cluster's name is listed.
     impact: 9
-    effort: 
+    effort: 9
     platform: GCP
-    category: 
-    resource: 
+    category: Networking and Content Delivery
+    resource: GKE
     nodes:
       - GCP_CONTAINER_CLUSTER
     refs:
@@ -3677,10 +3677,10 @@ controls:
       | jq -r 'select(.networkConfig.enableIntraNodeVisibility==true) | "(.name)"'`
       and ensure that the cluster's name is listed.
     impact: 2
-    effort: 
+    effort: 5
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: GKE
     nodes:
       - GCP_CONTAINER_CLUSTER
     refs:
@@ -3724,10 +3724,10 @@ controls:
       | jq -r 'select(.loggingService=="logging.googleapis.com/kubernetes") | "(.name)"'`
       and ensure that the cluster's name is listed.
     impact: 9
-    effort: 
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: GKE
     nodes:
       - GCP_CONTAINER_CLUSTER
     refs:
@@ -3773,10 +3773,10 @@ controls:
       | jq -r 'select(.nodePools[].config.imageType | test("^COS")) | "(.name)"'` and
       ensure that the cluster's name is listed.
     impact: 5
-    effort: 
+    effort: 8
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: GKE
     nodes:
       - GCP_CONTAINER_NODEPOOL
     refs:
@@ -3832,10 +3832,10 @@ controls:
       | jq -r 'select(.nodePools[].management.autoRepair==true) | "(.name)"'` and ensure
       that the cluster's name is listed.
     impact: 5
-    effort: 
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Management and Governance
+    resource: GKE
     nodes:
       - GCP_CONTAINER_NODEPOOL
     refs:
@@ -3875,10 +3875,10 @@ controls:
       | jq -r 'select(.nodePools[].management.autoUpgrade==true) | "(.name)"'` and ensure
       that the cluster's name is listed.
     impact: 2
-    effort: 
+    effort: 7
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: GKE
     nodes:
       - GCP_CONTAINER_NODEPOOL
     refs:
@@ -3918,10 +3918,10 @@ controls:
       | jq -r 'select(.ipAllocationPolicy.useIpAliases==true) | "(.name)"'` and ensure
       that the cluster's name is listed.
     impact: 5
-    effort: 
+    effort: 9
     platform: GCP
-    category: 
-    resource: 
+    category: Networking and Content Delivery
+    resource: GKE
     nodes:
       - GCP_CONTAINER_CLUSTER
     refs:
@@ -3967,10 +3967,10 @@ controls:
       | jq -r 'select(.legacyAbac.enabled | not) | "(.name)"'` and ensure that the cluster's
       name is listed.
     impact: 9
-    effort: 
+    effort: 8
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: GKE
     nodes:
       - GCP_CONTAINER_CLUSTER
     refs:
@@ -4011,10 +4011,10 @@ controls:
       on: (.settings.backupConfiguration.enabled) and PITR on: (.settings.backupConfiguration.binaryLogEnabled)"''`
       and ensure no entries are listed.'
     impact: 9
-    effort: 
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Management and Governance
+    resource: Cloud SQL
     nodes:
       - PLACEHOLDER
     refs:
@@ -4056,10 +4056,10 @@ controls:
       default compute service account ending in `-compute@developer.gserviceaccount.com`
       is not present.'
     impact: 7
-    effort: 
+    effort: 7
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: IAM
     nodes:
       - GCP_CLOUDRESOURCEMANAGER_PROJECT
       - GCP_IAM_ROLE
@@ -4097,10 +4097,10 @@ controls:
       offering to verify that application level encryption of Kubernetes Secrets with
       KMS keys is configured.
     impact: 2
-    effort: 
+    effort: 5
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: GKE
     nodes:
       - GCP_CONTAINER_CLUSTER
     refs:
@@ -4146,10 +4146,10 @@ controls:
       done
       ```
     impact: 7
-    effort: 
+    effort: 7
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: ServiceAccount
     nodes:
       - GCP_CLOUDRESOURCEMANAGER_PROJECT
       - GCP_IDENTITY
@@ -4180,10 +4180,10 @@ controls:
     remediation: TODO
     validation: TODO
     impact: 7
-    effort: 
+    effort: 7
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: IAM
     nodes:
       - GCP_IDENTITY
       - GCP_IAM_ROLE
@@ -4228,10 +4228,10 @@ controls:
           --format="csv[no-heading](bindings.members[])" | sort)
       ```
     impact: 9
-    effort: 
+    effort: 4
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: IAM
     nodes:
       - GCP_IDENTITY
       - GCP_IAM_ROLE
@@ -4302,10 +4302,10 @@ controls:
       done
       ```
     impact: 10
-    effort: 
+    effort: 2
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: KMS
     nodes:
       - GCP_CLOUDKMS_CRYPTOKEY
       - GCP_CLOUDRESOURCEMANAGER_PROJECT
@@ -4349,10 +4349,10 @@ controls:
         --format=json'(rotationPeriod)'
       ```
     impact: 5
-    effort: 
+    effort: 5
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: KMS
     nodes:
       - GCP_CLOUDKMS_CRYPTOKEY
     refs:
@@ -4393,10 +4393,10 @@ controls:
       any one of `Cloud KMS CryptoKey Encrypter/Decrypter`, `Cloud KMS CryptoKey Encrypter`, 
       `Cloud KMS CryptoKey Decrypter`.
     impact: 8
-    effort: 
+    effort: 4
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: IAM
     nodes:
       - GCP_IDENTITY
       - GCP_IAM_ROLE
@@ -4432,10 +4432,10 @@ controls:
        gcloud logging sinks list --folder=FOLDER_ID | --organization=ORGANIZATION_ID | --project=PROJECT_ID
        ```
     impact: 8
-    effort: 
+    effort: 4
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: Logging
     nodes:
       - GCP_IDENTITY
       - GCP_IAM_ROLE
@@ -4491,10 +4491,10 @@ controls:
       gsutil retention get gs://BUCKET_NAME
       ```
     impact: 8
-    effort: 
+    effort: 7
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: GCS
     nodes:
       - GCP_STORAGE_BUCKET
       - GCP_LOGGING_LOGSINK
@@ -4564,11 +4564,11 @@ controls:
 
       Ensure `conditions.conditionThreshold.filter` is set to 
       `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` is set to `true`.
-    impact: 8
-    effort: 
+    impact: 5
+    effort: 5
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: Logging
     nodes:
       - GCP_LOGGING_LOGSINK
       - GCP_CLOUDRESOURCEMANAGER_PROJECT
@@ -4636,10 +4636,10 @@ controls:
       `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and 
       `enabled` is set to `true`.
     impact: 8
-    effort: 
+    effort: 5
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: Logging
     nodes:
       - GCP_LOGGING_LOGSINK
       - GCP_CLOUDRESOURCEMANAGER_PROJECT
@@ -4703,10 +4703,10 @@ controls:
       Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
       set to `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` set to `true`.
     impact: 8
-    effort: 
+    effort: 5
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: Logging
     nodes:
       - GCP_LOGGING_LOGSINK
       - GCP_CLOUDRESOURCEMANAGER_PROJECT
@@ -4771,10 +4771,10 @@ controls:
       Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
       set to `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` set to `true`.
     impact: 8
-    effort: 
+    effort: 5
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: Logging
     nodes:
       - GCP_LOGGING_LOGSINK
       - GCP_CLOUDRESOURCEMANAGER_PROJECT
@@ -4799,10 +4799,10 @@ controls:
     description: |
       A metric filter and alarm should exist for VPC network changes. Monitoring changes 
       to a VPC will help ensure VPC traffic flow is not being impacted.
-    effort: 
+    effort: 5
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: Logging
     remediation: |-
       Create a [logging metric](https://console.cloud.google.com/logs/metrics) with the following
       advanced filter:
@@ -4849,10 +4849,10 @@ controls:
       Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
       set to `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` set to `true`.
     impact: 8
-    effort: 
+    effort: 5
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: Logging
     nodes:
       - GCP_LOGGING_LOGSINK
       - GCP_CLOUDRESOURCEMANAGER_PROJECT
@@ -4917,10 +4917,10 @@ controls:
       Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
       set to `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` set to `true`.
     impact: 8
-    effort: 
+    effort: 5
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: Logging
     nodes:
       - GCP_LOGGING_LOGSINK
       - GCP_CLOUDRESOURCEMANAGER_PROJECT
@@ -4982,10 +4982,10 @@ controls:
       Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
       set to `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` set to `true`.
     impact: 8
-    effort: 
+    effort: 5
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: Logging
     nodes:
       - GCP_LOGGING_LOGSINK
       - GCP_CLOUDRESOURCEMANAGER_PROJECT
@@ -5013,10 +5013,6 @@ controls:
       in scope and spans all cloud regions. Subnetworks cannot be created in a legacy network and are 
       unable to switch from legacy to auto or custom subnet networks. Legacy networks can have an 
       impact for high network traffic projects and are subject to a single point of contention or failure.
-    effort: 
-    platform: GCP
-    category: 
-    resource: 
     remediation: |-
       For each project with `legacy` mode networks, create a new non-legacy network and delete the legacy network.
     validation: |-
@@ -5026,10 +5022,10 @@ controls:
       gcloud compute networks list
       ```
     impact: 5
-    effort: 
+    effort: 9
     platform: GCP
-    category: 
-    resource: 
+    category: Networking and Content Delivery
+    resource: VPC
     nodes:
       - GCP_COMPUTE_NETWORK
     refs:
@@ -5073,10 +5069,10 @@ controls:
       gcloud dns managed-zones describe <ZONE_NAME>
       ```
     impact: 5
-    effort: 
+    effort: 5
     platform: GCP
-    category: 
-    resource: 
+    category: Networking and Content Delivery
+    resource: DNS
     nodes:
       - GCP_DNS_MANAGEDZONE
     refs:
@@ -5122,10 +5118,10 @@ controls:
         --format="json(dnsName,dnssecConfig.state,dnssecConfig.defaultKeySpecs)"
       ```
     impact: 5
-    effort: 
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Networking and Content Delivery
+    resource: DNS
     nodes:
       - GCP_DNS_MANAGEDZONE
     refs:
@@ -5171,10 +5167,10 @@ controls:
         --format="json(dnsName,dnssecConfig.state,dnssecConfig.defaultKeySpecs)"
       ```
     impact: 5
-    effort: 
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Networking and Content Delivery
+    resource: DNS
     nodes:
       - GCP_DNS_MANAGEDZONE
     refs:
@@ -5228,10 +5224,10 @@ controls:
       gcloud compute instances describe <INSTANCE_NAME> --zone <ZONE>
       ```
     impact: 5
-    effort: 
+    effort: 8
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: GCE
     nodes:
       - GCP_COMPUTE_INSTANCE
       - GCP_IDENTITY
@@ -5287,10 +5283,10 @@ controls:
       gcloud compute instances describe <INSTANCE_NAME> --zone <ZONE> | grep -v "gke-"
       ```
     impact: 5
-    effort: 
+    effort: 8
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: GCE
     nodes:
       - GCP_COMPUTE_INSTANCE
       - GCP_IAM_OAUTHSCOPE
@@ -5332,10 +5328,10 @@ controls:
       gcloud compute instances describe <INSTANCE_NAME>
       ```
     impact: 5
-    effort: 
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: GCE
     nodes:
       - GCP_COMPUTE_INSTANCE
       - GCP_COMPUTEMETADATAITEM
@@ -5387,10 +5383,10 @@ controls:
       gcloud compute instances describe <INSTANCE_NAME>
       ```
     impact: 5
-    effort: 
+    effort: 8
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: GCE
     nodes:
       - GCP_COMPUTE_INSTANCE
       - GCP_COMPUTEMETADATAITEM
@@ -5432,10 +5428,10 @@ controls:
         --format="json(metadata.items[].key,metadata.items[].value)"
       ```
     impact: 5
-    effort: 
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: GCE
     nodes:
       - GCP_COMPUTE_INSTANCE
       - GCP_COMPUTEMETADATAITEM
@@ -5459,10 +5455,6 @@ controls:
       Instances not involved in routing network traffic should have IP forwarding disabled.
     remediation: |-
       Confirm that instances with IP forwarding enabled can safely be shut down without impact other 
-    effort: 
-    platform: GCP
-    category: 
-    resource: 
       applications or services. Then shut those instances down and replace them with instances that have 
       `IP forwarding` set to `off`.
     validation: |-
@@ -5474,10 +5466,10 @@ controls:
         --format='table(name,canIpForward)'
       ```
     impact: 5
-    effort: 
+    effort: 8
     platform: GCP
-    category: 
-    resource: 
+    category: Networking and Content Delivery
+    resource: GCE
     nodes:
       - GCP_COMPUTE_INSTANCE
     refs:
@@ -5523,10 +5515,10 @@ controls:
         --format="json(diskEncryptionKey,name)"
       ```
     impact: 5
-    effort: 
+    effort: 9
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: GCE
     nodes:
       - GCP_COMPUTE_INSTANCE
       - GCP_COMPUTE_DISK
@@ -5592,10 +5584,10 @@ controls:
       gcloud compute instances describe <INSTANCE_NAME>
       ```
     impact: 5
-    effort: 
+    effort: 9
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: GCE
     nodes:
       - GCP_COMPUTE_INSTANCE
     refs:
@@ -5638,10 +5630,10 @@ controls:
       gsutil iam get gs://<BUCKET_NAME>
       ```
     impact: 8
-    effort: 
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: GCS
     nodes:
       - GCP_STORAGE_BUCKET
     refs:
@@ -5684,10 +5676,10 @@ controls:
       gsutil uniformbucketlevelaccess get gs://<BUCKET_NAME>/
       ```
     impact: 8
-    effort: 
+    effort: 5
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: GCS
     nodes:
       - GCP_STORAGE_BUCKET
     refs:
@@ -5709,35 +5701,34 @@ controls:
   - id: darkbit-gcp-97
     title: Cloud SQL Instances Running MySQL Should Have "local_infile" Disabled
     description: |
-      Not providing an administrative password at the time of MySQL instance creation allows anyone to 
-      connect to the SQL database instance with administrative privileges. The root password should be 
-      set to ensure only authorized users have these privileges.
+      Diabling `local_infile` controls the server-side `LOCAL` capability for `LOAD DATA`
+      statements which may be used to gain privileged access to the underlying virtual machine
+      if privileged access to the MySQL database server is obtained.
     remediation: |-
-      Set the MySQL administrative password.
+      Diable `local_infile` for MySQL Cloud SQL instances.
 
       ```
-      gcloud sql users set-password <ROOT_USERNAME> <AUTHORIZED_HOST_IP> \
-        --instance=<INSTANCE_NAME> \
-        --password=<PASSWORD>
+      gcloud sql instances patch <INSTANCE_NAME> \
+        --database-flags local_infile=off
       ```
     validation: |-
-      List all MySQL instances.
+      List MySQL Cloud SQL instances.
 
       ```
       gcloud sql instances list --filter='DATABASE_VERSION:MYSQL*'
       ```
 
-      Try to connect to the instance from an `authorized network` and confirm that the server does not 
-      offer a `mysql prompt`.
+      Ensure `local_infile` is `off` for each instance.
 
       ```
-      mysql -u root -h <INSTANCE_IP>
+      gcloud sql instances describe <INSTANCE_NAME> \
+        --format=json | jq '.settings.databaseFlags[] | select(.name=="local_infile")|.value'
       ```
     impact: 8
-    effort: 
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Database
+    resource: Cloud SQL
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
@@ -5781,11 +5772,11 @@ controls:
       gcloud sql instances describe <INSTANCE_NAME> \
         --format=json | jq '.settings.databaseFlags[] | select(.name=="log_checkpoints")|.value'
       ```
-    impact: 8
-    effort: 
+    impact: 5
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Database
+    resource: Cloud SQL
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
@@ -5832,11 +5823,11 @@ controls:
       gcloud sql instances describe <INSTANCE_NAME> \
         --format=json | jq '.settings.databaseFlags[] | select(.name=="log_connections")|.value'
       ```
-    impact: 8
-    effort: 
+    impact: 5
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Database
+    resource: Cloud SQL
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
@@ -5882,11 +5873,11 @@ controls:
       gcloud sql instances describe <INSTANCE_NAME> \
         --format=json | jq '.settings.databaseFlags[] | select(.name=="log_disconnections")|.value'
       ```
-    impact: 8
-    effort: 
+    impact: 5
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Database
+    resource: Cloud SQL
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
@@ -5932,11 +5923,11 @@ controls:
       gcloud sql instances describe <INSTANCE_NAME> \
         --format=json | jq '.settings.databaseFlags[] | select(.name=="log_lock_waits")|.value'
       ```
-    impact: 8
-    effort: 
+    impact: 3
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Database
+    resource: Cloud SQL
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
@@ -5980,11 +5971,11 @@ controls:
       gcloud sql instances describe <INSTANCE_NAME> \
         --format=json | jq '.settings.databaseFlags[] | select(.name=="log_min_error_statement")|.value'
       ```
-    impact: 8
-    effort: 
+    impact: 4
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Database
+    resource: Cloud SQL
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
@@ -6016,7 +6007,7 @@ controls:
 
       ```
       gcloud sql instances patch <INSTANCE_NAME> \
-        --database-flags log_temp_files=on
+        --database-flags log_temp_files=0
       ```
     validation: |-
       List PostgreSQL Cloud SQL instances.
@@ -6025,17 +6016,17 @@ controls:
       gcloud sql instances list --filter='DATABASE_VERSION:POSTGRES*'
       ```
 
-      Ensure `log_temp_files` is `on` for each instance.
+      Ensure `log_temp_files` is `0` for each instance.
 
       ```
       gcloud sql instances describe <INSTANCE_NAME> \
         --format=json | jq '.settings.databaseFlags[] | select(.name=="log_temp_files")|.value'
       ```
-    impact: 8
-    effort: 
+    impact: 3
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Database
+    resource: Cloud SQL
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
@@ -6079,11 +6070,11 @@ controls:
       gcloud sql instances describe <INSTANCE_NAME> \
         --format=json | jq '.settings.databaseFlags[] | select(.name=="log_min_duration_statement")|.value'
       ```
-    impact: 8
-    effort: 
+    impact: 2
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Database
+    resource: Cloud SQL
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
@@ -6107,8 +6098,8 @@ controls:
       The database flag `set cross db ownership chaining` should be disabled for SQL Server instances. This server 
       option allows you to control cross-database ownership chaining at the database level or to allow 
       cross-database ownership chaining for all databases. Enabling `cross db ownership` is not recommended 
-      unless all of the databases hosted by the instance of SQL Server must participate in cross-database 
-      ownership chaining and you are aware of the security implications of this setting
+      unless all of the databases hosted by the instance of SQL Server must participate in cross-database
+      ownership chaining and you are aware of the security implications of this setting.
     remediation: |-
       Disable `cross db ownership chaining` for SQL Server Cloud SQL instances.
 
@@ -6128,11 +6119,11 @@ controls:
       gcloud sql instances describe <INSTANCE_NAME> \
         --format=json | jq '.settings.databaseFlags[] | select(.name=="cross db ownership chaining")|.value'
       ```
-    impact: 8
-    effort: 
+    impact: 5
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Database
+    resource: Cloud SQL
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
@@ -6181,11 +6172,11 @@ controls:
       gcloud sql instances describe <INSTANCE_NAME> \
         --format=json | jq '.settings.databaseFlags[] | select(.name=="contained database authentication")|.value'
       ```
-    impact: 8
-    effort: 
+    impact: 5
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Database
+    resource: Cloud SQL
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
@@ -6231,10 +6222,10 @@ controls:
       gcloud sql instances describe <INSTANCE_NAME>
       ```
     impact: 8
-    effort: 
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Network Access Control
+    resource: Cloud SQL
     nodes:
       - GCP_SQLADMIN_INSTANCE
     refs:
@@ -6276,10 +6267,10 @@ controls:
       bq show <PROJECT_ID>:<DATASET_NAME>
       ```
     impact: 8
-    effort: 
+    effort: 3
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: BigQuery
     nodes:
       - GCP_BIGQUERY_DATASET
     refs:
@@ -6318,10 +6309,10 @@ controls:
         --format json | jq '.masterAuth.clientKey'
       ```
     impact: 8
-    effort: 
+    effort: 9
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: GKE
     nodes:
       - GCP_CONTAINER_CLUSTER
     refs:
@@ -6359,10 +6350,10 @@ controls:
       gcloud services list --enabled --filter=containerregistry
       ```
     impact: 8
-    effort: 
+    effort: 5
     platform: GCP
-    category: 
-    resource: 
+    category: Containers
+    resource: GCR
     nodes:
       - GCP_CLOUDRESOURCEMANAGER_PROJECT
     refs:
@@ -6422,10 +6413,10 @@ controls:
         OR bindings.role:roles/storage.legacyObjectOwner"
       ```
     impact: 8
-    effort: 
+    effort: 7
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: GCR
     nodes:
       - GCP_STORAGE_BUCKET
       - GCP_IAM_ROLE
@@ -6469,10 +6460,10 @@ controls:
 
       Confirm that `disable-legacy-endpoints` is `true` for all node pools.
     impact: 8
-    effort: 
+    effort: 7
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: GKE
     nodes:
       - GCP_CONTAINER_NODEPOOL
     refs:
@@ -6515,10 +6506,10 @@ controls:
         --format json | jq .releaseChannel.channel
       ```
     impact: 8
-    effort: 
+    effort: 8
     platform: GCP
-    category: 
-    resource: 
+    category: Management and Governance
+    resource: GKE
     nodes:
       - GCP_CONTAINER_CLUSTER
     refs:
@@ -6557,10 +6548,10 @@ controls:
         --format json | jq '.privateClusterConfig.enablePrivateNodes'
       ```
     impact: 8
-    effort: 
+    effort: 7
     platform: GCP
-    category: 
-    resource: 
+    category: Networking and Content Delivery
+    resource: GKE
     nodes:
       - GCP_CONTAINER_CLUSTER
     refs:
@@ -6605,10 +6596,10 @@ controls:
         '{name: .metadata.name, annotations: .metadata.annotations, namespace: .metadata.namespace, status: .status}'
       ```
     impact: 8
-    effort: 
+    effort: 6
     platform: GCP
-    category: 
-    resource: 
+    category: Networking and Content Delivery
+    resource: Load Balancer
     nodes:
       - K8S_INGRESS
     refs:
@@ -6646,10 +6637,10 @@ controls:
       Examine GKE [clusters](https://console.cloud.google.com/kubernetes/list) and confirm `Google Groups for RBAC` is 
       set to `Enabled`.
     impact: 5
-    effort: 
+    effort: 8
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: GKE
     nodes:
       - GCP_CONTAINER_CLUSTER
     refs:
@@ -6712,10 +6703,10 @@ controls:
         --format json | jq '.diskEncryptionKey.kmsKeyName'
       ```
     impact: 5
-    effort: 
+    effort: 9
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: GKE
     nodes:
       - GCP_CONTAINER_CLUSTER
       - GCP_COMPUTE_INSTANCE
@@ -6754,10 +6745,10 @@ controls:
         --format json | jq '.enableKubernetesAlpha'
       ```
     impact: 5
-    effort: 
+    effort: 8
     platform: GCP
-    category: 
-    resource: 
+    category: Management and Governance
+    resource: GKE
     nodes:
       - GCP_CONTAINER_CLUSTER
     refs:
@@ -6800,10 +6791,10 @@ controls:
         --format json | jq '.config.sandboxConfig'
       ```
     impact: 5
-    effort: 
+    effort: 7
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: GKE
     nodes:
       - GCP_CONTAINER_NODEPOOL
     refs:
@@ -6849,10 +6840,10 @@ controls:
         --format json | jq .binaryAuthorization
       ```
     impact: 5
-    effort: 
+    effort: 6
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: GKE
     nodes:
       - GCP_CONTAINER_CLUSTER
     refs:
@@ -6891,10 +6882,10 @@ controls:
         --format json | jq '.masterAuth.password and .masterAuth.username'
       ```
     impact: 9
-    effort: 
+    effort: 8
     platform: GCP
-    category: 
-    resource: 
+    category: Identity and Access Management
+    resource: GKE
     nodes:
       - GCP_CONTAINER_CLUSTER
     refs:
@@ -6960,10 +6951,10 @@ controls:
       Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
       set to `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` set to `true`.
     impact: 8
-    effort: 
+    effort: 6
     platform: GCP
-    category: 
-    resource: 
+    category: Security, Identity, and Compliance
+    resource: Logging
     nodes:
       - GCP_LOGGING_LOGSINK
       - GCP_CLOUDRESOURCEMANAGER_PROJECT
