@@ -1,7 +1,7 @@
 require 'yaml'
 require 'date'
 
-NARF = 'No affected resources found'
+NARF ||= 'No affected resources found'
 config_file = YAML.load(File.read(File.expand_path(File.dirname(__FILE__) + '/config.yaml')))
 control_pack = config_file['id']
 titles = Hash[config_file['controls'].map { |control| [control['id'], control['title']] }]

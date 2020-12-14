@@ -179,11 +179,24 @@ controls:
       to change their own passwords, expire passwords after 180 days, prevent password
       reuse for the past 5 or more, and require users to contact their administrator
       if their passwords expire.
-    validation:
-      Run `aws iam get-account-password-policy` and verify that `MinimumPasswordLength`
-      is `>= 14`, `RequireSymbols` is `true`, `RequireNumbers` is `true`, `RequireUppercaseCharacters`
-      is `true`, `RequireLowercaseCharacters` is `true`, `ExpirePasswords` is `true`,
-      `MaxPasswordAge` is `<= 90`, and `PasswordReusePrevention` is `>= 5`.
+    validation: |-
+      Run `aws iam get-account-password-policy` and verify the following settings:
+      
+      `MinimumPasswordLength` is `>= 14`
+      
+      `RequireSymbols` is `true`
+      
+      `RequireNumbers` is `true`
+      
+      `RequireUppercaseCharacters` is `true`
+      
+      `RequireLowercaseCharacters` is `true`
+      
+      `ExpirePasswords` is `true`
+
+      `MaxPasswordAge` is `<= 90`
+      
+      `PasswordReusePrevention` is `>= 5`
     impact: 5
     effort: 2
     platform: AWS
