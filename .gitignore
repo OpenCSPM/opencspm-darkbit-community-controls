@@ -1,2 +1,4 @@
 *.swp
 spec
+.ruby*
+Gemfile.*
