@@ -3581,7 +3581,7 @@ controls:
       - text: GKE Hardening
         url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#shielded_nodes
       - text: GKE Shielded Nodes
-        url: https://cloud.google.com/kubernetes-engine/docs/how-to/shielded-gke-node
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/shielded-gke-nodes
     public: true
     tags:
       - cis:
