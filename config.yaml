@@ -6371,6 +6371,30 @@ controls:
       - nist-csf:
           - nist-csf-todo
       - google cloud
+  - id: darkbit-gcp-111
+    title: GCR Access Should Be Restricted
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    effort: 7
+    platform: GCP
+    category: Identity and Access Management
+    resource: GCR
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level1
+          - gke-cis1.1-not-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.1
+          - gke-cis1.1-5.1.2
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
   - id: darkbit-gcp-112
     title: GKE Clusters Should Have Read-Only Permissions to GCR Registries
     description: |
@@ -6566,6 +6590,30 @@ controls:
           - gke-cis1.1-5
           - gke-cis1.1-5.6
           - gke-cis1.1-5.6.5
+      - nist-csf:
+          - nist-csf-todo
+      - google cloud
+  - id: darkbit-gcp-116
+    title: GKE Worker Nodes Should Not Be Exposed Via Firewall Rules
+    description: TODO
+    remediation: TODO
+    validation: TODO
+    impact: 5
+    effort: 5
+    platform: GCP
+    category: Network Access Control
+    resource: Firewall
+    refs:
+      - text: TODO
+        url: TODO
+    tags:
+      - cis:
+          - gke-cis1.1
+          - gke-cis1.1-level2
+          - gke-cis1.1-not-scored
+          - gke-cis1.1-5
+          - gke-cis1.1-5.6
+          - gke-cis1.1-5.6.6
       - nist-csf:
           - nist-csf-todo
       - google cloud

@@ -2477,6 +2477,15 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+control_id = 'darkbit-gcp-111'
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
+  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    it 'should not have a placeholder configuration' do
+      expect(true).to eq(true)
+    end
+  end
+end
+
 control_id = 'darkbit-gcp-112'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
@@ -2582,6 +2591,15 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       it 'should have private nodes configured' do
         expect(true).to eq(true)
       end
+    end
+  end
+end
+
+control_id = 'darkbit-gcp-116'
+RSpec.describe "[#{control_id}] #{titles[control_id]}" do
+  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    it 'should not have a placeholder configuration' do
+      expect(true).to eq(true)
     end
   end
 end
