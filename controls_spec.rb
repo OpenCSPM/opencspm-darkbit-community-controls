@@ -2479,9 +2479,54 @@ end
 
 control_id = 'darkbit-gcp-111'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (bucket:GCP_STORAGE_BUCKET)<-[:HAS_RESOURCE]-(project:GCP_CLOUDRESOURCEMANAGER_PROJECT)
+    MATCH (project)-[:HAS_RESOURCE]->(storagesvc:GCP_SERVICEUSAGE_SERVICE { resource_data_name: "containerregistry.googleapis.com"})
+    WITH project, bucket
+    WHERE bucket.resource_data_name STARTS WITH 'artifacts.' and bucket.resource_data_name ENDS WITH '.appspot.com'
+    OPTIONAL MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)<-[ir:HAS_IAMROLE]-(gi:GCP_IDENTITY)
+    WHERE
+    (
+       ir.role_name = 'roles/storage.admin'
+    OR ir.role_name = 'roles/storage.objectAdmin'
+    OR ir.role_name = 'roles/storage.objectCreator'
+    OR ir.role_name = 'roles/storage.legacyBucketOwner'
+    OR ir.role_name = 'roles/storage.legacyBucketWriter'
+    OR ir.role_name = 'roles/storage.legacyObjectOwner'
+    )
+    RETURN gi.name as identity_name, ir.role_name as role_name, bucket.name as bucket_name
+    UNION
+    MATCH (bucket:GCP_STORAGE_BUCKET)<-[:HAS_RESOURCE]-(project:GCP_CLOUDRESOURCEMANAGER_PROJECT)
+    MATCH (project)-[:HAS_RESOURCE]->(storagesvc:GCP_SERVICEUSAGE_SERVICE { resource_data_name: "containerregistry.googleapis.com"})
+    WITH project, bucket
+    WHERE bucket.resource_data_name STARTS WITH 'artifacts.' and bucket.resource_data_name ENDS WITH '.appspot.com'
+    OPTIONAL MATCH (bucket:GCP_STORAGE_BUCKET)<-[ir:HAS_IAMROLE]-(gi:GCP_IDENTITY)
+    WHERE
+    (
+       ir.role_name = 'roles/storage.admin'
+    OR ir.role_name = 'roles/storage.objectAdmin'
+    OR ir.role_name = 'roles/storage.objectCreator'
+    OR ir.role_name = 'roles/storage.legacyBucketOwner'
+    OR ir.role_name = 'roles/storage.legacyBucketWriter'
+    OR ir.role_name = 'roles/storage.legacyObjectOwner'
+    )
+    RETURN gi.name as identity_name, ir.role_name as role_name, bucket.name as bucket_name
+  )
+  identities = graphdb.query(q).mapped_results
+  if identities.length > 0
+    identities.each do |identity|
+      resource_name = "#{identity.identity_name} has #{identity.role_name} on #{identity.bucket_name}"
+      describe resource_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should be reviewed to see if access is needed' do
+          expect(resource_name).to be_nil
+        end
+      end
+    end
+  else
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should be reviewed to see if access is needed' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
@@ -2595,6 +2640,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
+# TODO: Control logic
 control_id = 'darkbit-gcp-116'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
