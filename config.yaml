@@ -4174,12 +4174,10 @@ controls:
           - nist-csf-todo
   - id: darkbit-gcp-63
     title: GCP Service Accounts Should Not Be Bound To Admin, Editor, or Owner Roles
-    description:
-      Service accounts can perform critical actions without user intervention. It is
-      recommended that service accounts not have Admin, Editor, or Owner permissions.
-    remediation: TODO
+    description: In most use cases, GCP Service Accounts should be bound to predefined or custom roles specific to the functions performed by that account.  Attaching `roles/owner`, `roles/editor`, or "admin" roles provides an overly broad and powerful set of permissions that makes the credential highly valuable to an attacker if leaked or compromised.  Notable exceptions are Service Accounts used for deployment and lifecycle management of other cloud resources (e.g. Terraform, Deployment Manager).
+    remediation: Review the IAM bindings granting `roles/owner`, `roles/editor`, or "admin" roles such as `roles/iam.serviceAccountAdmin` and determine if those bindings can be replaced with a small number of predefined roles and/or custom roles using the GCP IAM Recommender to understand which permissions are actually used in the past 90 days.
     validation: TODO
-    impact: 7
+    impact: 5
     effort: 7
     platform: GCP
     category: Identity and Access Management
@@ -4191,7 +4189,9 @@ controls:
       - text: Default Compute Service Account
         url: https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#using_the_default_service_account
       - text: Understanding Service Accounts
-        url: https://cloud.google.com/iam/docs/understanding-service-accounts
+        url: https://cloud.google.com/iam/docs/understanding-service-accountsA
+      - text: GCP IAM Recommender
+        url: https://cloud.google.com/iam/docs/recommender-overview
     public: true
     tags:
       - google cloud
@@ -6372,18 +6372,39 @@ controls:
           - nist-csf-todo
       - google cloud
   - id: darkbit-gcp-111
-    title: GCR Access Should Be Restricted
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    title: GCR Push Access Should Be Minimized
+    description: |
+      Google Container Registries are commonly the central storage point for all internal container images in an organization, and these container images are run in multiple situations with direct access to sensitive data and credentials.  Therefore, the ability to "push" or upload images is a privileged operation that should be restricted to a small number of identities to maintain the integrity of the software supply chain.  Permissions for accessing GCR registries are handled directly by the permissions assigned to the Google Storage Bucket.
+    remediation: |
+      Review the IAM permissions assigned to the GCP Project where the GCR registry is held and the IAM permissions directly assigned to the GCS Storage Bucket named `artifacts.[PROJECT_ID].appspot.com` in that project.  Modify the IAM permissions to ensure the following `roles/*` are bound to the minimal set of identities: `storage.admin`, `storage.objectAdmin`, `storage.objectCreator`, `storage.legacyBucketOwner`, `storage.legacyBucketWriter`, and `storage.legacyObjectOwner`.  For the ability to "pull" or "read" images, assign just the role named `roles/storage.objectViewer`.
+    validation: |-
+      In each project where GCR registries are held, run
+      ```
+      gsutil iam get gs://artifacts.$PROJECT_ID.appspot.com
+      ```
+
+      and
+
+      ```
+      gcloud projects get-iam-policy $PROJECT_ID \
+         --flatten="bindings[].members" \
+         --format='table(bindings.members,bindings.role)' \
+         --filter="bindings.role:roles/storage.admin OR \
+           bindings.role:roles/storage.objectAdmin OR \
+           bindings.role:roles/storage.objectCreator OR \
+           bindings.role:roles/storage.legacyBucketOwner OR \
+           bindings.role:roles/storage.legacyBucketWriter OR \
+           bindings.role:roles/storage.legacyObjectOwner"
+      ```
+      to ensure the desired bindings are in effect.
     impact: 5
     effort: 7
     platform: GCP
     category: Identity and Access Management
     resource: GCR
     refs:
-      - text: TODO
-        url: TODO
+      - text: GCR IAM Access Control
+        url: https://cloud.google.com/container-registry/docs/access-control
     tags:
       - cis:
           - gke-cis1.1
@@ -6594,18 +6615,41 @@ controls:
           - nist-csf-todo
       - google cloud
   - id: darkbit-gcp-116
-    title: GKE Worker Nodes Should Not Be Exposed Via Firewall Rules
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    title: GKE Worker Nodes Should Have Restrictive Ingress and Egress Firewall Rules
+    description: |
+      GKE Worker Nodes are commonly provisioned with public IP addresses in projects with permissive inbound SSH access and any egress traffic allowed.  If a container running on a node were compromised or an administrative GCP credential stolen, an attacker would experience minimal friction in terms of network access controls.
+    remediation: |
+      Ensure that GKE Worker Nodes are not provisioned with public IPs, remove the default ingress SSH firewall rule allowing traffic from `0.0.0.0/0`, and ensure that at least one egress deny firewall rule is in the project.
+    validation: |-
+      In each project where GKE clusters are present, describe GKE clusters and confirm `enablePrivateNodes` is `true`.
+
+      ```
+      gcloud container clusters describe $CLUSTER_NAME \
+        --format json | jq '.privateClusterConfig.enablePrivateNodes'
+      ```
+
+      Ensure the following command returns no entries.
+
+      ```
+      gcloud compute firewall-rules list --filter="name=(default-allow-ssh)"
+
+      ```
+
+      Finally, ensure at firewall rule returns via the following command.
+
+      ```
+      gcloud compute firewall-rules list --format=json | jq -r '.[] | . as $rule | select(.direction=="EGRESS") | select(.disabled==false) | select(.denied) | select(.destinationRanges) | select(.destinationRanges[] | contains("0.0.0.0/0")) | .denied[] | select(.IPProtocol=="all") | $rule.name'
+      ```
     impact: 5
     effort: 5
     platform: GCP
     category: Network Access Control
     resource: Firewall
     refs:
-      - text: TODO
-        url: TODO
+      - text: GCP Firewall Rules
+        url: https://cloud.google.com/vpc/docs/firewalls#firewall_rule_components
+      - text: Creating a private GKE cluster
+        url: https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters
     tags:
       - cis:
           - gke-cis1.1
