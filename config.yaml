@@ -6,9 +6,10 @@ controls:
     title: Users Should Not Have Access Keys Unused for Over 90 Days
     description:
       AWS Access Keys that have not been used for over 90 days indicate that
-      they are no longer in regular use and represent an unnecessary exposure of valid
-      credentials.
-    remediation: Review the access keys that have not been used and consider revoking them.
+      they are no longer in regular use and represent an unnecessary exposure of 
+      valid credentials.
+    remediation: |
+      Review the access keys that have not been used and consider revoking them.
     validation: |-
       Run `aws iam get-credential-report --output text | base64 -d | awk -F, 
       '{print $1 " " $11 " " $16}'` to get a list of `user`, `access_key_1_last_used_date`,
@@ -2820,25 +2821,39 @@ controls:
       at the Project Level
     description:
       When creating a GCP resources that attaches a GCP service account,
-      the calling user or service account must have the permission to "use" that service
-      account. Otherwise, the ability to create a GCE instance with any service account
-      attached would be a direct path to privilege escalation if at least one other
-      service account in the project had higher permissions. This permission can be
-      granted on a specific service account or at the project level.  Granting the permission
-      directly on the service account resource permits "use" of just that service account.  Granting
-      the permission at the project level permits the "use" of any service account in
-      the project.  Even if the project does not currently have a highly privileged
-      service account today, it might in the future, and that would inadvertently increase
-      the power of this binding.
+      the calling user or service account must have the permission to "use" that 
+      service account. Otherwise, the ability to create a GCE instance with any 
+      service account attached would be a direct path to privilege escalation if at 
+      least one other service account in the project had higher permissions. This 
+      permission can be granted on a specific service account or at the project level.  
+      Granting the permission directly on the service account resource permits "use" 
+      of just that service account.  Granting the permission at the project level 
+      permits the "use" of any service account in the project.  Even if the project 
+      does not currently have a highly privileged service account today, it might in 
+      the future, and that would inadvertently increase the power of this binding.
     remediation:
-      Remove the permission at the project level and instead assign "iam.serviceAccountUser"
-      or "iam.serviceAccountTokenCreator" on the small number of service accounts in the
+      Remove the permission at the project level and instead assign `iam.serviceAccountUser`
+      or `iam.serviceAccountTokenCreator` on the small number of service accounts in the
       project that are necessary.
-    validation:
-      Run `gcloud beta projects get-iam-policy PROJECTID --flatten='bindings[]'
-      --filter=bindings.role:iam.serviceAccountUser --format="csv[no-heading](bindings.members[])"`
-      for each project and ensure no results are displayed. Perform the same for
-      `iam.serviceAccountTokenCreator`.
+    validation: |-
+      Run the following commands for each project and ensure no results are displayed for 
+      `iam.serviceAccountUser` or `iam.serviceAccountTokenCreator`.
+      
+      ```
+      gcloud beta projects get-iam-policy [PROJECT_ID] 
+        --flatten='bindings[]' \
+        --filter=bindings.role:iam.serviceAccountUser \
+        --format="csv[no-heading](bindings.members[])"
+      ```
+
+      and
+
+      ```
+      gcloud beta projects get-iam-policy [PROJECT_ID] 
+        --flatten='bindings[]' \
+        --filter=bindings.role:iam.serviceAccountTokenCreator \
+        --format="csv[no-heading](bindings.members[])"
+      ```
     impact: 5
     effort: 2
     platform: GCP
@@ -2878,9 +2893,12 @@ controls:
       enable bucket versioning and optionally configure an object lifecycle policy to
       retain the data for the desired period only.
     validation: |-
-      In each project, run `gcloud compute networks subnets list --format=json
-      | jq -r '.[] | select(.logConfig.enable | not) | "(.name) (.region)"'` and ensure
-      no entries are present.
+      In each project, run the following command and and ensure no entries are present.
+      
+      ```
+      gcloud compute networks subnets list \
+        --format=json | jq -r '.[] | select(.logConfig.enable | not) | "\(.name) \(.region)"'
+      ``` 
     impact: 7
     effort: 4
     platform: GCP
@@ -2911,18 +2929,25 @@ controls:
     title: Firewall Rules Should Not Allow Access to SSH TCP/22 From All Hosts
     description:
       Firewall rules that permit inbound/ingress access from any IP address
-      (0.0.0.0/0) to administrative ports via SSH (TCP/22) should be reviewed for necessity
+      (0.0.0.0/0) to administrative ports via SSH (tcp/22) should be reviewed for necessity
       to prevent unintended exposure of services and systems protected by that security
       group.  The primary exclusion to this is a dedicated, hardened bastion host.
     remediation:
       For each firewall rule, assess whether the attached systems requires
-      SSH access from any IP address.  If it doesn't, consider reducing the source IP
+      SSH access from any IP address.  If not, consider reducing the source IP
       ranges to a specific set of subnets or to the bastion host(s) in the environment.
     validation: |-
-      In each project, run `gcloud compute firewall-rules list --format=json
-      | jq -r '.[] | select(.sourceRanges) | select(.allowed) | select(.sourceRanges[]
-      | contains("0.0.0.0/0")) | "(.name) (.allowed[])"'` and ensure no entries that
+      In each project, run the following command and ensure no entries that
       permit `IPProtocol` of `tcp` and `ports` of `22`.
+      
+      ```
+      gcloud compute firewall-rules list \
+        --format=json | jq -r '.[] | 
+          select(.sourceRanges) | 
+          select(.allowed) | 
+          select(.sourceRanges[] | 
+          contains("0.0.0.0/0")) | "\(.name) \(.allowed[])"'
+      ``` 
     impact: 8
     effort: 4
     platform: GCP
@@ -2963,11 +2988,16 @@ controls:
       be exposed externally, configure a load balancer.  For remote administration,
       consider using the Identity-Aware Proxy service to create an SSH or RDP-over-TLS
       tunnel directly to the private IP of the instance.
-    validation:
-      'In each project, run `gcloud compute instances list --format=json |
-      jq -r ''.[] | . as $instance | .networkInterfaces[] | select(.accessConfigs) |
-      .accessConfigs[] | select(.type=="ONE_TO_ONE_NAT") | "($instance.name): (.natIP)"''`
-      and ensure that no entries with public IPs exist.'
+    validation: |-
+      In each project, run the following command and ensure that no entries with public IPs exist.
+      
+      ```
+      gcloud compute instances list \
+        --format=json | 
+          jq -r '.[] | . as $instance | .networkInterfaces[] | 
+          select(.accessConfigs) | .accessConfigs[] | 
+          select(.type=="ONE_TO_ONE_NAT") | "\($instance.name): \(.natIP)"'
+      ```
     impact: 5
     effort: 8
     platform: GCP
@@ -3005,12 +3035,15 @@ controls:
       create a new VPC and subnets according to the networking and IP address management
       needs of the organization to avoid overlap.  To ensure all projects created do
       not have the default VPC/Network and subnets created automatically, configure
-      the constraints/compute.skipDefaultNetworkCreation organization policy at the
+      the `constraints/compute.skipDefaultNetworkCreation` organization policy at the
       organization node.
-    validation:
-      In each project, run `gcloud compute networks list --format=json | jq
-      -r 'select(.[]) | .[] | select(.name=="default") | .name'` and ensure no entries
-      are listed.
+    validation: |-
+      In each project, run the following command and ensure no entries are listed.
+
+      ```
+      gcloud compute networks list \
+        --format=json | jq -r 'select(.[]) | .[] | select(.name=="default") | .name'
+      ```
     impact: 3
     effort: 8
     platform: GCP
@@ -3059,21 +3092,28 @@ controls:
       use cases for those types of integrations.  Refactor GCP applications using static,
       exported service account keys to use the native integration.  For keys used by
       external services, rotate them every 90 days.
-    validation:
-      'Run `for project in $(gcloud projects list --filter=parent.id=ORGIDNUMBER
-      --format="value(projectId)"); do for sa in $(gcloud iam service-accounts list
-      --format="value(email)" --project=$project); do gcloud iam service-accounts keys
-      list --iam-account $sa --project=$project --format=json | jq -r ''.[] | select(.keyType=="USER_MANAGED")
-      | "(.name): (.validAfterTime) (.validBeforeTime)"''; done; done` and review the
-      validAfterTime and validBeforeTime values for each key to ensure they are not
-      valid for longer than 90 days.'
+    validation: |-
+      For each project, run the following command and and review the `validAfterTime` 
+      and `validBeforeTime` values for each key to ensure they are not valid for longer than 90 days.
+      
+      ```
+      for sa in $(gcloud iam service-accounts list \
+        --format="value(email)" \
+        --project=[PROJECT_ID]); do
+          gcloud iam service-accounts keys list \
+            --iam-account $sa \
+            --project=[PROJECT_ID] \
+            --format=json | jq -r '.[] | 
+              select(.keyType=="USER_MANAGED") | "\(.name): \(.validAfterTime) \(.validBeforeTime)"'
+          done
+      ```
     impact: 2
     effort: 6
     platform: GCP
     category: Management and Governance
     resource: ServiceAccount
     nodes:
-      - PLACEHOLDER
+      - GCP_IAM_SERVICEACCOUNTKEY
     refs:
       - text: Managing Service Account Keys
         url: https://cloud.google.com/iam/docs/creating-managing-service-account-keys
@@ -3105,33 +3145,43 @@ controls:
       object in a GCS bucket".  These logs can and should be enabled on non-development
       projects to enable full capture of API activity necessary to support incident
       analysis and for meeting certain regulatory compliance requirements.
-    remediation:
-      'Enable "Admin READ" and "Data READ and WRITE" access logging for "allServices"
+    remediation: |
+      Enable `Admin READ` and `Data READ and WRITE` access logging for `allServices`
       at the organization level so that it applies to all downstream folders and projects.  Configure
       Stackdriver to export audit logs to a storage medium such as a GCS bucket and
       configure a lifecycle and retention policy to automatically move data to cheaper
       storage and to prune old data.  Caveat: Audit logs are often verbose and generate
       large volumes of log entries, and storing these in GCS buckets incurs an additional
       cost.  Use the exemption configuration to remove GCP internal service audit logs
-      if necessary.'
+      if necessary.
     validation: |-
-      Run `for project in $(gcloud projects list --filter=parent.id=ORGIDNUMBER --format="value(projectId)"); do gcloud projects get-iam-policy $project --format=json | jq -r 'select(.auditConfigs)'; done` and ensure that it returns the following: `[
-            {
-              "service": "allServices",
-              "auditLogConfigs": [
-                { "logType": "ADMIN_READ" },
-                { "logType": "DATA_READ"  },
-                { "logType": "DATA_WRITE" },
-              ]
-            },
-          ]`.
+      For each project, run the following command:
+      
+      ```
+      gcloud projects get-iam-policy [PROJECT_ID] --format=json | jq -r 'select(.auditConfigs)'
+      ```
+      
+      and ensure that it is not empty and it returns the following:
+      
+      ```
+      [
+        {
+          "service": "allServices",
+          "auditLogConfigs": [
+            { "logType": "ADMIN_READ" },
+            { "logType": "DATA_READ"  },
+            { "logType": "DATA_WRITE" },
+          ]
+        }
+      ]
+      ```
     impact: 8
     effort: 4
     platform: GCP
     category: Security, Identity, and Compliance
     resource: Project
     nodes:
-      - PLACEHOLDER
+      - GCP_CLOUDRESOURCEMANAGER_PROJECT
     refs:
       - text: Project Audit Logs
         url: https://cloud.google.com/logging/docs/audit/understanding-audit-logs
@@ -3163,18 +3213,23 @@ controls:
       By default, Cloud SQL instances are assigned a public IPv4 address,
       and the access list allows any source IP address to attempt to connect and authenticate
       to the database.  This facilitates development and ease of connectivity for troubleshooting,
-      but it means an attacker can access the potentially sensitive data in the database
+      but it also means an attacker can access the potentially sensitive data in the database
       without restriction if they obtain valid credentials.
     remediation:
-      To reduce the likelihood of an attacker to access the database service
-      directly or to use stolen credentials from any source IP, the instance should
+      To reduce the likelihood of an attacker gaining access the database service
+      directly or using stolen credentials from any source IP, the instance should
       be configured with a private IP address only. This should be configured during
       creation of the instance and a VPC peering relationship should be configured between
       the Cloud SQL VPC and the VPCs where applications accessing the database reside.
-    validation:
-      'In each project, run `gcloud sql instances list --format=json | jq
-      -r ''.[] | select(.settings.ipConfiguration.ipv4Enabled==true) | "(.name) Public
-      IP: (.settings.ipConfiguration.ipv4Enabled)"''` and ensure no entries are listed.'
+    validation: |-
+      In each project, run the following command and ensure no entries are listed.
+      
+      ```
+      gcloud sql instances list \
+        --format=json | jq -r '.[] | 
+          select(.settings.ipConfiguration.ipv4Enabled==true) | 
+          "\(.name) Public IP: \(.settings.ipConfiguration.ipv4Enabled)"'
+      ```
     impact: 5
     effort: 9
     platform: GCP
@@ -3220,16 +3275,21 @@ controls:
       can be used.  It can handle setting up a localhost SSL proxy/tunnel and applications
       can be configured to connect to the database via that tunnel.
     validation: |
-      'In each project, run `gcloud sql instances list --format=json | jq
-      -r ''.[] | select(.settings.ipConfiguration.requireSsl==null) | "(.name) SSL:
-      (.settings.ipConfiguration.requireSsl)"''` and ensure no entries are listed.'
+      In each project, run the following command and ensure no entries are listed.
+      
+      ```
+      gcloud sql instances list \
+        --format=json | jq -r '.[] | 
+          select(.settings.ipConfiguration.requireSsl==null) | 
+          "\(.name) SSL: \(.settings.ipConfiguration.requireSsl)"'
+      ```
     impact: 5
     effort: 7
     platform: GCP
     category: Networking and Content Delivery
     resource: Cloud SQL
     nodes:
-      - PLACEHOLDER
+      - GCP_SQLADMIN_INSTANCE
     refs:
       - text: Cloud SQL MySQL Require SSL/TLS
         url: https://cloud.google.com/sql/docs/mysql/configure-ssl-instance
@@ -3256,7 +3316,7 @@ controls:
     title: Firewall Rules Should Not Allow Access to RDP TCP/3389 From All Hosts
     description:
       Firewall rules that permit inbound/ingress access from any IP address
-      (0.0.0.0/0) to database ports via RDP (TCP/3389) should be reviewed for necessity
+      (0.0.0.0/0) to database ports via RDP (tcp/3389) should be reviewed for necessity
       to prevent unintended exposure of services and systems protected by that security
       group.  The primary exclusion to this is a dedicated, hardened bastion host.
     remediation:
@@ -3265,17 +3325,24 @@ controls:
       source IP ranges to a specific set of subnets or to the bastion host(s) in the
       environment.
     validation: |-
-      In each project, run ``gcloud compute firewall-rules list --format=json
-      | jq -r '.[] | select(.sourceRanges) | select(.allowed) | select(.sourceRanges[]
-      | contains("0.0.0.0/0")) | "(.name) (.allowed[])"' and ensure no entries that
-      permit `IPProtocol` of `tcp` and `ports` of `3389`.
+      In each project, run and ensure no entries that permit `IPProtocol` of `tcp` 
+      and `ports` of `3389`.
+      
+      ```
+      gcloud compute firewall-rules list \
+        --format=json | jq -r '.[] | 
+          select(.sourceRanges) | 
+          select(.allowed) | 
+          select(.sourceRanges[] | contains("0.0.0.0/0")) | "\(.name) \(.allowed[])"'.
+      ```
     impact: 7
     effort: 4
     platform: GCP
     category: Network Access Control
     resource: Firewall
     nodes:
-      - PLACEHOLDER
+      - GCP_COMPUTE_FIREWALL
+      - GCP_COMPUTE_FIREWALLIPRANGE
     refs:
       - text: Configuring Firewall Rules
         url: https://cloud.google.com/vpn/docs/how-to/configuring-firewall-rules
@@ -3300,27 +3367,39 @@ controls:
     title: Load Balancers Should Use a MODERN or RESTRICTED SSL Policy
     description:
       By default, Load Balancers use an SSL/TLS policy equivalent to the
-      COMPATIBLE profile which supports a wide range of ciphers and TLS versions of
+      `COMPATIBLE` profile which supports a wide range of ciphers and TLS versions of
       varying security.  In nearly all use cases, the more stringent profiles should
       be used to ensure client connections only negotiate with strong ciphers and recent
-      TLS versions.  For compliance-focused environments, the RESTRICTED policy should
+      TLS versions.  For compliance-focused environments, the `RESTRICTED` policy should
       be used.
     remediation:
-      Configure all Load Balancers to leverage the MODERN or RESTRICTED SSL
-      policy or a CUSTOM SSL policy with equivalent enforcement of secure ciphers and
+      Configure all Load Balancers to leverage the `MODERN` or `RESTRICTED SSL`
+      policy or a `CUSTOM SSL` policy with equivalent enforcement of secure ciphers and
       TLS versions.
     validation: |
-      Run `gcloud compute target-https-proxies list --format=json | jq -r
-      '.[] | select(.sslPolicy | not) | "(.name) (.selfLink)"'` and `gcloud compute
-      target-ssl-proxies list --format=json | jq -r '.[] | select(.sslPolicy | not)
-      | "(.name) (.selfLink)"'` and ensure they do not return any entries.
+      Run the following commands and ensure they do not return any entries.
+      
+      ```
+      gcloud compute target-https-proxies list \
+        --format=json | jq -r '.[] | 
+          select(.sslPolicy | not) | "\(.name) \(.selfLink)"'
+      ```
+      
+      and
+      
+      ```
+      gcloud compute target-ssl-proxies list \
+        --format=json | jq -r '.[] | 
+          select(.sslPolicy | not) | "\(.name) \(.selfLink)"'
+      ```
     impact: 3
     effort: 3
     platform: GCP
     category: Networking and Content Delivery
     resource: Load Balancer
     nodes:
-      - PLACEHOLDER
+      - GCP_COMPUTE_TARGETHTTPSPROXY
+      - GCP_COMPUTE_TARGETSSLPROXY
     refs:
       - text: GCP SSL Policies
         url: https://cloud.google.com/load-balancing/docs/ssl-policies-concepts
@@ -3348,16 +3427,20 @@ controls:
       by IP and egress to any subnet (including the Internet) unless routing or firewalls
       are added to prevent that traffic.  This presents ample opportunity for lateral
       movement from the perspective of a compromised workload. One of the best ways
-      to reduce the scope of that movement is to deploy NetworkPolicy resources that
+      to reduce the scope of that movement is to deploy `NetworkPolicy` resources that
       define firewall rules for pod-to-pod traffic.  In GKE, the Network Policy add-on
       must be enabled to allow for the cluster to enforce firewall policies on Pods.
     remediation:
       Configure the cluster to enabled Network Policy support to allow for
       in-cluster support for NetworkPolicy (firewall rules) resources.
     validation: |-
-      Run `gcloud container clusters describe <clustername> --format=json
-      | jq -r 'select(.networkPolicy.enabled==true and .networkPolicy.provider=="CALICO")
-      | "(.name)"'` and ensure that the cluster's name is listed.
+      For each cluster, run the following command and ensure the cluster name is listed.
+      
+      ```
+      gcloud container clusters describe [CLUSTER_NAME] \
+        --format=json | jq -r 'select(.networkPolicy.enabled==true 
+          and .networkPolicy.provider=="CALICO") | "\(.name)"'
+      ```
     impact: 9
     effort: 3
     platform: GCP
@@ -3400,9 +3483,13 @@ controls:
       to a known set of IP ranges for API Server access.  In environments with bastion
       hosts or VPNs, their internal subnet range or security groups are commonly used.
     validation: |-
-      Run `gcloud container clusters describe <clustername> --format=json
-      | jq -r 'select(.masterAuthorizedNetworksConfig.enabled==true) | select(.masterAuthorizedNetworksConfig.cidrBlocks[].cidrBlock!="0.0.0.0/0")
-      | "(.name)"'` and ensure that the cluster's name is listed.
+      For each cluster, run the following command and ensure that the cluster's name is listed.
+      
+      ```
+      gcloud container clusters describe [CLUSTER_NAME] \
+        --format=json | jq -r 'select(.masterAuthorizedNetworksConfig.enabled==true) | 
+          select(.masterAuthorizedNetworksConfig.cidrBlocks[].cidrBlock!="0.0.0.0/0")| "\(.name)"'
+      ```
     impact: 9
     effort: 5
     platform: GCP
@@ -3438,23 +3525,27 @@ controls:
       GKE Workload Identity Should Be Enabled and Enforcing Metadata Protection
       on All Nodepools
     description:
-      Currently, all pods have the ability to reach the Instance Metadata
+      GKE clusters without Workload Identity allow pods to reach the Instance Metadata
       API corresponding to the underlying node.  By extension, those pods can access
       the APIs and data used to bootstrap the Kubernetes worker node.  The credentials
       used to bootstrap a Kubernetes worker node are very commonly sufficient to be
       used to privilege escalate to "cluster-admin".  Also by extension, this means
       that every container image ever run in this cluster in the non-"prod" namespace
-      has had the ability to reach and export these credentials.  Therefore, it's very
+      has had the ability to reach and export these credentials.  Therefore, it is 
       important for a cluster's security posture to prevent pods from being able to
       reach the Instance Metadata API to fetch those bootstrapping credentials.
     remediation:
       Configure Workload Identity on the cluster and every node pool in the
-      cluster with the GKE_METADATA setting enabled.  Alternatively, deploy an egress
-      NetworkPolicy blocking egress to 169.254.169.254 for all non-kube-system namespaces.
+      cluster with the `GKE_METADATA` setting enabled.  Alternatively, deploy an egress
+      `NetworkPolicy` blocking egress to `169.254.169.254` for all non-kube-system namespaces.
     validation: |-
-      Run `gcloud container clusters describe <clustername> --format=json
-      | jq -r 'select(.workloadIdentityConfig.workloadPool | test("svc.id.goog")) |
-      "(.name)"'` and ensure that the cluster's name is listed.
+      For each cluster, run and ensure that the cluster's name is listed.
+      
+      ```
+      gcloud container clusters describe [CLUSTER_NAME] \
+        --format=json | jq -r 'select(.workloadIdentityConfig.workloadPool | 
+        test("svc.id.goog")) | "\(.name)"'
+      ``` 
     impact: 9
     effort: 5
     platform: GCP
@@ -3496,26 +3587,35 @@ controls:
   - id: darkbit-gcp-41
     title: GKE Node Pools Should Use Dedicated GCP Service Accounts
     description:
-      By default, GKE associates the "default" compute service account to
-      GKE worker nodes, and it is automatically granted the "Project Editor" IAM Role.  To
+      By default, GKE associates the `default` compute service account to
+      GKE worker nodes, and it is automatically granted the `Project Editor` IAM Role.  To
       avoid using an inherently shared service account with over-provisioned permissions,
       create a dedicated service account for each GKE cluster in each project and grant
       it only the minimal IAM permissions needed.
     remediation: |-
-      Create a dedicated GCP service account for each cluster in each project. Create a custom IAM Role with the "monitoring.viewer", "monitoring.metricWriter", and "logging.logWriter" permissions, and associate that with the dedicated GCP service account.  Also, ensure the OAuth Scopes attached to the nodes are:
+      Create a dedicated GCP service account for each cluster in each project. Create a 
+      custom IAM Role with the `monitoring.viewer`, `monitoring.metricWriter`, and 
+      `logging.logWriter` permissions, and associate that with the dedicated GCP service 
+      account.  Also, ensure the OAuth Scopes attached to the nodes are:
 
-      * https://www.googleapis.com/auth/devstorage.read_only
-      * https://www.googleapis.com/auth/logging.write
-      * https://www.googleapis.com/auth/monitoring
-      * https://www.googleapis.com/auth/servicecontrol
-      * https://www.googleapis.com/auth/service.management.readonly
-      * https://www.googleapis.com/auth/trace.append
+      ```
+      https://www.googleapis.com/auth/devstorage.read_only
+      https://www.googleapis.com/auth/logging.write
+      https://www.googleapis.com/auth/monitoring
+      https://www.googleapis.com/auth/servicecontrol
+      https://www.googleapis.com/auth/service.management.readonly
+      https://www.googleapis.com/auth/trace.append
+      ```
 
       Consideration: Changing the service account or the OAuth Scopes will result in a rolling redeployment of the Node Pool.
     validation: |-
-      Run `gcloud container clusters describe <clustername> --format=json
-      | jq -r 'select(.nodePools[].config.serviceAccount | test("-compute@developer.gserviceaccount.com")
-      | not) | "(.name)"'` and ensure that the cluster's name is listed.
+      For each cluster, run the following command and ensure that the cluster's name is listed.
+
+      ```
+      gcloud container clusters describe [CLUSTER_NAME] \
+        --format=json | jq -r 'select(.nodePools[].config.serviceAccount | 
+          test("-compute@developer.gserviceaccount.com") | not) | "\(.name)"'
+      ```
     impact: 9
     effort: 6
     platform: GCP
@@ -3557,19 +3657,23 @@ controls:
       Metadata API, and that can be accessed by any Pod unless additional protections
       are put in place.  These credentials can be leveraged to escalate to cluster-admin
       in most situations.
-    remediation:
-      'Modify the cluster node pool configuration to enable shielded nodes
-      (--enable-shielded-nodes) and secure boot (--shielded-secure-boot).  This will
+    remediation: |
+      Modify the cluster node pool configuration to enable shielded nodes
+      (`--enable-shielded-nodes`) and secure boot (`--shielded-secure-boot`).  This will
       remove the sensitive bootstrapping credentials from the GCE Metadata API and enable
       additional verification checks to ensure the worker nodes have not been compromised
-      at a fundamental level.  Considerations: The nodes must be running the COS or
-      COS_CONTAINERD operating system, and enabling this change will require a node
-      pool rolling redeployment performed at the next maintenance window.'
+      at a fundamental level.  Considerations: The nodes must be running the `COS` or
+      `COS_CONTAINERD` operating system, and enabling this change will require a node
+      pool rolling redeployment performed at the next maintenance window.
     validation: |-
-      Run `gcloud container clusters describe <clustername> --format=json
-      | jq -r 'select(.nodePools[].config.shieldedInstanceConfig.enableIntegrityMonitoring==true
-      and .nodePools[].config.shieldedInstanceConfig.enableSecureBoot==true) | "(.name)"'`
-      and ensure that the cluster's name is listed.
+      For each cluster, run the following command and ensure that the cluster's name is listed.
+      
+      ```
+      gcloud container clusters describe [CLUSTER_NAME]> \
+        --format=json | jq -r 'select(.nodePools[].config.shieldedInstanceConfig.enableIntegrityMonitoring==true 
+          and .nodePools[].config.shieldedInstanceConfig.enableSecureBoot==true) | "\(.name)"'
+      ```
+      
     impact: 9
     effort: 6
     platform: GCP
@@ -3619,19 +3723,24 @@ controls:
       plane without any network restriction on source IP ranges that can access it.  Even
       though the access controls protecting the API server require authentication and
       authorization, the API server is open to denial-of-service attacks, being probed
-      by bots/scanners inflating Stackdriver logs, and direct exploitation should a
+      by bots/scanners inflating activity logs, and direct exploitation should a
       Kubernetes API Server vulnerability be discovered.
     remediation: |-
-      Consider rebuilding GKE clusters with the "private master endpoint" configuration to ensure the API server is not assigned a routable public IP address.  Additional considerations:
+      Consider rebuilding GKE clusters with the "private master endpoint" configuration to ensure 
+      the API server is not assigned a routable public IP address.  Additional considerations:
 
       * Converting a public to a private GKE cluster requires rebuilding it.
-      * Use a dedicated /28 subnet for the control plane IP space that does not overlap anywhere and is not part of 172.17.0.0/16.
+      * Use a dedicated `/28` subnet for the control plane IP space that does not overlap anywhere and is not part of `172.17.0.0/16`.
       * Private control planes leverage VPC peering and count toward VPC peering quota.
       * Modifications to the VPC peering or firewall rules from the control plane to the worker nodes can break the cluster.
     validation: |-
-      Run `gcloud container clusters describe <clustername> --format=json
-      | jq -r 'select(.privateClusterConfig.enablePrivateEndpoint==true) | "(.name)"'`
-      and ensure that the cluster's name is listed.
+      For each cluster, run the following command and ensure that the cluster's name is listed.
+      
+      ```
+      gcloud container clusters describe [CLUSTER_NAME] \
+        --format=json | jq -r 'select(.privateClusterConfig.enablePrivateEndpoint==true) | "\(.name)"'
+      ```
+      
     impact: 9
     effort: 9
     platform: GCP
@@ -3668,14 +3777,17 @@ controls:
       two pods on the same node do not exit the host's network and therefore are omitted
       from VPC Flow Logging.  Enabling Intranode Visibility allows this traffic to be
       recorded in the VPC Flow Logs for analysis and diagnosis.
-    remediation:
-      'Configure Intranode Visibility on GKE Clusters running in VPCs with
+    remediation: |
+      Configure Intranode Visibility on GKE Clusters running in VPCs with
       Flow logging enabled.  Considerations: VPC Flow logs may increase in size and
-      contribute to additional cost.'
+      contribute to additional cost.
     validation: |-
-      Run `gcloud container clusters describe <clustername> --format=json
-      | jq -r 'select(.networkConfig.enableIntraNodeVisibility==true) | "(.name)"'`
-      and ensure that the cluster's name is listed.
+      For each cluster, run the following command and ensure that the cluster's name is listed.
+      
+      ```
+      gcloud container clusters describe [CLUSTER_NAME] \
+        --format=json | jq -r 'select(.networkConfig.enableIntraNodeVisibility==true) | "\(.name)"'
+      ```
     impact: 2
     effort: 5
     platform: GCP
@@ -3705,7 +3817,7 @@ controls:
           - nist-csf-de.cm-7
       - google cloud
   - id: darkbit-gcp-48
-    title: GKE Logs Should Be Sent to Stackdriver/GCP Cloud Monitoring
+    title: GKE Logs Should Be Sent to Stackdriver/Google Cloud Monitoring
     description:
       By default, GKE enables a Stackdriver log export managed add-on capability
       that ships all Host OS, Kubernetes components, and container logs to the Stackdriver
@@ -3720,9 +3832,12 @@ controls:
       option to gcloud on all GKE clusters. Existing clusters can have this feature
       enabled in-place with no downtime.
     validation: |-
-      Run `gcloud container clusters describe <clustername> --format=json
-      | jq -r 'select(.loggingService=="logging.googleapis.com/kubernetes") | "(.name)"'`
-      and ensure that the cluster's name is listed.
+      For each cluster, run the following command and ensure that the cluster's name is listed.
+      
+      ```
+      gcloud container clusters describe [CLUSTER_NAME] \
+        --format=json | jq -r 'select(.loggingService=="logging.googleapis.com/kubernetes") | "\(.name)"'
+      ```
     impact: 9
     effort: 3
     platform: GCP
@@ -3759,19 +3874,22 @@ controls:
       degree of security, and it receives automatic updates from Google.  The track
       record for security issues that affect Ubuntu nodes in GKE that did not affect
       COS nodes is also important to consider.
-    remediation:
-      'Configure your GKE Node Pools to leverage either the COS or COS_CONTAINERD
+    remediation: |
+      Configure your GKE Node Pools to leverage either the COS or COS_CONTAINERD
       image type.  The COS image leverages Docker, and the COS_CONTAINERD image implements
-      only containerd and does not use the commonly known Docker socket at `/var/run/docker.sock`
+      only `containerd` and does not use the commonly known Docker socket at `/var/run/docker.sock`
       which allows applications that can access that socket to effectively be "root"
       on the host.  If your workloads do not require the ability to mount the docker
       socket for activities such as image building in-cluster or certain security features,
       COS_CONTAINERD offers an even smaller attack surface than COS.  Considerations:
-      changing the image type recreates the nodes in the node pool.'
+      changing the image type recreates the nodes in the node pool.
     validation: |-
-      Run `gcloud container clusters describe <clustername> --format=json
-      | jq -r 'select(.nodePools[].config.imageType | test("^COS")) | "(.name)"'` and
-      ensure that the cluster's name is listed.
+      For each cluster, run the following command and ensure that the cluster's name is listed.
+      
+      ```
+      gcloud container clusters describe [CLUSTER_NAME] \
+        --format=json | jq -r 'select(.nodePools[].config.imageType | test("^COS")) | "\(.name)"'
+      ```
     impact: 5
     effort: 8
     platform: GCP
@@ -3828,9 +3946,12 @@ controls:
       Configure the node pools to enable AutoRepair during node pool creation
       or to existing clusters with the `--enable-autorepair` feature set.
     validation: |
-      Run `gcloud container clusters describe <clustername> --format=json
-      | jq -r 'select(.nodePools[].management.autoRepair==true) | "(.name)"'` and ensure
-      that the cluster's name is listed.
+      For each clustr, run the following command and ensure that the cluster's name is listed.
+      
+      ```
+      gcloud container clusters describe [CLUSTER_NAME]> \
+        --format=json | jq -r 'select(.nodePools[].management.autoRepair==true) | "\(.name)"'
+      ```
     impact: 5
     effort: 3
     platform: GCP
@@ -3871,9 +3992,12 @@ controls:
       recommended to validate that all workloads can handle the upgrade process smoothly
       in a development cluster before enabling this setting in production.
     validation: |-
-      Run `gcloud container clusters describe <clustername> --format=json
-      | jq -r 'select(.nodePools[].management.autoUpgrade==true) | "(.name)"'` and ensure
-      that the cluster's name is listed.
+      For each cluster, run the following command and ensure that the cluster's name is listed.
+      
+      ```
+      gcloud container clusters describe [CLUSTER_NAME] \
+        --format=json | jq -r 'select(.nodePools[].management.autoUpgrade==true) | "\(.name)"'
+      ```
     impact: 2
     effort: 7
     platform: GCP
@@ -3903,7 +4027,7 @@ controls:
     title: GKE Subnet Alias Ranges Should Be Configured
     description:
       In order to support private GKE Clusters, Alias IP ranges on the VPC
-      Subnets is required.  In addition to private clusters, Alias IP ranges simplify
+      Subnets are required.  In addition to private clusters, Alias IP ranges simplify
       the route tables in the VPC, reduce the number of "hops" traffic takes from load
       balancers to Pods, and allows the GCE network interfaces to perform anti-spoofing
       checks as IP forwarding is not required on the instance.  Finally, the separation
@@ -3914,9 +4038,12 @@ controls:
       ranges and secondary ranges for Pods and Services.  This can only be done at cluster
       creation time.
     validation: |-
-      Run `gcloud container clusters describe <clustername> --format=json
-      | jq -r 'select(.ipAllocationPolicy.useIpAliases==true) | "(.name)"'` and ensure
-      that the cluster's name is listed.
+      For each cluster, run the following command and ensure that the cluster's name is listed.
+      
+      ```
+      gcloud container clusters describe [CLUSTER_NAME] \
+        --format=json | jq -r 'select(.ipAllocationPolicy.useIpAliases==true) | "\(.name)"'
+      ```
     impact: 5
     effort: 9
     platform: GCP
@@ -3957,15 +4084,18 @@ controls:
       compromise should an attacker gain access to a single pod with a mounted Kubernetes
       service account or a valid cluster credential.
     remediation:
-      Configure the cluster without the `--enable-legacy-authorization` flag
+      Configure clusters without the `--enable-legacy-authorization` flag
       set.  If migrating an existing cluster from ABAC to RBAC by modifying this setting
       in-place, ensure that all the required RBAC RoleBindings and ClusterRoleBindings
       are present first.  This should be performed in a development environment before
       applying this process to production clusters.
     validation: |-
-      Run `gcloud container clusters describe <clustername> --format=json
-      | jq -r 'select(.legacyAbac.enabled | not) | "(.name)"'` and ensure that the cluster's
-      name is listed.
+      For each cluster, run the following command and ensure that the cluster's name is listed.
+      
+      ```
+      gcloud container clusters describe [CLUSTER_NAME] \
+        --format=json | jq -r 'select(.legacyAbac.enabled | not) | "\(.name)"'
+      ``` 
     impact: 9
     effort: 8
     platform: GCP
@@ -4005,18 +4135,21 @@ controls:
       during a desired window and point-in-time recovery is enabled.  Existing instances
       can be modified to have these settings take effect, but it requires the instance
       to be restarted.
-    validation:
-      'In each project, run `gcloud sql instances list --format=json | jq
-      -r ''.[] | select(.settings.backupConfiguration.enabled==false) | "(.name) Backups
-      on: (.settings.backupConfiguration.enabled) and PITR on: (.settings.backupConfiguration.binaryLogEnabled)"''`
-      and ensure no entries are listed.'
+    validation: |-
+      In each project, run the following command and ensure no entries are listed.
+      
+      ```
+      gcloud sql instances list --format=json | jq -r '.[] | \
+        select(.settings.backupConfiguration.enabled==false) | 
+        "\(.name) Backups on: \(.settings.backupConfiguration.enabled) and PITR on: \(.settings.backupConfiguration.binaryLogEnabled)"'
+      ```
     impact: 9
     effort: 3
     platform: GCP
     category: Management and Governance
     resource: Cloud SQL
     nodes:
-      - PLACEHOLDER
+      - GCP_SQLADMIN_INSTANCE
     refs:
       - text: Cloud SQL MySQL Backups
         url: https://cloud.google.com/sql/docs/mysql/backup-recovery/backups
@@ -4050,11 +4183,16 @@ controls:
     remediation:
       Remove the IAM role binding of "Project Editor" from the default compute
       service account in all projects.
-    validation: 'For each project, run `gcloud projects get-iam-policy
-      PROJECTID --format=json | jq -r ''select(.bindings) | .bindings[] | .role as $role
-      | select(.role=="roles/editor") | "($role): (.members[])"''` and validate that the
+    validation: |-
+      For each project, run the following command and validate that the
       default compute service account ending in `-compute@developer.gserviceaccount.com`
-      is not present.'
+      is not present.
+      
+      ```
+      gcloud projects get-iam-policy [PROJECT_ID] \
+        --format=json | jq -r 'select(.bindings) | .bindings[] | .role as $role | 
+          select(.role=="roles/editor") | "\($role): \(.members[])"'
+      ``` 
     impact: 7
     effort: 7
     platform: GCP
@@ -4136,7 +4274,7 @@ controls:
       service account key creation through the `Disable service account key creation` Organization policy.
     validation: |-
       Run the following command to list all service accounts with user-managed keys, and 
-      confirm each service account returns `0 items`.
+      confirm each service account returns zero items.
 
       ```
       for i in $(gcloud iam service-accounts list | grep 'iam.gserviceaccount.com' | awk '{print $2}')
@@ -4174,8 +4312,18 @@ controls:
           - nist-csf-todo
   - id: darkbit-gcp-63
     title: GCP Service Accounts Should Not Be Bound To Admin, Editor, or Owner Roles
-    description: In most use cases, GCP Service Accounts should be bound to predefined or custom roles specific to the functions performed by that account.  Attaching `roles/owner`, `roles/editor`, or "admin" roles provides an overly broad and powerful set of permissions that makes the credential highly valuable to an attacker if leaked or compromised.  Notable exceptions are Service Accounts used for deployment and lifecycle management of other cloud resources (e.g. Terraform, Deployment Manager).
-    remediation: Review the IAM bindings granting `roles/owner`, `roles/editor`, or "admin" roles such as `roles/iam.serviceAccountAdmin` and determine if those bindings can be replaced with a small number of predefined roles and/or custom roles using the GCP IAM Recommender to understand which permissions are actually used in the past 90 days.
+    description: |
+      In most use cases, GCP Service Accounts should be bound to predefined or custom roles 
+      specific to the functions performed by that account.  Attaching `roles/owner`, `roles/editor`, 
+      or `admin` roles provides an overly broad and powerful set of permissions that makes the 
+      credential highly valuable to an attacker if leaked or compromised.  Notable exceptions are 
+      Service Accounts used for deployment and lifecycle management of other cloud resources 
+      (e.g. Terraform, Deployment Manager).
+    remediation: |
+      Review the IAM bindings granting `roles/owner`, `roles/editor`, or "admin" roles such as 
+      `roles/iam.serviceAccountAdmin` and determine if those bindings can be replaced with a small 
+      number of predefined roles and/or custom roles using the GCP IAM Recommender to understand 
+      which permissions are actually used in the past 90 days.
     validation: TODO
     impact: 5
     effort: 7
@@ -4218,11 +4366,11 @@ controls:
 
       ```
       comm -1 -2 \
-        <(gcloud projects get-iam-policy $PROJECT_ID \
+        <(gcloud projects get-iam-policy [PROJECT_ID] \
           --filter=bindings.role:roles/iam.serviceAccountAdmin \
           --flatten='bindings[]' \
           --format="csv[no-heading](bindings.members[])" | sort) \
-        <(gcloud projects get-iam-policy $PROJECT_ID \
+        <(gcloud projects get-iam-policy [PROJECT_ID] \
           --filter=bindings.role:roles/iam.serviceAccountUser \
           --flatten='bindings[]' \
           --format="csv[no-heading](bindings.members[])" | sort)
@@ -4335,17 +4483,17 @@ controls:
       Set the rotation period of KMS keys to a value less than or equal to `90` days.
 
       ```
-      gcloud kms keys update new --keyring=KEY_RING \
-        --location=LOCATION \
-        --next-rotation-time=NEXT_ROTATION_TIME \
-        --rotation-period=ROTATION_PERIOD
+      gcloud kms keys update new --keyring=[KEY_RING] \
+        --location=global \
+        --next-rotation-time=[NEXT_ROTATION_TIME] \
+        --rotation-period=[ROTATION_PERIOD]
       ```
     validation: |-
       Run the following command and verify the rotation period is less than or equal to `90` days.
 
       ```
-      gcloud kms keys list --keyring=<KEY_RING> \
-        --location=<LOCATION> \
+      gcloud kms keys list --keyring=[KEY_RING] \
+        --location=global \
         --format=json'(rotationPeriod)'
       ```
     impact: 5
@@ -4378,7 +4526,7 @@ controls:
       to encrypt and decrypt data at rest using an encryption key(s). As a best practice to ensure
       separation of duties, no user should have both of these roles assigned at the same time.
     remediation: |
-      From the console, go to [IAM & Admin/IAM](https://console.cloud.google.com/iam-admin/iam) and for  
+      From the console, go to [IAM & Admin/IAM](https://console.cloud.google.com/iam-admin/iam) and for 
       any users with the `Cloud KMS Admin` role remove any of the following if present: `Cloud KMS 
       CryptoKey Encrypter/Decrypter`, `Cloud KMS CryptoKey Encrypter`, and `Cloud KMS CryptoKey Decrypter`.
 
@@ -4386,7 +4534,7 @@ controls:
       Run the following command to list all users and role assignments.
 
       ```
-      gcloud projects get-iam-policy PROJECT_ID
+      gcloud projects get-iam-policy [PROJECT_ID]
       ```
 
       Ensure that there are no common users found in the member section for roles `cloudkms.admin` and 
@@ -4423,14 +4571,14 @@ controls:
       Create a sink to export all log entries to a Google Cloud Storage bucket.
 
       ```
-      gcloud logging sinks create <sink-name> storage.googleapis.com/DESTINATION_BUCKET_NAME
+      gcloud logging sinks create [SINK_NAME] storage.googleapis.com/[DESTINATION_BUCKET_NAME]
       ```
     validation: |-
-      Run the following command and verify that at least one sink has an empty `filter`.
+      For each project, run the following command and verify that at least one sink has an empty `filter`.
 
       ```
-       gcloud logging sinks list --folder=FOLDER_ID | --organization=ORGANIZATION_ID | --project=PROJECT_ID
-       ```
+      gcloud logging sinks list --project=[PROJECT_ID]
+      ```
     impact: 8
     effort: 4
     platform: GCP
@@ -4462,33 +4610,33 @@ controls:
       storage buckets from being overwritten or accidentally deleted. Set up retention 
       policies and configure Bucket Lock on all storage buckets that are used as log sinks.
     remediation: |-
-      Run the following command to list log sinks that exporting to storage buckets:
+      For each project, run the following command to list log sinks that exporting to storage buckets:
 
       ```
-      gcloud logging sinks list --folder=FOLDER_ID | --organization=ORGANIZATION_ID | --project=PROJECT_ID
+      gcloud logging sinks list --project=[PROJECT_ID]
       ```
 
-      For each bucket, set a Retention Policy and enable Bucket Lock
+      For each bucket, set a `Retention Policy` and enable `Bucket Lock`
 
       ```
       gsutil retention set [TIME_DURATION] gs://[BUCKET_NAME]
       gsutil retention lock gs://[BUCKET_NAME]
       ```
 
-      Note that locking a bucket is an irreversible action. Once you lock a bucket, 
+      __Note__ that locking a bucket is an irreversible action. Once you lock a bucket, 
       you cannot remove the retention policy from the bucket or decrease the retention 
       period for the policy.
     validation: |-
-      Run the following command to list log sinks that exporting to storage buckets:
+      For each project, run the following command to list log sinks that are exporting to storage buckets:
 
       ```
-      gcloud logging sinks list --folder=FOLDER_ID | --organization=ORGANIZATION_ID | --project=PROJECT_ID
+      gcloud logging sinks list --project=[PROJECT_ID]
       ```
 
-      For each bucket, verify Retention Policies and Bucket Lock are enabled.
+      For each bucket, verify `Retention Policies` and `Bucket Lock` are enabled.
 
       ```
-      gsutil retention get gs://BUCKET_NAME
+      gsutil retention get gs://[BUCKET_NAME]
       ```
     impact: 8
     effort: 7
@@ -4529,9 +4677,9 @@ controls:
       ```
       (protoPayload.serviceName="cloudresourcemanager.googleapis.com")
         AND (ProjectOwnership OR projectOwnerInvitee)
-      OR (protoPayload.serviceData.policyDelta.bindingDeltas.action="REMOVE"
+       OR (protoPayload.serviceData.policyDelta.bindingDeltas.action="REMOVE"
         AND protoPayload.serviceData.policyDelta.bindingDeltas.role="roles/owner") 
-      OR (protoPayload.serviceData.policyDelta.bindingDeltas.action="ADD"
+       OR (protoPayload.serviceData.policyDelta.bindingDeltas.action="ADD"
         AND protoPayload.serviceData.policyDelta.bindingDeltas.role="roles/owner")
       ```
 
@@ -4550,9 +4698,9 @@ controls:
       ```
       (protoPayload.serviceName="cloudresourcemanager.googleapis.com")
         AND (ProjectOwnership OR projectOwnerInvitee)
-      OR (protoPayload.serviceData.policyDelta.bindingDeltas.action="REMOVE"
+       OR (protoPayload.serviceData.policyDelta.bindingDeltas.action="REMOVE"
         AND protoPayload.serviceData.policyDelta.bindingDeltas.role="roles/owner") 
-      OR (protoPayload.serviceData.policyDelta.bindingDeltas.action="ADD"
+       OR (protoPayload.serviceData.policyDelta.bindingDeltas.action="ADD"
         AND protoPayload.serviceData.policyDelta.bindingDeltas.role="roles/owner")
       ```
 
@@ -4563,7 +4711,7 @@ controls:
       ```
 
       Ensure `conditions.conditionThreshold.filter` is set to 
-      `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` is set to `true`.
+      `metric.type="logging.googleapis.com/user/[Log Metric Name]"` and `enabled` is set to `true`.
     impact: 5
     effort: 5
     platform: GCP
@@ -4633,7 +4781,7 @@ controls:
 
       Ensure that the output contains at least one alert policy where 
       `conditions.conditionThreshold.filter` is set to 
-      `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and 
+      `metric.type="logging.googleapis.com/user/[Log Metric Name]"` and 
       `enabled` is set to `true`.
     impact: 8
     effort: 5
@@ -4669,8 +4817,8 @@ controls:
 
       ```
       resource.type="gce_firewall_rule"
-      AND jsonPayload.event_subtype="compute.firewalls.patch"
-      OR jsonPayload.event_subtype="compute.firewalls.insert"
+        AND jsonPayload.event_subtype="compute.firewalls.patch"
+        OR jsonPayload.event_subtype="compute.firewalls.insert"
       ```
 
       In the Metric Editor menu, fill out the `name` field. Set `Units` to `1` (default)
@@ -4701,7 +4849,7 @@ controls:
       ```
 
       Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
-      set to `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` set to `true`.
+      set to `metric.type="logging.googleapis.com/user/[Log Metric Name]"` and `enabled` set to `true`.
     impact: 8
     effort: 5
     platform: GCP
@@ -4769,7 +4917,7 @@ controls:
       ```
 
       Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
-      set to `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` set to `true`.
+      set to `metric.type="logging.googleapis.com/user/[Log Metric Name]"` and `enabled` set to `true`.
     impact: 8
     effort: 5
     platform: GCP
@@ -4847,7 +4995,7 @@ controls:
       ```
 
       Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
-      set to `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` set to `true`.
+      set to `metric.type="logging.googleapis.com/user/[Log Metric Name]"` and `enabled` set to `true`.
     impact: 8
     effort: 5
     platform: GCP
@@ -4915,7 +5063,7 @@ controls:
       ```
 
       Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
-      set to `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` set to `true`.
+      set to `metric.type="logging.googleapis.com/user/[Log Metric Name]"` and `enabled` set to `true`.
     impact: 8
     effort: 5
     platform: GCP
@@ -4980,7 +5128,7 @@ controls:
       ```
 
       Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
-      set to `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` set to `true`.
+      set to `metric.type="logging.googleapis.com/user/[Log Metric Name]"` and `enabled` set to `true`.
     impact: 8
     effort: 5
     platform: GCP
@@ -5054,7 +5202,7 @@ controls:
       Enable DNSSEC for any Managed Zones without DNSSEC enabled.
 
       ```
-      gcloud dns managed-zones update <ZONE_NAME> --dnssec-state on
+      gcloud dns managed-zones update [ZONE_NAME] --dnssec-state on
       ```
     validation: |-
       List all Managed Zones in a project.
@@ -5066,7 +5214,7 @@ controls:
       For each zone with `public` visibility, get its metadata and esure that the `dnssecConfig.state` property is `on`.
 
       ```
-      gcloud dns managed-zones describe <ZONE_NAME>
+      gcloud dns managed-zones describe [ZONE_NAME]
       ```
     impact: 5
     effort: 5
@@ -5098,13 +5246,13 @@ controls:
       turned off and re-enabled with different settings. To turn off DNSSEC, run the following command:
 
       ```
-      gcloud dns managed-zones update <ZONE_NAME> --dnssec-state off
+      gcloud dns managed-zones update [ZONE_NAME] --dnssec-state off
       ```
 
       Update the key-signing algorithm for a Managed Zone.
 
       ```
-      gcloud dns managed-zones update <ZONE_NAME> \
+      gcloud dns managed-zones update [ZONE_NAME] \
         --dnssec-state on \
         --ksk-algorithm ECDSAP256SHA256 --ksk-key-length 256 \
         --zsk-algorithm ECDSAP256SHA256 --zsk-key-length 256 \
@@ -5114,7 +5262,7 @@ controls:
       List Managed Zones and ensure SHA1 is not configured.
 
       ```
-      gcloud dns managed-zones describe <ZONE_NAME> \
+      gcloud dns managed-zones describe [ZONE_NAME] \
         --format="json(dnsName,dnssecConfig.state,dnssecConfig.defaultKeySpecs)"
       ```
     impact: 5
@@ -5147,13 +5295,13 @@ controls:
       turned off and re-enabled with different settings. To turn off DNSSEC, run the following command:
 
       ```
-      gcloud dns managed-zones update <ZONE_NAME> --dnssec-state off
+      gcloud dns managed-zones update [ZONE_NAME] --dnssec-state off
       ```
 
       Update the zone-signing algorithm for a Managed Zone.
 
       ```
-      gcloud dns managed-zones update <ZONE_NAME> \
+      gcloud dns managed-zones update [ZONE_NAME] \
         --dnssec-state on \
         --ksk-algorithm ECDSAP256SHA256 --ksk-key-length 256 \
         --zsk-algorithm ECDSAP256SHA256 --zsk-key-length 256 \
@@ -5163,7 +5311,7 @@ controls:
       List Managed Zones and ensure SHA1 is not configured.
 
       ```
-      gcloud dns managed-zones describe <ZONE_NAME> \
+      gcloud dns managed-zones describe [ZONE_NAME] \
         --format="json(dnsName,dnssecConfig.state,dnssecConfig.defaultKeySpecs)"
       ```
     impact: 5
@@ -5195,24 +5343,24 @@ controls:
       For any instances with the Default Compute Service Account attached, stop the instance.
 
       ```
-      gcloud compute instances stop <INSTANCE_NAME>
+      gcloud compute instances stop [INSTANCE_NAME]
       ```
 
       Update the instance to use a non-default Service Account.
 
       ```
-      gcloud compute instances set-service-account <INSTANCE_NAME> \
-        --service-account=<SERVICE_ACCOUNT>
+      gcloud compute instances set-service-account [INSTANCE_NAME] \
+        --service-account=[SERVICE_ACCOUNT]
       ```
 
       Restart the instance.
 
       ```
-      gcloud compute instances start <INSTANCE_NAME>
+      gcloud compute instances start [INSTANCE_NAME]
       ```
 
     validation: |-
-      List instances in the the project.
+      List instances in the project.
 
       ```
       gcloud compute instances list
@@ -5221,7 +5369,7 @@ controls:
       Get the details of each instance and ensure that none of the Service Accounts end with `-compute@developer.gserviceaccount.com`.
 
       ```
-      gcloud compute instances describe <INSTANCE_NAME> --zone <ZONE>
+      gcloud compute instances describe [INSTANCE_NAME] --zone [ZONE]
       ```
     impact: 5
     effort: 8
@@ -5254,21 +5402,21 @@ controls:
       For any instances that have full access scope, stop the instance:
 
       ```
-      gcloud compute instances stop <INSTANCE_NAME>
+      gcloud compute instances stop [INSTANCE_NAME]
       ```
 
       Update the instance scopes.
 
       ```
-      gcloud compute instances set-service-account <INSTANCE_NAME> \
-        --service-account=<SERVICE_ACCOUNT> \
+      gcloud compute instances set-service-account [INSTANCE_NAME] \
+        --service-account=[SERVICE_ACCOUNT] \
         --scopes [<SCOPE1>, <SCOPE2>...]
       ```
 
       Restart the instance.
 
       ```
-      gcloud compute instances start <INSTANCE_NAME>
+      gcloud compute instances start [INSTANCE_NAME]
       ```
     validation: |-
       List GCE instances in a project.
@@ -5280,7 +5428,7 @@ controls:
       Get the details of each instance and ensure `serviceAccount`.`scopes` does not include `https://www.googleapis.com/auth/cloud-platform`.
 
       ```
-      gcloud compute instances describe <INSTANCE_NAME> --zone <ZONE> | grep -v "gke-"
+      gcloud compute instances describe [INSTANCE_NAME] --zone [ZONE] | grep -v "gke-"
       ```
     impact: 5
     effort: 8
@@ -5312,7 +5460,7 @@ controls:
       Block project-wide SSH keys by setting `block-project-ssh-keys` to `true`.
 
       ```
-      gcloud compute instances add-metadata <INSTANCE_NAME> \
+      gcloud compute instances add-metadata [INSTANCE_NAME] \
         --metadata block-project-ssh-keys=TRUE
       ```
     validation: |-
@@ -5325,7 +5473,7 @@ controls:
       For every instance, get the instance metadata and ensure `block-project-ssh-keys` is set to `true`.
 
       ```
-      gcloud compute instances describe <INSTANCE_NAME>
+      gcloud compute instances describe [INSTANCE_NAME]
       ```
     impact: 5
     effort: 3
@@ -5352,7 +5500,7 @@ controls:
   - id: darkbit-gcp-88
     title: OSLogin Should Be Enabled In Compute Projects And GCE Instances Should Not Override Via Metadata
     description: |
-      Enabling osLogin ensures that SSH keys used to connect to instances are mapped with IAM users. Revoking 
+      Enabling `osLogin` ensures that SSH keys used to connect to instances are mapped with IAM users. Revoking 
       access to IAM user will revoke all the SSH keys associated with that particular user. This facilitates 
       centralized and automated SSH key pair management.
     remediation: |-
@@ -5366,7 +5514,7 @@ controls:
       And remove instance metadata that overrides the project settings.
 
       ```
-      gcloud compute instances remove-metadata <INSTANCE_NAME> \
+      gcloud compute instances remove-metadata [INSTANCE_NAME] \
         --keys=enable-oslogin
       ```
     validation: |-
@@ -5380,7 +5528,7 @@ controls:
       no instance in the project overrides the project setting.
 
       ```
-      gcloud compute instances describe <INSTANCE_NAME>
+      gcloud compute instances describe [INSTANCE_NAME]
       ```
     impact: 5
     effort: 8
@@ -5415,16 +5563,16 @@ controls:
       Disable the virtual serial console.
 
       ```
-      gcloud compute instances add-metadata <INSTANCE_NAME> \
-        --zone=<ZONE> \
+      gcloud compute instances add-metadata [INSTANCE_NAME] \
+        --zone=[ZONE] \
         --metadata=serial-port-enable=false
       ```
     validation: |-
       Check instance metadata. The `serial-port-enable` should either be missing or set to `0`,
 
       ```
-      gcloud compute instances describe <vmName> \
-        --zone=<ZONE> \
+      gcloud compute instances describe [VM_NAME] \
+        --zone=[ZONE] \
         --format="json(metadata.items[].key,metadata.items[].value)"
       ```
     impact: 5
@@ -5496,21 +5644,21 @@ controls:
       Create compute instances with a CSEK.
 
       ```
-      gcloud compute instances create <INSTANCE_NAME> \
+      gcloud compute instances create [INSTANCE_NAME] \
         --csek-key-file <key-file.json>
       ```
 
       Encrypt standalone persistent disks.
 
       ```
-      gcloud compute disks create <DISK_NAME> \
+      gcloud compute disks create [DISK_NAME] \
         --csek-key-file <key-file.json>
       ```
     validation: |-
       Verify Compute Engine disks are encrypted with CSEKs.
 
       ```
-      gcloud compute disks describe <DISK_NAME> \
+      gcloud compute disks describe [DISK_NAME] \
         --zone=ZONE \
         --format="json(diskEncryptionKey,name)"
       ```
@@ -5553,13 +5701,13 @@ controls:
       To update an instance to enabled Shielded VM, first stop the VM:
 
       ```
-      gcloud compute instances stop <INSTANCE_NAME>
+      gcloud compute instances stop [INSTANCE_NAME]
       ```
 
       Then update the instance.
 
       ```
-      gcloud compute instances update <INSTANCE_NAME> \
+      gcloud compute instances update [INSTANCE_NAME] \
         --shielded-vtpm \
         --shielded-vm-integrity-monitoring
       ```
@@ -5567,21 +5715,21 @@ controls:
       Optionally, also enable secure boot.
 
       ```
-      gcloud compute instances update <INSTANCE_NAME> \
+      gcloud compute instances update [INSTANCE_NAME] \
         --shielded-vm-secure-boot
       ```
 
       Then restart the instance.
 
       ```
-      gcloud compute instances start <INSTANCE_NAME>
+      gcloud compute instances start [INSTANCE_NAME]
       ```
     validation: |-
       List instances in a project and ensure `shieldedInstanceConfig` configuration is present and 
       that configuration has the `enableIntegrityMonitoring` and `enableVtpm` set to `true`. 
 
       ```
-      gcloud compute instances describe <INSTANCE_NAME>
+      gcloud compute instances describe [INSTANCE_NAME]
       ```
     impact: 5
     effort: 9
@@ -5614,8 +5762,8 @@ controls:
       Remove anonymous and public access from buckets.
 
       ```
-      gsutil iam ch -d allUsers gs://<BUCKET_NAME>
-      gsutil iam ch -d allAuthenticatedUsers gs://<BUCKET_NAME>
+      gsutil iam ch -d allUsers gs://[BUCKET_NAME]
+      gsutil iam ch -d allAuthenticatedUsers gs://[BUCKET_NAME]
       ```
     validation: |-
       List all buckets in a project.
@@ -5627,7 +5775,7 @@ controls:
       Check the IAM Policy for each bucket and ensure no role contains `allUsers` or `allAuthenticatedUsers`.
 
       ```
-      gsutil iam get gs://<BUCKET_NAME>
+      gsutil iam get gs://[BUCKET_NAME]
       ```
     impact: 8
     effort: 3
@@ -5653,15 +5801,15 @@ controls:
   - id: darkbit-gcp-95
     title: GCS Buckets Should Have Uniform IAM Access Configured
     description: |
-      Cloud Storage has uniform bucket- level access. Using this feature disables ACLs for all Cloud 
-      Storage resources: access to Cloud Storage resources then is granted exclusively through Cloud 
+      Cloud Storage has uniform bucket-level access. Using this feature disables ACLs for all Cloud 
+      Storage resources. Access to Cloud Storage resources is then granted exclusively through Cloud 
       IAM. Enabling uniform bucket-level access guarantees that if a Storage bucket is not publicly 
       accessible, no object in the bucket is publicly accessible either.
     remediation: |-
       Enable `uniformbucketlevelaccess` for buckets.
 
       ```
-      gsutil uniformbucketlevelaccess set on gs://<BUCKET_NAME>/
+      gsutil uniformbucketlevelaccess set on gs://[BUCKET_NAME]
       ```
     validation: |-
       List all buckets in a project.
@@ -5673,7 +5821,7 @@ controls:
       For each bucket, verify that uniform bucket-level access is enabled.
 
       ```
-      gsutil uniformbucketlevelaccess get gs://<BUCKET_NAME>/
+      gsutil uniformbucketlevelaccess get gs://[BUCKET_NAME]
       ```
     impact: 8
     effort: 5
@@ -5708,7 +5856,7 @@ controls:
       Diable `local_infile` for MySQL Cloud SQL instances.
 
       ```
-      gcloud sql instances patch <INSTANCE_NAME> \
+      gcloud sql instances patch [INSTANCE_NAME] \
         --database-flags local_infile=off
       ```
     validation: |-
@@ -5721,8 +5869,9 @@ controls:
       Ensure `local_infile` is `off` for each instance.
 
       ```
-      gcloud sql instances describe <INSTANCE_NAME> \
-        --format=json | jq '.settings.databaseFlags[] | select(.name=="local_infile")|.value'
+      gcloud sql instances describe [INSTANCE_NAME] \
+        --format=json | jq '.settings.databaseFlags[] | 
+          select(.name=="local_infile") | .value'
       ```
     impact: 8
     effort: 3
@@ -5756,7 +5905,7 @@ controls:
       Enable `log_checkpoints` for PostgreSQL Cloud SQL instances.
 
       ```
-      gcloud sql instances patch <INSTANCE_NAME> \
+      gcloud sql instances patch [INSTANCE_NAME] \
         --database-flags log_checkpoints=on
       ```
     validation: |-
@@ -5769,8 +5918,9 @@ controls:
       Ensure `log_checkpoints` is `on` for each instance.
 
       ```
-      gcloud sql instances describe <INSTANCE_NAME> \
-        --format=json | jq '.settings.databaseFlags[] | select(.name=="log_checkpoints")|.value'
+      gcloud sql instances describe [INSTANCE_NAME] \
+        --format=json | jq '.settings.databaseFlags[] | 
+          select(.name=="log_checkpoints") | .value'
       ```
     impact: 5
     effort: 3
@@ -5807,7 +5957,7 @@ controls:
       Enable `log_connections` for PostgreSQL Cloud SQL instances.
 
       ```
-      gcloud sql instances patch <INSTANCE_NAME> \
+      gcloud sql instances patch [INSTANCE_NAME] \
         --database-flags log_connections=on
       ```
     validation: |-
@@ -5820,8 +5970,9 @@ controls:
       Ensure `log_connections` is `on` for each instance.
 
       ```
-      gcloud sql instances describe <INSTANCE_NAME> \
-        --format=json | jq '.settings.databaseFlags[] | select(.name=="log_connections")|.value'
+      gcloud sql instances describe [INSTANCE_NAME] \
+        --format=json | jq '.settings.databaseFlags[] | 
+          select(.name=="log_connections") | .value'
       ```
     impact: 5
     effort: 3
@@ -5857,7 +6008,7 @@ controls:
       Enable `log_disconnections` for PostgreSQL Cloud SQL instances.
 
       ```
-      gcloud sql instances patch <INSTANCE_NAME> \
+      gcloud sql instances patch [INSTANCE_NAME] \
         --database-flags log_disconnections=on
       ```
     validation: |-
@@ -5870,8 +6021,9 @@ controls:
       Ensure `log_disconnections` is `on` for each instance.
 
       ```
-      gcloud sql instances describe <INSTANCE_NAME> \
-        --format=json | jq '.settings.databaseFlags[] | select(.name=="log_disconnections")|.value'
+      gcloud sql instances describe [INSTANCE_NAME] \
+        --format=json | jq '.settings.databaseFlags[] | 
+          select(.name=="log_disconnections") | .value'
       ```
     impact: 5
     effort: 3
@@ -5907,7 +6059,7 @@ controls:
       Enable `log_lock_waits` for PostgreSQL Cloud SQL instances.
 
       ```
-      gcloud sql instances patch <INSTANCE_NAME> \
+      gcloud sql instances patch [INSTANCE_NAME] \
         --database-flags log_lock_waits=on
       ```
     validation: |-
@@ -5920,8 +6072,9 @@ controls:
       Ensure `log_lock_waits` is `on` for each instance.
 
       ```
-      gcloud sql instances describe <INSTANCE_NAME> \
-        --format=json | jq '.settings.databaseFlags[] | select(.name=="log_lock_waits")|.value'
+      gcloud sql instances describe [INSTANCE_NAME] \
+        --format=json | jq '.settings.databaseFlags[] | 
+          select(.name=="log_lock_waits") | .value'
       ```
     impact: 3
     effort: 3
@@ -5955,7 +6108,7 @@ controls:
       Enable `log_min_error_statement` for PostgreSQL Cloud SQL instances.
 
       ```
-      gcloud sql instances patch <INSTANCE_NAME> \
+      gcloud sql instances patch [INSTANCE_NAME] \
         --database-flags log_min_error_statement=on
       ```
     validation: |-
@@ -5968,8 +6121,9 @@ controls:
       Ensure `log_min_error_statement` is `on` for each instance.
 
       ```
-      gcloud sql instances describe <INSTANCE_NAME> \
-        --format=json | jq '.settings.databaseFlags[] | select(.name=="log_min_error_statement")|.value'
+      gcloud sql instances describe [INSTANCE_NAME] \
+        --format=json | jq '.settings.databaseFlags[] | 
+          select(.name=="log_min_error_statement") | .value'
       ```
     impact: 4
     effort: 3
@@ -6006,7 +6160,7 @@ controls:
       Enable `log_temp_files` for PostgreSQL Cloud SQL instances.
 
       ```
-      gcloud sql instances patch <INSTANCE_NAME> \
+      gcloud sql instances patch [INSTANCE_NAME] \
         --database-flags log_temp_files=0
       ```
     validation: |-
@@ -6019,8 +6173,9 @@ controls:
       Ensure `log_temp_files` is `0` for each instance.
 
       ```
-      gcloud sql instances describe <INSTANCE_NAME> \
-        --format=json | jq '.settings.databaseFlags[] | select(.name=="log_temp_files")|.value'
+      gcloud sql instances describe [INSTANCE_NAME] \
+        --format=json | jq '.settings.databaseFlags[] | 
+          select(.name=="log_temp_files") | .value'
       ```
     impact: 3
     effort: 3
@@ -6054,7 +6209,7 @@ controls:
       Enable `log_min_duration_statement` for PostgreSQL Cloud SQL instances.
 
       ```
-      gcloud sql instances patch <INSTANCE_NAME> \
+      gcloud sql instances patch [INSTANCE_NAME] \
         --database-flags log_min_duration_statement=on
       ```
     validation: |-
@@ -6067,8 +6222,9 @@ controls:
       Ensure `log_min_duration_statement` is `-1` for each instance.
 
       ```
-      gcloud sql instances describe <INSTANCE_NAME> \
-        --format=json | jq '.settings.databaseFlags[] | select(.name=="log_min_duration_statement")|.value'
+      gcloud sql instances describe [INSTANCE_NAME] \
+        --format=json | jq '.settings.databaseFlags[] | 
+          select(.name=="log_min_duration_statement") | .value'
       ```
     impact: 2
     effort: 3
@@ -6104,7 +6260,7 @@ controls:
       Disable `cross db ownership chaining` for SQL Server Cloud SQL instances.
 
       ```
-      gcloud sql instances patch <INSTANCE_NAME> --database-flags "cross db ownership chaining=off"
+      gcloud sql instances patch [INSTANCE_NAME] --database-flags "cross db ownership chaining=off"
       ```
     validation: |-
       List SQL Server Cloud SQL instances.
@@ -6116,8 +6272,9 @@ controls:
       Ensure `cross db ownership chaining` is `off` for each instance.
 
       ```
-      gcloud sql instances describe <INSTANCE_NAME> \
-        --format=json | jq '.settings.databaseFlags[] | select(.name=="cross db ownership chaining")|.value'
+      gcloud sql instances describe [INSTANCE_NAME] \
+        --format=json | jq '.settings.databaseFlags[] | 
+          select(.name=="cross db ownership chaining") | .value'
       ```
     impact: 5
     effort: 3
@@ -6157,7 +6314,7 @@ controls:
       Disable `contained database authentication` for SQL Server Cloud SQL instances.
 
       ```
-      gcloud sql instances patch <INSTANCE_NAME> --database-flags "contained database authentication=off"
+      gcloud sql instances patch [INSTANCE_NAME] --database-flags "contained database authentication=off"
       ```
     validation: |-
       List SQL Server Cloud SQL instances.
@@ -6169,8 +6326,9 @@ controls:
       Ensure `contained database authentication` is `0` for each instance.
 
       ```
-      gcloud sql instances describe <INSTANCE_NAME> \
-        --format=json | jq '.settings.databaseFlags[] | select(.name=="contained database authentication")|.value'
+      gcloud sql instances describe [INSTANCE_NAME] \
+        --format=json | jq '.settings.databaseFlags[] | 
+          select(.name=="contained database authentication") | .value'
       ```
     impact: 5
     effort: 3
@@ -6205,8 +6363,8 @@ controls:
       Ensure Cloud SQL instances have `authorized-networks` defined.
 
       ```
-      gcloud sql instances patch <INSTANCE_NAME> \
-        --authorized-networks=<CIDR_1>,<CIDR_2>,<CIDR_N>
+      gcloud sql instances patch [INSTANCE_NAME] \
+        --authorized-networks=[CIDR_1],[CIDR_2],[CIDR_N]
       ```
     validation: |-
       List all Cloud SQL database instances.
@@ -6219,7 +6377,7 @@ controls:
       `settings: ipConfiguration : authorizedNetworks` does not have any parameter value containing `0.0.0.0/0`.
 
       ```
-      gcloud sql instances describe <INSTANCE_NAME>
+      gcloud sql instances describe [INSTANCE_NAME]
       ```
     impact: 8
     effort: 3
@@ -6252,19 +6410,19 @@ controls:
       Get the dataset information.
 
       ```
-      bq show --format=prettyjson <PROJECT_ID>:<DATASET_NAME> > PATH_TO_FILE
+      bq show --format=prettyjson [PROJECT_ID]:[DATASET_NAME] > PATH_TO_FILE
       ```
 
       Edit the file to remove any occurrences of `allUsers` or `allAuthenticatedUsers`. Then update the dataset.
 
       ```
-      bq update --source PATH_TO_FILE <PROJECT_ID>:<DATASET_NAME>
+      bq update --source PATH_TO_FILE [PROJECT_ID]:[DATASET_NAME]
       ```
     validation: |-
       List datasets and ensure that `allUsers` and `allAuthenticatedUsers` have not been granted access.
 
       ```
-      bq show <PROJECT_ID>:<DATASET_NAME>
+      bq show [PROJECT_ID]:[DATASET_NAME]
       ```
     impact: 8
     effort: 3
@@ -6304,8 +6462,8 @@ controls:
       Verify that a client certificate has not been issued.
 
       ```
-      gcloud container clusters describe $CLUSTER_NAME \
-        --zone $COMPUTE_ZONE \
+      gcloud container clusters describe [CLUSTER_NAME] \
+        --zone [COMPUTE_ZONE] \
         --format json | jq '.masterAuth.clientKey'
       ```
     impact: 8
@@ -6336,7 +6494,9 @@ controls:
   - id: darkbit-gcp-110
     title: GCR Image Vulnerability Scanning Should Be Enabled
     description: |
-      Container images stored in GCR should be scanned for vulnerabilities.
+      Vulnerabilities in software packages can be exploited by hackers or malicious users to 
+      obtain unauthorized access to local cloud resources. GCR Container Analysis and other 
+      third party products allow images stored in GCR to be scanned for known vulnerabilities.
     remediation: |-
       Enable the container scanning API.
 
@@ -6380,21 +6540,21 @@ controls:
     validation: |-
       In each project where GCR registries are held, run
       ```
-      gsutil iam get gs://artifacts.$PROJECT_ID.appspot.com
+      gsutil iam get gs://artifacts.[PROJECT_ID].appspot.com
       ```
 
       and
 
       ```
-      gcloud projects get-iam-policy $PROJECT_ID \
+      gcloud projects get-iam-policy [PROJECT_ID] \
          --flatten="bindings[].members" \
          --format='table(bindings.members,bindings.role)' \
-         --filter="bindings.role:roles/storage.admin OR \
-           bindings.role:roles/storage.objectAdmin OR \
-           bindings.role:roles/storage.objectCreator OR \
-           bindings.role:roles/storage.legacyBucketOwner OR \
-           bindings.role:roles/storage.legacyBucketWriter OR \
-           bindings.role:roles/storage.legacyObjectOwner"
+         --filter="bindings.role:roles/storage.admin \
+           OR bindings.role:roles/storage.objectAdmin \
+           OR bindings.role:roles/storage.objectCreator \
+           OR bindings.role:roles/storage.legacyBucketOwner \
+           OR bindings.role:roles/storage.legacyBucketWriter \
+           OR bindings.role:roles/storage.legacyObjectOwner"
       ```
       to ensure the desired bindings are in effect.
     impact: 5
@@ -6420,34 +6580,36 @@ controls:
     title: GKE Clusters Should Have Read-Only Permissions to GCR Registries
     description: |
       The Cluster Service Account should have read-only access to GCR. The Cluster Service Account does 
-      not require administrative access to GCR, only requiring pull access to containers to deploy onto 
-      GKE. Restricting permissions follows the principles of least privilege and prevents credentials 
+      not require administrative access to GCR, only requiring pull access for containers to deploy onto 
+      GKE. Restricting permissions follows the principle of least privilege and prevents credentials 
       from being abused beyond the required role.
     remediation: |-
       First, add read access to the Kubernetes Service Account.
 
       ```
-      gsutil iam ch [TYPE]:[EMAIL-ADDRESS]:objectViewer gs://artifacts.$(gcloud config get-value project).appspot.com
+      gsutil iam ch [TYPE]:[EMAIL_ADDRESS]:objectViewer \
+        gs://artifacts.[PROJECT_ID].appspot.com
       ```
 
-      Then remove over-privileged roles (Storage Admin, Storage Object Admin, and Storage Object Creator)
+      Then remove over-privileged roles (`Storage Admin`, `Storage Object Admin`, and `Storage Object Creator`)
 
       ```
-      gsutil iam ch -d [TYPE]:[EMAIL-ADDRESS]:[ROLE] gs://artifacts.$(gcloud config get-value project).appspot.com
+      gsutil iam ch -d [TYPE]:[EMAIL_ADDRESS]:[ROLE] \
+        gs://artifacts.[PROJECT_ID].appspot.com
       ```
     validation: |-
       List GCR bucket permissions and ensure that if the GKE Service Account is listed, the role is 
       set to `roles/storage.objectViewer`.
 
       ```
-      gsutil iam get gs://artifacts.$(gcloud config get-value project).appspot.com
+      gsutil iam get gs://artifacts.[PROJECT_ID].appspot.com
       ```
 
       If the GKE Service Account has project level permissions that are inherited within the bucket, 
       ensure that these are not privileged. Your GKE Service Account should not be listed.
 
       ```
-      gcloud projects get-iam-policy $(gcloud config get-value project) \
+      gcloud projects get-iam-policy [PROJECT_ID] \
         --flatten="bindings[].members" \
         --format='table(bindings.members,bindings.role)' \
         --filter="bindings.role:roles/storage.admin \
@@ -6498,8 +6660,8 @@ controls:
       Verify a cluster node pool is not using the legacy metadata API.
 
       ```
-      gcloud container clusters describe $CLUSTER_NAME \ 
-        --zone $COMPUTE_ZONE \
+      gcloud container clusters describe [CLUSTER_NAME] \ 
+        --zone [COMPUTE_ZONE] \
         --format json | jq .nodePools[].config.metadata
       ```
 
@@ -6529,25 +6691,27 @@ controls:
   - id: darkbit-gcp-114
     title: GKE Clusters Should Use Stable Or Regular Release Channels
     description: |
-      Clusters should be subscribed to the Regular or Stable Release Channel to automate version upgrades to 
-      the GKE cluster and to reduce version management complexity to the number of features and level of stability 
-      required. Release Channels signal a graduating level of stability and production-readiness. These are based on 
-      observed performance of GKE clusters running that version and represent experience and confidence in the 
-      cluster version.
+      Clusters should be subscribed to the Regular or Stable Release Channel to 
+      automate version upgrades to the GKE cluster and to reduce version management 
+      complexity to the number of features and level of stability required. Release 
+      Channels signal a graduating level of stability and production-readiness. 
+      These are based on observed performance of GKE clusters running that version 
+      and represent experience and confidence in the cluster version.
     remediation: |-
       Cluster Release Channels are only configurable during creation of the cluster.
 
       ```
       gcloud beta container clusters create [CLUSTER_NAME] \ 
-        --zone [COMPUTE_ZONE] \
+        --zone [ZONE] \
         --release-channel [RELEASE_CHANNEL]
       ```
     validation: |-
-      Describe GKE clusters and confirm that `regular` or `stable` release channels are used.
+      Describe GKE clusters and confirm that `regular` or `stable` release channels 
+      are used.
 
       ```
       gcloud beta container clusters describe [CLUSTER_NAME] \ 
-        --zone [COMPUTE_ZONE] \
+        --zone [ZONE] \
         --format json | jq .releaseChannel.channel
       ```
     impact: 8
@@ -6575,12 +6739,14 @@ controls:
   - id: darkbit-gcp-115
     title: GKE Cluster Nodes Should Not Have Public IP Addresses
     description: |
-      Disable public IP addresses for cluster nodes, so that they only have private IP addresses. Disabling 
-      public IP addresses on cluster nodes restricts access to only internal networks, forcing attackers to 
-      obtain local network access before attempting to compromise the underlying Kubernetes hosts.
+      Disable public IP addresses for cluster nodes, so that they only have private 
+      IP addresses. Disabling public IP addresses on cluster nodes restricts access 
+      to only internal networks, forcing attackers to obtain local network access 
+      before attempting to compromise the underlying Kubernetes hosts.
     remediation: |-
-      Private Nodes can only be configured during cluster creation. To create a cluster with Private Nodes 
-      enabled, include the `--enable-private-nodes` flag within the cluster create command.
+      Private Nodes can only be configured during cluster creation. To create a 
+      cluster with Private Nodes enabled, include the `--enable-private-nodes` flag 
+      within the cluster create command.
 
       ```
       gcloud container clusters create [CLUSTER_NAME] --enable-private-nodes
@@ -6589,7 +6755,7 @@ controls:
       Describe GKE clusters and confirm `enablePrivateNodes` is `true`.
 
       ```
-      gcloud container clusters describe $CLUSTER_NAME \
+      gcloud container clusters describe [CLUSTER_NAME] \
         --format json | jq '.privateClusterConfig.enablePrivateNodes'
       ```
     impact: 8
@@ -6617,28 +6783,43 @@ controls:
   - id: darkbit-gcp-116
     title: GKE Worker Nodes Should Have Restrictive Ingress and Egress Firewall Rules
     description: |
-      GKE Worker Nodes are commonly provisioned with public IP addresses in projects with permissive inbound SSH access and any egress traffic allowed.  If a container running on a node were compromised or an administrative GCP credential stolen, an attacker would experience minimal friction in terms of network access controls.
+      GKE Worker Nodes should not provisioned with public IP addresses in projects 
+      with permissive inbound SSH access and any egress traffic allowed.  If a 
+      container running on a node were compromised or an administrative GCP 
+      credential stolen, an attacker would experience minimal friction in terms of 
+      network access controls.
     remediation: |
-      Ensure that GKE Worker Nodes are not provisioned with public IPs, remove the default ingress SSH firewall rule allowing traffic from `0.0.0.0/0`, and ensure that at least one egress deny firewall rule is in the project.
+      Ensure that GKE Worker Nodes are not provisioned with public IPs, remove the 
+      default ingress SSH firewall rule allowing traffic from `0.0.0.0/0`, and 
+      ensure that at least one egress deny firewall rule is in the project.
     validation: |-
-      In each project where GKE clusters are present, describe GKE clusters and confirm `enablePrivateNodes` is `true`.
+      In each project where GKE clusters are present, describe GKE clusters and 
+      confirm `enablePrivateNodes` is `true`.
 
       ```
-      gcloud container clusters describe $CLUSTER_NAME \
+      gcloud container clusters describe [CLUSTER_NAME] \
         --format json | jq '.privateClusterConfig.enablePrivateNodes'
       ```
 
       Ensure the following command returns no entries.
 
       ```
-      gcloud compute firewall-rules list --filter="name=(default-allow-ssh)"
+      gcloud compute firewall-rules list \
+        --filter="name=(default-allow-ssh)"
 
       ```
 
       Finally, ensure at firewall rule returns via the following command.
 
       ```
-      gcloud compute firewall-rules list --format=json | jq -r '.[] | . as $rule | select(.direction=="EGRESS") | select(.disabled==false) | select(.denied) | select(.destinationRanges) | select(.destinationRanges[] | contains("0.0.0.0/0")) | .denied[] | select(.IPProtocol=="all") | $rule.name'
+      gcloud compute firewall-rules list \
+        --format=json | jq -r '.[] | . as $rule | 
+          select(.direction=="EGRESS") | 
+          select(.disabled==false) | 
+          select(.denied) | 
+          select(.destinationRanges) | 
+          select(.destinationRanges[] | contains("0.0.0.0/0")) | .denied[] | 
+          select(.IPProtocol=="all") | $rule.name'
       ```
     impact: 5
     effort: 5
@@ -6664,8 +6845,9 @@ controls:
   - id: darkbit-gcp-117
     title: HTTPS Load Balancers Should Use Google-Managed SSL Certificates
     description: |
-      Traffic to HTTPS load balancers should be encrypted using Google-managed SSL certificates. Encrypting 
-      traffic between users and your Kubernetes workload is fundamental to protecting data sent over the web.
+      Traffic to HTTPS load balancers should be encrypted using Google-managed SSL 
+      certificates. Encrypting traffic between users and your Kubernetes workload 
+      is fundamental to protecting data sent over the web.
     remediation: |-
       Identify any workloads exposed publicly using Services of `type:LoadBalancer`.
 
@@ -6681,11 +6863,15 @@ controls:
       kubectl get svc -A -o json | jq '.items[] | select(.spec.type=="LoadBalancer")'
       ```
 
-      Inspect ingresses and confirm the annotation `networking.gke.io/managed-certificates` is present.
+      Inspect ingresses and confirm the annotation `networking.gke.io/managed-certificates` 
+      is present.
 
       ```
       kubectl get ingress -A -o json | jq .items[] | jq \
-        '{name: .metadata.name, annotations: .metadata.annotations, namespace: .metadata.namespace, status: .status}'
+        '{name: .metadata.name, 
+          annotations: .metadata.annotations, 
+          namespace: .metadata.namespace, 
+          status: .status}'
       ```
     impact: 8
     effort: 6
@@ -6712,11 +6898,11 @@ controls:
   - id: darkbit-gcp-121
     title: GKE Clusters Should Support Google Groups In RBAC Bindings
     description: |
-      Leverage Google Groups and Cloud IAM to assign Kubernetes user roles to a collection of users, 
-      instead of to individual emails using only Cloud IAM.
+      Leverage Google Groups and Cloud IAM to assign Kubernetes user roles to a 
+      collection of users, instead of to individual emails using only Cloud IAM.
     remediation: |-
-      The security group can only be specified during cluster creation. Follow the setup 
-      [instructions](https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control#google-groups-for-gke) 
+      The security group can only be specified during cluster creation. Follow 
+      the setup [instructions](https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control#google-groups-for-gke) 
       for Google Groups for GKE. Then create a cluster specifying the security group.
 
       ```
@@ -6726,8 +6912,8 @@ controls:
 
       Then create `Roles`, `ClusterRoles`, `RoleBindings`, and `ClusterRoleBindings` that reference your Google Groups.
     validation: |-
-      Examine GKE [clusters](https://console.cloud.google.com/kubernetes/list) and confirm `Google Groups for RBAC` is 
-      set to `Enabled`.
+      Examine GKE [clusters](https://console.cloud.google.com/kubernetes/list) 
+      and confirm `Google Groups for RBAC` is set to `Enabled`.
     impact: 5
     effort: 8
     platform: GCP
@@ -6753,16 +6939,20 @@ controls:
   - id: darkbit-gcp-122
     title: GKE Cluster Node Boot And Persistent Disks Should Be Encrypted With Customer Managed Encryption Keys (CMEK)
     description: |
-      GCE persistent disks are encrypted at rest by default using envelope encryption with keys managed by Google. 
-      Customer-Managed Encryption Keys (CMEK) should be used to encrypt node boot and dynamically provisioned attached 
-      Google Compute Engine Persistent Disks (PDs) using keys managed within Cloud Key Management Service (Cloud KMS).
+      GCE persistent disks are encrypted at rest by default using envelope 
+      encryption with keys managed by Google. Customer-Managed Encryption Keys 
+      (CMEK) should be used to encrypt node boot and dynamically provisioned 
+      attached Google Compute Engine Persistent Disks (PDs) using keys managed 
+      within Cloud Key Management Service (Cloud KMS).
     remediation: |-
-      Disk encryption cannot be changed after cluster creations. Create a new cluster using a CMEK for the node boot disk.
+      Disk encryption cannot be changed after cluster creations. Create a new 
+      cluster using a CMEK for the node boot disk.
 
       ```
       gcloud beta container clusters create [CLUSTER_NAME] \
         --disk-type [DISK_TYPE] \
-        --boot-disk-kms-key projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKey s/[KEY_NAME]
+        --boot-disk-kms-key \
+          projects/[PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKeys/[KEY_NAME]
       ```
 
       Create node pools using a CMEK for the node boot disk.
@@ -6770,18 +6960,21 @@ controls:
       ```
       gcloud beta container node-pools create [CLUSTER_NAME] \
         --disk-type [DISK_TYPE] \
-        --boot-disk-kms-key projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKey s/[KEY_NAME]
+        --boot-disk-kms-key \
+          projects/[PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKeys/[KEY_NAME]
       ```
     validation: |-
-      Verify node boot disks are encrypted with a CMEK by examining node pool details. 
-      Confirm `diskType` is either`pd-standard` or `pd-ssd` and `bootDiskKmsKey` specifies a CMEK.
+      Verify node boot disks are encrypted with a CMEK by examining node pool 
+      details. Confirm `diskType` is either`pd-standard` or `pd-ssd` and 
+      `bootDiskKmsKey` specifies a CMEK.
 
       ```
       gcloud beta container node-pools describe [NODE_POOL_NAME] \ 
         --cluster [CLUSTER_NAME]
       ```
 
-      Verify attached disks are encrypted with a CMEK by examining GCE disks. First, list Persistent Volumes.
+      Verify attached disks are encrypted with a CMEK by examining GCE disks. 
+      First, list Persistent Volumes.
 
       ``
       kubectl get pv -o json | jq '.items[].metadata.name'
@@ -6791,7 +6984,7 @@ controls:
 
       ```
       gcloud compute disks describe [PV_NAME] \
-        --zone [COMPUTE-ZONE] \
+        --zone [COMPUTE_ZONE] \
         --format json | jq '.diskEncryptionKey.kmsKeyName'
       ```
     impact: 5
@@ -6823,17 +7016,20 @@ controls:
   - id: darkbit-gcp-123
     title: Alpha GKE Clusters Should Not Be Used In Production
     description: |
-      Alpha clusters should not be used in production as they are not covered by an SLA and are not production-ready. 
-      They have all Kubernetes API features enabled, but are not covered by the GKE SLA, do not receive security 
-      updates, have node auto-upgrade and node auto-repair disabled, cannot be upgraded, and are also deleted after 30 days.
+      Alpha clusters should not be used in production as they are not covered 
+      by an SLA and are not production-ready. They have all Kubernetes API features 
+      enabled, but are not covered by the GKE SLA, do not receive security updates, 
+      have node auto-upgrade and node auto-repair disabled, cannot be upgraded, 
+      and are also deleted after 30 days.
     remediation: |-
-      Alpha clusters cannot be disabled. A new cluster must be created without the `--enable-kubernetes-alpha` option.
+      Alpha clusters cannot be disabled. A new cluster must be created without 
+      the `--enable-kubernetes-alpha` option.
     validation: |-
       Describe GKE clusters and ensure none are `true` for Alpha clusters.
 
       ```
-      gcloud container clusters describe $CLUSTER_NAME \ 
-        --zone $COMPUTE-ZONE \
+      gcloud container clusters describe [CLUSTER_NAME] \ 
+        --zone [COMPUTE_ZONE]> \
         --format json | jq '.enableKubernetesAlpha'
       ```
     impact: 5
@@ -6861,14 +7057,14 @@ controls:
   - id: darkbit-gcp-124
     title: GKE Sandbox (gVisor) Should Be Enabled For Untrusted Workloads
     description: |
-      GKE Sandbox should be used to restrict untrusted workloads as an additional layer of protection w
-      hen running in a multi-tenant environment.
+      GKE Sandbox should be used to restrict untrusted workloads as an additional 
+      layer of protection when running in a multi-tenant environment.
     remediation: |-
       GKE Sanbox can only be enabled during cluster creation.
 
       ```
       gcloud container node-pools create [NODE_POOL_NAME] \ 
-        --zone=[COMPUTE-ZONE] \
+        --zone=[COMPUTE_ZONE] \
         --cluster=[CLUSTER_NAME] \ 
         --image-type=cos_containerd \
         --sandbox type=gvisor
@@ -6878,7 +7074,7 @@ controls:
 
       ```
       gcloud container node-pools describe [NODE_POOL_NAME] \ 
-        --zone [COMPUTE-ZONE] \
+        --zone [COMPUTE_ZONE] \
         --cluster [CLUSTER_NAME] \
         --format json | jq '.config.sandboxConfig'
       ```
@@ -6907,14 +7103,15 @@ controls:
   - id: darkbit-gcp-125
     title: GKE Clusters Should Enable Binary Authorization
     description: |
-      Binary Authorization should be used to help enforce supply-chain security by only allowing 
-      images with verifiable cryptographically signed metadata into the cluster.
+      Binary Authorization should be used to help enforce supply-chain security by 
+      only allowing images with verifiable cryptographically signed metadata into 
+      the cluster.
     remediation: |-
       Update the cluster to enable Binary Authorization.
 
       ```
       gcloud container cluster update [CLUSTER_NAME] \ 
-        --zone [COMPUTE-ZONE] \
+        --zone [COMPUTE_ZONE] \
         --enable-binauthz
       ```
 
@@ -6924,11 +7121,12 @@ controls:
       gcloud container binauthz policy import [policy_file.yaml]
       ```
     validation: |-
-      Describe GKE clusters and confirm `enabled` is `true` for `binaryAuthorization`.
+      Describe GKE clusters and confirm `enabled` is `true` for 
+      `binaryAuthorization`.
 
       ```
-      gcloud container clusters describe $CLUSTER_NAME \ 
-        --zone $COMPUTE_ZONE \
+      gcloud container clusters describe [CLUSTER_NAME] \ 
+        --zone [COMPUTE_ZONE] \
         --format json | jq .binaryAuthorization
       ```
     impact: 5
@@ -6956,8 +7154,8 @@ controls:
   - id: darkbit-gcp-127
     title: GKE Clusters Should Not Have Basic Authentication Enabled
     description: |
-      Disable Basic Authentication (basic auth) for API server authentication as it uses static passwords 
-      which need to be rotated.
+      Disable Basic Authentication (basic auth) for API server authentication as 
+      it uses static passwords which need to be rotated.
     remediation: |-
       Disable Basic Authentication by removing the status password.
 
@@ -6966,11 +7164,12 @@ controls:
         --no-enable-basic-auth
       ```
     validation: |-
-      Describe GKE clusters and ensure `masterAuth` `username` and `password` are `false`.
+      Describe GKE clusters and ensure `masterAuth` `username` and `password` 
+      are `false`.
 
       ```
-      gcloud container clusters describe $CLUSTER_NAME \
-        --zone $COMPUTE_ZONE \
+      gcloud container clusters describe [CLUSTER_NAME] \
+        --zone [COMPUTE_ZONE] \
         --format json | jq '.masterAuth.password and .masterAuth.username'
       ```
     impact: 9
@@ -6998,26 +7197,28 @@ controls:
   - id: darkbit-gcp-128
     title: Log Metric Filter And Alert Should Notify On Custom Role Changes
     description: |
-      A metric filter and alert should exist for changes to Identity and Access Management (IAM) role 
-      creation, deletion and updating activities. Monitoring role creation, deletion and updating 
-      activities will help in identifying any over-privileged role at early stages.
+      A metric filter and alert should exist for changes to Identity and Access 
+      Management (IAM) role creation, deletion and updating activities. Monitoring 
+      role creation, deletion and updating activities will help in identifying 
+      any over-privileged role at early stages.
     remediation: |-
       Create a [logging metric](https://console.cloud.google.com/logs/metrics) with the following
       advanced filter:
 
       ```
       resource.type="iam_role" 
-        AND protoPayload.methodName = "google.iam.admin.v1.CreateRole" 
+        AND protoPayload.methodName="google.iam.admin.v1.CreateRole" 
         OR protoPayload.methodName="google.iam.admin.v1.DeleteRole" 
         OR protoPayload.methodName="google.iam.admin.v1.UpdateRole"
       ```
 
-      In the Metric Editor menu, fill out the `name` field. Set `Units` to `1` (default)
-      and `Type` to `Counter`. This will ensure that the log metric counts the number
-      of log entries matching the user's advanced logs query.
+      In the Metric Editor menu, fill out the `name` field. Set `Units` to `1` 
+      (default) and `Type` to `Counter`. This will ensure that the log metric 
+      counts the number of log entries matching the user's advanced logs query.
 
       Next, [Create an alert from the Metric](https://console.cloud.google.com/logs/metrics) with
-      an alert threshold of `0` to trigger a notification any time IAM admin roles are changed.
+      an alert threshold of `0` to trigger a notification any time IAM admin 
+      roles are changed.
     validation: |-
       List the log metrics.
 
@@ -7029,7 +7230,7 @@ controls:
 
       ```
       resource.type="iam_role" 
-        AND protoPayload.methodName = "google.iam.admin.v1.CreateRole" 
+        AND protoPayload.methodName="google.iam.admin.v1.CreateRole" 
         OR protoPayload.methodName="google.iam.admin.v1.DeleteRole" 
         OR protoPayload.methodName="google.iam.admin.v1.UpdateRole"
       ```
@@ -7041,7 +7242,8 @@ controls:
       ```
 
       Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
-      set to `metric.type="logging.googleapis.com/user/<Log Metric Name>"` and `enabled` set to `true`.
+      set to `metric.type="logging.googleapis.com/user/[Log Metric Name]"` 
+      and `enabled` set to `true`.
     impact: 8
     effort: 6
     platform: GCP
