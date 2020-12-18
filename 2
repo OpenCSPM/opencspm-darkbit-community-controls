@@ -1586,12 +1586,12 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
        AND sink.resource_data_filter CONTAINS "jsonPayload.event_subtype=\"compute.routes.delete\""
        AND sink.resource_data_filter CONTAINS "jsonPayload.event_subtype=\"compute.routes.insert\""
     )
-    RETURN project.name as project_name, project.resource_data_name as display_name, sink.resource_data_filter as sink_filter
+    RETURN project.name as project_name, sink.resource_data_filter as sink_filter
   )
   projects = graphdb.query(q).mapped_results
   if projects.length > 0
     projects.each do |project|
-      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe project.project_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have a logsink filter for route changes' do
           expect(project.sink_filter).not_to be_nil
         end
@@ -1619,12 +1619,12 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
        AND sink.resource_data_filter CONTAINS "jsonPayload.event_subtype=\"compute.networks.removePeering\""
        AND sink.resource_data_filter CONTAINS "jsonPayload.event_subtype=\"compute.networks.addPeering\""
     )
-    RETURN project.name as project_name, project.resource_data_name as display_name, sink.resource_data_filter as sink_filter
+    RETURN project.name as project_name, sink.resource_data_filter as sink_filter
   )
   projects = graphdb.query(q).mapped_results
   if projects.length > 0
     projects.each do |project|
-      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe project.project_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have a logsink filter for network changes' do
           expect(project.sink_filter).not_to be_nil
         end
@@ -1648,12 +1648,12 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
     WHERE (sink.resource_data_filter CONTAINS "resource.type=\"gcs_bucket\""
        AND sink.resource_data_filter CONTAINS "protoPayload.methodName=\"storage.setIamPermissions\""
     )
-    RETURN project.name as project_name, project.resource_data_name as display_name, sink.resource_data_filter as sink_filter
+    RETURN project.name as project_name, sink.resource_data_filter as sink_filter
   )
   projects = graphdb.query(q).mapped_results
   if projects.length > 0
     projects.each do |project|
-      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe project.project_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have a logsink filter for storage IAM changes' do
           expect(project.sink_filter).not_to be_nil
         end
@@ -1675,12 +1675,12 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
     MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)
     OPTIONAL MATCH (sink:GCP_LOGGING_LOGSINK)<-[:HAS_RESOURCE]-(project)
     WHERE (sink.resource_data_filter CONTAINS "protoPayload.methodName=\"cloudsql.instances.update\"")
-    RETURN project.name as project_name, project.resource_data_name as display_name, sink.resource_data_filter as sink_filter
+    RETURN project.name as project_name, sink.resource_data_filter as sink_filter
   )
   projects = graphdb.query(q).mapped_results
   if projects.length > 0
     projects.each do |project|
-      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe project.project_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have a logsink filter for cloudsql instance changes' do
           expect(project.sink_filter).not_to be_nil
         end
@@ -2032,12 +2032,12 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
     MATCH (gi:GCP_IDENTITY { name: "allUsers" })
     OPTIONAL MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)<-[ir1:HAS_IAMROLE]-(gi)
     OPTIONAL MATCH (bucket:GCP_STORAGE_BUCKET)<-[ir2:HAS_IAMROLE]-(gi)
-    RETURN project.name as project_name, project.resource_data_name as display_name, bucket.name as bucket_name, ir1.role_name as project_role, ir2.role_name as bucket_role
+    RETURN project.name as project_name, bucket.name as bucket_name, ir1.role_name as project_role, ir2.role_name as bucket_role
     UNION
     MATCH (gi:GCP_IDENTITY { name: "allAuthenticatedUsers" })
     OPTIONAL MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)<-[ir1:HAS_IAMROLE]-(gi)
     OPTIONAL MATCH (bucket:GCP_STORAGE_BUCKET)<-[ir2:HAS_IAMROLE]-(gi)
-    RETURN project.name as project_name, project.resource_data_name as display_name, bucket.name as bucket_name, ir1.role_name as project_role, ir2.role_name as bucket_role
+    RETURN project.name as project_name, bucket.name as bucket_name, ir1.role_name as project_role, ir2.role_name as bucket_role
   )
   identities = graphdb.query(q).mapped_results
   if identities.length > 0
@@ -2049,7 +2049,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
           end
         end
       else
-        resource_name = "#{identity.project_name}[#{identity.display_name}]" || identity.key_name
+        resource_name = identity.project_name || identity.bucket_name
         describe resource_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
           it 'should not have all(Authenticated)Users access to projects or buckets' do
             expect(resource_name).to be_nil
@@ -2392,12 +2392,12 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
     MATCH (gi:GCP_IDENTITY { name: "allUsers" })
     OPTIONAL MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)<-[ir1:HAS_IAMROLE]-(gi)
     OPTIONAL MATCH (dataset:GCP_BIGQUERY_DATASET)<-[ir2:HAS_IAMROLE]-(gi)
-    RETURN project.name as project_name, project.resource_data_name as display_name, dataset.name as dataset_name, ir1.role_name as project_role, ir2.role_name as dataset_role
+    RETURN project.name as project_name, dataset.name as dataset_name, ir1.role_name as project_role, ir2.role_name as dataset_role
     UNION
     MATCH (gi:GCP_IDENTITY { name: "allAuthenticatedUsers" })
     OPTIONAL MATCH (project:GCP_CLOUDRESOURCEMANAGER_PROJECT)<-[ir1:HAS_IAMROLE]-(gi)
     OPTIONAL MATCH (dataset:GCP_BIGQUERY_DATASET)<-[ir2:HAS_IAMROLE]-(gi)
-    RETURN project.name as project_name, project.resource_data_name as display_name, dataset.name as dataset_name, ir1.role_name as project_role, ir2.role_name as dataset_role
+    RETURN project.name as project_name, dataset.name as dataset_name, ir1.role_name as project_role, ir2.role_name as dataset_role
   )
   identities = graphdb.query(q).mapped_results
   if identities.length > 0
@@ -2409,7 +2409,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
           end
         end
       else
-        resource_name = "#{identity.project_name}[#{identity.display_name}]" || identity.key_name
+        resource_name = identity.project_name || identity.dataset_name
         describe resource_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
           it 'should not have all(Authenticated)Users access to projects or datasets' do
             expect(resource_name).to be_nil
@@ -2457,12 +2457,12 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
     MATCH (project)-[:HAS_RESOURCE]->(bucket:GCP_STORAGE_BUCKET)
     WHERE bucket.resource_data_name STARTS WITH 'artifacts.' and bucket.resource_data_name ENDS WITH '.appspot.com'
     OPTIONAL MATCH (project)-[:HAS_RESOURCE]->(conscansvc:GCP_SERVICEUSAGE_SERVICE { resource_data_name: "containerscanning.googleapis.com"})
-    RETURN project.name as project_name, project.resource_data_name as display_name, conscansvc.name as svc_name
+    RETURN project.name as project_name, conscansvc.name as svc_name
   )
   projects = graphdb.query(q).mapped_results
   if projects.length > 0
     projects.each do |project|
-      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe project.project_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have container vulnerability scanning enabled' do
           expect(project.svc_name).not_to be_nil
         end
@@ -2786,12 +2786,12 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
        AND sink.resource_data_filter CONTAINS "google.iam.admin.v1.DeleteRole"
        AND sink.resource_data_filter CONTAINS "google.iam.admin.v1.UpdateRole"
     )
-    RETURN project.name as project_name, project.resource_data_name as display_name, sink.resource_data_filter as sink_filter
+    RETURN project.name as project_name, sink.resource_data_filter as sink_filter
   )
   projects = graphdb.query(q).mapped_results
   if projects.length > 0
     projects.each do |project|
-      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe project.project_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have a logsink filter for custom role changes' do
           expect(project.sink_filter).not_to be_nil
         end
