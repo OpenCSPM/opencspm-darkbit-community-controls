@@ -2640,12 +2640,37 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-# TODO: Control logic
 control_id = 'darkbit-gcp-116'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %s(
+    MATCH (cluster:GCP_CONTAINER_CLUSTER)-[:IN_SUBNETWORK]->(subnet:GCP_COMPUTE_SUBNETWORK)<-[:HAS_SUBNETWORK]-(vpc:GCP_COMPUTE_NETWORK)
+    WITH cluster, subnet, vpc
+
+    OPTIONAL MATCH (range:GCP_COMPUTE_FIREWALLIPRANGE { name: "0.0.0.0/0"})<-[:HAS_SOURCEIPRANGE]-(fwi:GCP_COMPUTE_FIREWALL { resource_data_direction: "INGRESS" })-[rule:HAS_FIREWALLRULE { action: "allow"}]->(proto:GCP_COMPUTE_NETWORKPROTOCOL), (fwi)<-[:HAS_FIREWALL]-(vpc)
+    WHERE ((rule.from_port <= 22 AND 22 <= rule.to_port) AND (proto.name = 'all' OR proto.name = 'tcp'))
+    WITH fwi, cluster, subnet, vpc
+
+    OPTIONAL MATCH (fwe:GCP_COMPUTE_FIREWALL {resource_data_direction: "EGRESS"})-[rule:HAS_FIREWALLRULE { action: "deny"}]->(proto:GCP_COMPUTE_NETWORKPROTOCOL { name: 'all'}), (fwe)<-[:HAS_FIREWALL]-(vpc)
+    WITH cluster, subnet, vpc, fwi, fwe
+
+    RETURN cluster.name as cluster_name, cluster.resource_data_privateClusterConfig_enablePrivateNodes as private_nodes, count(fwi) as ssh_ingress, count(fwe) as deny_egress
+  )
+  gkeclusters = graphdb.query(q).mapped_results
+  if gkeclusters.length > 0
+    gkeclusters.each do |cluster|
+      describe cluster.cluster_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        it 'should have private nodes configured, no SSH inbound, and a default deny egress fw rule' do
+          expect(cluster.private_nodes).to eq('true')
+          expect(cluster.ssh_ingress.to_i).to eq(0)
+          expect(cluster.deny_egress.to_i).to be > 0
+        end
+      end
+    end
+  else
+    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should have private nodes configured, no SSH inbound, and a default deny egress fw rule' do
+        expect(true).to eq(true)
+      end
     end
   end
 end
