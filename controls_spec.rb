@@ -634,7 +634,7 @@ end
 control_id = 'darkbit-gcp-15'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
-    MATCH (range:GCP_COMPUTE_FIREWALLIPRANGE { name: "0.0.0.0/0"})<-[:HAS_SOURCEIPRANGE]-(f:GCP_COMPUTE_FIREWALL { resource_data_direction: "INGRESS" })-[rule:HAS_FIREWALLRULE { action: "allow"}]->(proto:GCP_COMPUTE_NETWORKPROTOCOL)
+    MATCH (range:GCP_COMPUTE_FIREWALLIPRANGE { name: "0.0.0.0/0"})<-[:HAS_SOURCEIPRANGE]-(f:GCP_COMPUTE_FIREWALL { resource_data_direction: "INGRESS", resource_data_disabled: "false" })-[rule:HAS_FIREWALLRULE { action: "allow"}]->(proto:GCP_COMPUTE_NETWORKPROTOCOL)
     WHERE ((rule.from_port <= 22 AND 22 <= rule.to_port) AND (proto.name = 'all' OR proto.name = 'tcp'))
     RETURN DISTINCT f.name as firewall_name
   )
@@ -818,7 +818,7 @@ end
 control_id = 'darkbit-gcp-26'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
-    MATCH (range:GCP_COMPUTE_FIREWALLIPRANGE { name: "0.0.0.0/0"})<-[:HAS_SOURCEIPRANGE]-(f:GCP_COMPUTE_FIREWALL { resource_data_direction: "INGRESS" })-[rule:HAS_FIREWALLRULE { action: "allow"}]->(proto:GCP_COMPUTE_NETWORKPROTOCOL)
+    MATCH (range:GCP_COMPUTE_FIREWALLIPRANGE { name: "0.0.0.0/0"})<-[:HAS_SOURCEIPRANGE]-(f:GCP_COMPUTE_FIREWALL { resource_data_direction: "INGRESS", resource_data_disabled: "false" })-[rule:HAS_FIREWALLRULE { action: "allow"}]->(proto:GCP_COMPUTE_NETWORKPROTOCOL)
     WHERE ((rule.from_port <= 3389 AND 3389 <= rule.to_port) AND (proto.name = 'all' OR proto.name = 'tcp'))
     RETURN DISTINCT f.name as firewall_name
   )
@@ -1217,10 +1217,14 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   )
   sas = graphdb.query(q).mapped_results
   if sas.length > 0
-    sas.each do |sa|
-      describe sa.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    records = sas.group_by { |r| r[:name] }.map do |id, roles|
+      editor = (roles.select{|k,v| (k['role_name'] == 'roles/editor') }.length > 0) || false
+      [ id, editor ]
+    end
+    records.each do |sa|
+      describe sa[0], control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should not have Editor bound to the default service account' do
-          expect(sa.role_name).not_to eq('roles/editor')
+          expect(sa[1]).to eq(false)
         end
       end
     end
@@ -1288,7 +1292,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
     MATCH (gi:GCP_IDENTITY)
     WHERE gi.member_name ENDS WITH '.iam.gserviceaccount.com'
-    OPTIONAL MATCH (resource)<-[ir1:HAS_IAMROLE]-(gi:GCP_IDENTITY)
+    OPTIONAL MATCH (resource)<-[ir1:HAS_IAMROLE]-(gi)
     WHERE (ir1.role_name = "roles/owner"
          OR ir1.role_name = "roles/editor"
          OR ir1.role_name CONTAINS 'Admin'
@@ -1318,8 +1322,8 @@ end
 control_id = 'darkbit-gcp-64'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
-    MATCH (gi:GCP_IDENTITY)
-    OPTIONAL MATCH (resource)<-[ir1:HAS_IAMROLE]-(gi:GCP_IDENTITY)-[ir2:HAS_IAMROLE]->(resource)
+    MATCH (gi:GCP_IDENTITY)-[ir1:HAS_IAMROLE]->(resource)
+    MATCH (gi)-[ir2:HAS_IAMROLE]->(resource)
     WHERE ir1.role_name = "roles/iam.serviceAccountUser"
       AND ir2.role_name = "roles/iam.serviceAccountAdmin"
     RETURN DISTINCT gi.name as identity_name, resource.name as resource_name
@@ -1327,7 +1331,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   identities = graphdb.query(q).mapped_results
   if identities.length > 0
     identities.each do |identity|
-      describe identity.identity_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe "#{identity.identity_name} -> #{identity.resource_name}", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should not have iam admin and serviceaccountuser to the same resource' do
           expect(identity.resource_name).to be_nil
         end
@@ -1699,7 +1703,7 @@ control_id = 'darkbit-gcp-81'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
     MATCH (v:GCP_COMPUTE_NETWORK)
-    WHERE NOT v.resource_data_name IS NULL
+    WHERE v.resource_data_name IS NOT NULL
     RETURN v.name as vpc_name, v.resource_data_IPv4Range as legacy_range
   )
   vpcs = graphdb.query(q).mapped_results
@@ -1846,8 +1850,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
     MATCH (i:GCP_COMPUTE_INSTANCE)
     WHERE i.resource_data_labels_goog_gke_node IS NULL
-    OPTIONAL MATCH (i:GCP_COMPUTE_INSTANCE)-[r:HAS_OAUTHSCOPE]->(s:GCP_IAM_OAUTHSCOPE { name: 'https://www.googleapis.com/auth/cloud-platform'} )
-    WHERE i.resource_data_labels_goog_gke_node IS NULL
+    OPTIONAL MATCH (i)-[r:HAS_OAUTHSCOPE]->(s:GCP_IAM_OAUTHSCOPE { name: 'https://www.googleapis.com/auth/cloud-platform'} )
     RETURN i.name as name, s.name as cloud_platform_scope
   )
   instances = graphdb.query(q).mapped_results
@@ -2365,15 +2368,15 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
     MATCH (sql:GCP_SQLADMIN_INSTANCE)
     OPTIONAL MATCH (sql)-[:HAS_SQLMASTERAUTHORIZEDNETWORK]->(an:GCP_SQLADMIN_MASTERAUTHORIZEDNETWORK)
-    WHERE an.cidr_block IS NULL OR an.cidr_block = '0.0.0.0/0'
-    RETURN sql.name as instance_name, an.cidr_block as cidr_block
+    WHERE NOT an.cidr_block = '0.0.0.0/0'
+    RETURN sql.name as instance_name, count(an) as authorized_networks
   )
   instances = graphdb.query(q).mapped_results
   if instances.length > 0
     instances.each do |instance|
       describe instance.instance_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have not allow connections from all IPs' do
-          expect(instance.cidr_block).not_to eq('0.0.0.0/0')
+          expect(instance.authorized_networks.to_i).to be > 0
         end
       end
     end

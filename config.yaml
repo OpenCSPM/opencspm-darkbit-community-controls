@@ -3995,8 +3995,8 @@ controls:
   - id: darkbit-gcp-59
     title: Cloud SQL Instance Automatic Backups With Point-in-Time Recovery Should Be Configured
     description:
-      By default, Cloud SQL instances have automatic backups with point-in-time
-      recovery enabled.  It's important that these settings are not disabled to ensure
+      By default, Cloud SQL instances do not have automatic backups with point-in-time
+      recovery enabled.  It's important that this setting is enabled to ensure
       that all databases can be restored to a known-good state should a security incident
       occur.  For example, a SQL injection attack that results in the deletion or modification
       of tables in the database.
