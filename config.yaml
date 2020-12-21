@@ -3949,7 +3949,7 @@ controls:
       For each clustr, run the following command and ensure that the cluster's name is listed.
       
       ```
-      gcloud container clusters describe [CLUSTER_NAME]> \
+      gcloud container clusters describe [CLUSTER_NAME] \
         --format=json | jq -r 'select(.nodePools[].management.autoRepair==true) | "\(.name)"'
       ```
     impact: 5
