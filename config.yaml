@@ -4337,7 +4337,7 @@ controls:
       - text: Default Compute Service Account
         url: https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#using_the_default_service_account
       - text: Understanding Service Accounts
-        url: https://cloud.google.com/iam/docs/understanding-service-accountsA
+        url: https://cloud.google.com/iam/docs/understanding-service-accounts
       - text: GCP IAM Recommender
         url: https://cloud.google.com/iam/docs/recommender-overview
     public: true
