@@ -4226,14 +4226,47 @@ controls:
       additional protection in the event of unauthorized access to the disk or datastore
       where etcd maintains the cluster state.  It also ensures that the most sensitive
       data in etcd backups are not directly readable if stored in cloud storage buckets.
-    remediation:
-      Follow the instructions for your specific cloud provider's Kubernetes
-      offering to enable application level encryption of Kubernetes Secrets with KMS
-      keys.
-    validation:
-      Follow the instructions for your specific cloud provider's Kubernetes
-      offering to verify that application level encryption of Kubernetes Secrets with
-      KMS keys is configured.
+    remediation: |-
+      Create a new KMS Keyring and KMS Key for each GKE Cluster.
+
+      ```
+      gcloud kms keyrings create [RING_NAME] \
+        --location [LOCATION] \
+        --project [KEY_PROJECT_ID]
+      ```
+
+      ```
+      gcloud kms keys create [KEY_NAME] \
+                  --location [LOCATION] \
+                  --keyring [RING_NAME] \
+                  --purpose encryption \
+                  --project [KEY_PROJECT_ID]
+      ```
+      Grant the Kubernetes Engine Service Agent service account the Cloud KMS CryptoKey Encrypter/Decrypter role.
+
+      ```
+      gcloud kms keys add-iam-policy-binding [KEY_NAME] \
+         --location [LOCATION] \
+         --keyring [RING_NAME] \
+         --member serviceAccount:[SERVICE_ACCOUNT_NAME] \
+         --role roles/cloudkms.cryptoKeyEncrypterDecrypter \
+         --project [KEY_PROJECT_ID]
+      ```
+
+      Update the existing cluster with the following command.
+
+      ```
+      gcloud container clusters update [CLUSTER_NAME] \
+        --zone [ZONE] \
+        --database-encryption-key projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKeys/[KEY_NAME] \
+        --project [CLUSTER_PROJECT_ID]
+      ```
+    validation: |-
+      Run the following command in each project with GKE Clusters and ensure the `state` is `ENCRYPTED`..
+
+      ```
+      gcloud container clusters describe $CLUSTER_NAME --format json | jq '.databaseEncryption'
+      ```
     impact: 2
     effort: 5
     platform: GCP
@@ -4324,7 +4357,19 @@ controls:
       `roles/iam.serviceAccountAdmin` and determine if those bindings can be replaced with a small 
       number of predefined roles and/or custom roles using the GCP IAM Recommender to understand 
       which permissions are actually used in the past 90 days.
-    validation: TODO
+    validation: |-
+      Run the following command to list the IAM policy of the current project.
+
+      ```
+      gcloud projects get-iam-policy PROJECT_ID \
+         --flatten="bindings[].members" \
+         --format='table(bindings.members,bindings.role)' \
+         --filter="bindings.members:serviceAccount:* AND \
+            (bindings.role:roles/owner OR binding.role:roles/editor \
+             OR binding.role:roles/*dmin)"
+      ```
+
+      Ensure that there are no entries listed.
     impact: 5
     effort: 7
     platform: GCP
