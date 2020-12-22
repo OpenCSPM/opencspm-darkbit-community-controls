@@ -3490,7 +3490,7 @@ controls:
         --format=json | jq -r 'select(.masterAuthorizedNetworksConfig.enabled==true) | 
           select(.masterAuthorizedNetworksConfig.cidrBlocks[].cidrBlock!="0.0.0.0/0")| "\(.name)"'
       ```
-    impact: 9
+    impact: 6
     effort: 5
     platform: GCP
     category: Network Access Control
@@ -3741,7 +3741,7 @@ controls:
         --format=json | jq -r 'select(.privateClusterConfig.enablePrivateEndpoint==true) | "\(.name)"'
       ```
       
-    impact: 9
+    impact: 6
     effort: 9
     platform: GCP
     category: Networking and Content Delivery
@@ -4420,7 +4420,7 @@ controls:
           --flatten='bindings[]' \
           --format="csv[no-heading](bindings.members[])" | sort)
       ```
-    impact: 9
+    impact: 5
     effort: 4
     platform: GCP
     category: Identity and Access Management
@@ -6511,7 +6511,7 @@ controls:
         --zone [COMPUTE_ZONE] \
         --format json | jq '.masterAuth.clientKey'
       ```
-    impact: 8
+    impact: 5
     effort: 9
     platform: GCP
     category: Identity and Access Management
@@ -6554,7 +6554,7 @@ controls:
       ```
       gcloud services list --enabled --filter=containerregistry
       ```
-    impact: 8
+    impact: 6
     effort: 5
     platform: GCP
     category: Containers
@@ -6918,7 +6918,7 @@ controls:
           namespace: .metadata.namespace, 
           status: .status}'
       ```
-    impact: 8
+    impact: 6
     effort: 6
     platform: GCP
     category: Networking and Content Delivery
