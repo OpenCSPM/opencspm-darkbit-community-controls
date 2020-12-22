@@ -4828,7 +4828,7 @@ controls:
       `conditions.conditionThreshold.filter` is set to 
       `metric.type="logging.googleapis.com/user/[Log Metric Name]"` and 
       `enabled` is set to `true`.
-    impact: 8
+    impact: 5
     effort: 5
     platform: GCP
     category: Security, Identity, and Compliance
@@ -4895,7 +4895,7 @@ controls:
 
       Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
       set to `metric.type="logging.googleapis.com/user/[Log Metric Name]"` and `enabled` set to `true`.
-    impact: 8
+    impact: 5
     effort: 5
     platform: GCP
     category: Security, Identity, and Compliance
@@ -4963,7 +4963,7 @@ controls:
 
       Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
       set to `metric.type="logging.googleapis.com/user/[Log Metric Name]"` and `enabled` set to `true`.
-    impact: 8
+    impact: 5
     effort: 5
     platform: GCP
     category: Security, Identity, and Compliance
@@ -5041,7 +5041,7 @@ controls:
 
       Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
       set to `metric.type="logging.googleapis.com/user/[Log Metric Name]"` and `enabled` set to `true`.
-    impact: 8
+    impact: 5
     effort: 5
     platform: GCP
     category: Security, Identity, and Compliance
@@ -5109,7 +5109,7 @@ controls:
 
       Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
       set to `metric.type="logging.googleapis.com/user/[Log Metric Name]"` and `enabled` set to `true`.
-    impact: 8
+    impact: 5
     effort: 5
     platform: GCP
     category: Security, Identity, and Compliance
@@ -5174,7 +5174,7 @@ controls:
 
       Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
       set to `metric.type="logging.googleapis.com/user/[Log Metric Name]"` and `enabled` set to `true`.
-    impact: 8
+    impact: 5
     effort: 5
     platform: GCP
     category: Security, Identity, and Compliance
@@ -7289,8 +7289,8 @@ controls:
       Ensure that at least one alert policy has `conditions.conditionThreshold.filter`
       set to `metric.type="logging.googleapis.com/user/[Log Metric Name]"` 
       and `enabled` set to `true`.
-    impact: 8
-    effort: 6
+    impact: 5
+    effort: 5
     platform: GCP
     category: Security, Identity, and Compliance
     resource: Logging
