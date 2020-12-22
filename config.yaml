@@ -5868,7 +5868,7 @@ controls:
       ```
       gsutil uniformbucketlevelaccess get gs://[BUCKET_NAME]
       ```
-    impact: 8
+    impact: 3
     effort: 5
     platform: GCP
     category: Identity and Access Management
