@@ -897,7 +897,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
     MATCH (c:GCP_CONTAINER_CLUSTER)
     OPTIONAL MATCH (c:GCP_CONTAINER_CLUSTER)-[:HAS_MASTERAUTHORIZEDNETWORK]->(n:GCP_CONTAINER_MASTERAUTHORIZEDNETWORK)
     WHERE n.cidr_block = '0.0.0.0/0'
-    RETURN c.name, c.resource_data_masterAuthorizedNetworksConfig_enabled as authorized_networks_enabled, n.cidr_block as any_ip
+    RETURN c.name as name, c.resource_data_masterAuthorizedNetworksConfig_enabled as authorized_networks_enabled, n.cidr_block as any_ip
   )
   gkeclusters = graphdb.query(q).mapped_results
   if gkeclusters.length > 0
@@ -1187,12 +1187,12 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
     MATCH (instance:GCP_SQLADMIN_INSTANCE)
     WHERE instance.resource_data_instanceType <> 'READ_REPLICA_INSTANCE'
-    RETURN instance.name, instance.resource_data_settings_backupConfiguration_enabled as backups, instance.resource_data_settings_backupConfiguration_binaryLogEnabled as binlog_enabled
+    RETURN instance.name as instance_name, instance.resource_data_settings_backupConfiguration_enabled as backups, instance.resource_data_settings_backupConfiguration_binaryLogEnabled as binlog_enabled
   )
   instances = graphdb.query(q).mapped_results
   if instances.length > 0
     instances.each do |instance|
-      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe instance.instance_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have automatic backups configured' do
           expect(instance.backups).to eq('true')
           expect(instance.binlog_enabled).to eq('true')
@@ -1387,7 +1387,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
     MATCH (key:GCP_CLOUDKMS_CRYPTOKEY)
     WHERE key.resource_data_primary_state = "ENABLED"
       AND key.resource_data_purpose = "ENCRYPT_DECRYPT"
-    RETURN key.name, key.resource_data_primary_generateTime as last_generated
+    RETURN key.name as name , key.resource_data_primary_generateTime as last_generated
   )
   keys = graphdb.query(q).mapped_results
   if keys.length > 0
@@ -1979,12 +1979,12 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
     MATCH (instance:GCP_COMPUTE_INSTANCE)-[:HAS_DISK]->(disk:GCP_COMPUTE_DISK)
     WHERE instance.resource_data_labels_goog_gke_node IS NULL
-    RETURN instance.name, disk.resource_data_diskEncryptionKey_kmsKeyName as key_name
+    RETURN instance.name as instance_name, disk.resource_data_diskEncryptionKey_kmsKeyName as key_name
   )
   gcenodes = graphdb.query(q).mapped_results
   if gcenodes.length > 0
     gcenodes.each do |node|
-      describe node.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe node.instance_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have CMEK configured for its disks' do
           expect(node.key_name).not_to be_nil
         end
@@ -2004,7 +2004,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
     MATCH  (i:GCP_COMPUTE_INSTANCE)
     WHERE  i.resource_data_labels_goog_gke_node IS NULL
-    RETURN i.name,
+    RETURN i.name as instance_name,
            i.resource_data_shieldedInstanceConfig_enableIntegrityMonitoring as integrity_monitoring,
            i.resource_data_shieldedInstanceConfig_enableSecureBoot as secure_boot,
            i.resource_data_shieldedInstanceConfig_enableVtpm as enable_vtpm
@@ -2012,7 +2012,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   instances = graphdb.query(q).mapped_results
   if instances.length > 0
     instances.each do |instance|
-      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe instance.instance_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have shielded node configuration enabled' do
           expect(instance.integrity_monitoring).to eq('true')
           expect(instance.secure_boot).to eq('true')
@@ -2052,7 +2052,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
           end
         end
       else
-        resource_name = "#{identity.project_name}[#{identity.display_name}]" || identity.key_name
+        resource_name = "#{identity.bucket_name}: #{identity.bucket_role}" || identity.key_name
         describe resource_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
           it 'should not have all(Authenticated)Users access to projects or buckets' do
             expect(resource_name).to be_nil
@@ -2105,7 +2105,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   instances = graphdb.query(q).mapped_results
   if instances.length > 0
     instances.each do |instance|
-      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe instance.instance_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have local_infile disabled' do
           expect(instance.setting_value).to eq('off')
         end
@@ -2132,7 +2132,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   instances = graphdb.query(q).mapped_results
   if instances.length > 0
     instances.each do |instance|
-      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe instance.instance_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have log_checkpoints enabled' do
           expect(instance.setting_value).to eq('on')
         end
@@ -2159,7 +2159,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   instances = graphdb.query(q).mapped_results
   if instances.length > 0
     instances.each do |instance|
-      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe instance.instance_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have log_connections enabled' do
           expect(instance.setting_value).to eq('on')
         end
@@ -2186,7 +2186,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   instances = graphdb.query(q).mapped_results
   if instances.length > 0
     instances.each do |instance|
-      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe instance.instance_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have log_disconnections enabled' do
           expect(instance.setting_value).to eq('on')
         end
@@ -2213,7 +2213,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   instances = graphdb.query(q).mapped_results
   if instances.length > 0
     instances.each do |instance|
-      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe instance.instance_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have log_lock_waits enabled' do
           expect(instance.setting_value).to eq('on')
         end
@@ -2240,7 +2240,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   instances = graphdb.query(q).mapped_results
   if instances.length > 0
     instances.each do |instance|
-      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe instance.instance_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have log_min_error_statement set to ERROR' do
           expect(instance.setting_value).to eq('ERROR')
         end
@@ -2267,7 +2267,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   instances = graphdb.query(q).mapped_results
   if instances.length > 0
     instances.each do |instance|
-      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe instance.instance_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have log_temp_files enabled' do
           expect(instance.setting_value).to eq('-1')
         end
@@ -2294,7 +2294,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   instances = graphdb.query(q).mapped_results
   if instances.length > 0
     instances.each do |instance|
-      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe instance.instance_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have log_min_duration_statement disabled' do
           expect(instance.setting_value).to eq('-1')
         end
@@ -2321,7 +2321,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   instances = graphdb.query(q).mapped_results
   if instances.length > 0
     instances.each do |instance|
-      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe instance.instance_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have cross db ownership chaining disabled' do
           expect(instance.setting_value).to eq('off')
         end
@@ -2348,7 +2348,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   instances = graphdb.query(q).mapped_results
   if instances.length > 0
     instances.each do |instance|
-      describe instance.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe instance.instance_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have contained database authentication disabled' do
           expect(instance.setting_value).to eq('off')
         end
@@ -2732,12 +2732,12 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
     MATCH (instance:GCP_COMPUTE_INSTANCE)-[:HAS_DISK]->(disk:GCP_COMPUTE_DISK)
     WHERE NOT instance.resource_data_labels_goog_gke_node IS NULL
-    RETURN instance.name, disk.resource_data_diskEncryptionKey_kmsKeyName as key_name
+    RETURN instance.name as instance_name, disk.resource_data_diskEncryptionKey_kmsKeyName as key_name
   )
   gkenodes = graphdb.query(q).mapped_results
   if gkenodes.length > 0
     gkenodes.each do |node|
-      describe node.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe node.instance_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have CMEK configured for its disks' do
           expect(node.key_name).not_to be_nil
         end
@@ -2781,12 +2781,12 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
     MATCH (np:GCP_CONTAINER_NODEPOOL)
     WHERE NOT np.name ENDS WITH '/default-pool'
-    RETURN np.name, np.resource_data_config_sandboxConfig_sandboxType as sandbox_type
+    RETURN np.name as nodepool_name, np.resource_data_config_sandboxConfig_sandboxType as sandbox_type
   )
   nps = graphdb.query(q).mapped_results
   if nps.length > 0
     nps.each do |np|
-      describe np.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe np.nodepool_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have gVisor enabled' do
           expect(np.sandbox_type).to eq('GVISOR')
         end
