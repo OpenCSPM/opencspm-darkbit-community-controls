@@ -1415,12 +1415,12 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
     MATCH (gi)-[ir2:HAS_IAMROLE]->(resource)
     WHERE ir1.role_name = "roles/cloudkms.admin"
       AND ir2.role_name = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-    RETURN gi.name as identity_name, resource.name as resource_name
+    RETURN DISTINCT gi.name as identity_name, resource.name as resource_name
   )
   identities = graphdb.query(q).mapped_results
   if identities.length > 0
     identities.each do |identity|
-      describe identity.identity_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe "#{identity.identity_name}: [#{identity.resource_name}]", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should not have kms admin and cryptokeyencrypeterdecrypter to the same resource' do
           expect(identity.resource_name).to be_nil
         end
