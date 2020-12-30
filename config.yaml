@@ -1897,8 +1897,8 @@ controls:
     nodes:
       - AWS_IAM_USER
     refs:
-      - text: TODO
-        url: TODO
+      - text: AWS Account Root User
+        url: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html
     public: true
     tags:
       - cis:
@@ -1915,9 +1915,28 @@ controls:
       Access keys are long-term credentials. Access keys can be used to
       sign programmatic requests to the AWS CLI or AWS API. Minimize the risk 
       of credential leakage by not allowing users to have multiple access keys.
-    remediation: TODO
-    validation: TODO
-    impact: 8
+    remediation: |-
+      If a user has multiple `Active` access keys, remove one after notifying them.
+
+      ```
+      aws iam update-access-key --access-key-id <access-key-id> \
+        --status Inactive --user-name <user-name>
+      ```
+    validation: |-
+      List all the IAM users in the account.
+
+      ```
+      aws iam list-users --query "Users[*].UserName"
+      ```
+
+      For each user, list the access keys and their status.
+
+      ```
+      aws iam list-access-keys --user-name <user-name>
+      ```
+
+      Verify that each user has only one `Active` access key.
+    impact: 3
     effort: 2
     platform: AWS
     category: Identity and Access Management
@@ -1925,8 +1944,8 @@ controls:
     nodes:
       - AWS_IAM_USER
     refs:
-      - text: TODO
-        url: TODO
+      - text: AWS Access Keys Best Practices
+        url: https://docs.aws.amazon.com/general/latest/gr/aws-access-keys-best-practices.html
     public: true
     tags:
       - cis:
@@ -1939,19 +1958,42 @@ controls:
       - aws
   - id: darkbit-aws-111
     title: AWS Access Keys Should Be Rotated Every 90 Days
-    description: TODO
-    remediation: TODO
-    validation: TODO
-    impact: 8
-    effort: 2
+    description: AWS Access Keys are used to make programmatic requests to AWS APIs, and they are commonly stored on developer and administrator workstation disks, CI/CD systems, and baked into applications.  Periodic rotation of all keys can reduce the time window available for leaked or stolen credentials to be valid, and it helps identify places where keys are "hardcoded" into applications and system configuration.
+    remediation: |-
+      Create a second access key.
+
+      ```
+      aws iam create-access-key
+      ```
+
+      After updating all applications to use the new key, wait several days.  Verify that the keys have not been used since the time of rotation.
+
+      ```
+      aws iam get-access-key-last-used
+      ```
+
+      Delete the previous key.
+
+      ```
+      aws iam delete-access-key
+      ```
+    validation: |-
+      Generate a new AWS Credentials Report and review the `access_key_#_last_rotated` fields.
+
+      ```
+      aws iam generate-credential-report
+      aws iam get-credential-report --query 'Content' --output text | base64 -d
+      ```
+    impact: 5
+    effort: 7
     platform: AWS
     category: Identity and Access Management
     resource: IAM
     nodes:
       - PLACEHOLDER
     refs:
-      - text: TODO
-        url: TODO
+      - text: Finding Unused AWS Credentials
+        url: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_finding-unused.html
     public: true
     tags:
       - cis:
@@ -1981,10 +2023,26 @@ controls:
       - aws
   - id: darkbit-aws-113
     title: AWS IAM SSL/TLS Certificates Should Not Be Expired
-    description: TODO
-    remediation: TODO
-    validation: TODO
-    impact: 8
+    description: SSL/TLS Certificates can be handled by AWS Certificate Manager (ACM) or imported from an external provider and stored in IAM for use in regions where ACM is not supported.  Certificates stored in IAM should not be expired to avoid the risk of deploying it in an expired state.
+    remediation: |-
+      Identify expired certificates by running the following command and looking at the `Expiration` field.
+
+      ```
+      aws iam list-server-certificates
+      ```
+
+      For certificates that have expired, delete them.
+
+      ```
+      aws iam delete-server-certificate --server-certificate-name <CERTIFICATE_NAME>
+      ```
+    validation: |-
+      Review the `Expiration` field for any certificates that are listed with the following command.
+
+      ```
+      aws iam list-server-certificates
+      ```
+    impact: 5
     effort: 2
     platform: AWS
     category: Identity and Access Management
@@ -1992,8 +2050,8 @@ controls:
     nodes:
       - PLACEHOLDER
     refs:
-      - text: TODO
-        url: TODO
+      - text: Managing Server Certificates in IAM
+        url: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs.html
     public: true
     tags:
       - cis:
