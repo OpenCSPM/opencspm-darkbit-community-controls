@@ -2064,19 +2064,29 @@ controls:
       - aws
   - id: darkbit-aws-114
     title: AWS IAM Access Analyzer Should Be Enabled
-    description: TODO
-    remediation: TODO
-    validation: TODO
-    impact: 5
-    effort: 8
+    description: AWS IAM Access Analyzer helps organizations identify the resources in the organization and accounts that are shared with an external entity.  For each instance, Access Analyzer generates a finding with information about the access and the external principal to allow administrators to determine if the access is unintended and a security risk.
+    remediation: |-
+      Enable Access Analyzer for the intended region(s).
+
+      ```
+      aws accessanalyzer create-analyzer --analyzer-name <name> --type <ACCOUNT|ORGANIZATION>
+      ```
+    validation: |-
+      Run the following command against each region and check for an `ACTIVE` status.
+
+      ```
+      aws accessanalyzer list-analyzers --region <region>
+      ```
+    impact: 6
+    effort: 4
     platform: AWS
     category: Identity and Access Management
     resource: IAM
     nodes:
       - PLACEHOLDER
     refs:
-      - text: TODO
-        url: TODO
+      - text: Using AWS IAM Access Analyzer
+        url: https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html
     public: true
     tags:
       - cis:
@@ -2088,9 +2098,26 @@ controls:
       - aws
   - id: darkbit-aws-115
     title: S3 Buckets Should Be Encrypted At Rest
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: Encrypting data at rest stored in S3 Buckets requires the combination of IAM access and access to/possession of the decryption keys to be read, and this provides a stronger defense than protection with IAM alone for little to no additional cost.
+    remediation: |-
+      Run either of the following commands for each non-server access logging bucket.
+
+      ```
+       aws s3api put-bucket-encryption --bucket <bucket name> --server-side- encryption-configuration '{"Rules": [{"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}}]}'
+      ```
+
+      or
+
+      ```
+      aws s3api put-bucket-encryption --bucket <bucket name> --server-side- encryption-configuration '{"Rules": [{"ApplyServerSideEncryptionByDefault":
+{"SSEAlgorithm": "aws:kms","KMSMasterKeyID": "aws/s3"}}]}'
+      ```
+    validation: |-
+      For each bucket, run the following command and verify it displays `AES256` or `aws:kms` for the `SSEAlgorithm` field.
+
+      ```
+      aws s3api get-bucket-encryption --bucket <bucket name>
+      ```
     impact: 5
     effort: 5
     platform: AWS
@@ -2099,8 +2126,8 @@ controls:
     nodes:
       - PLACEHOLDER
     refs:
-      - text: TODO
-        url: TODO
+      - text: S3 Server Side Encryption
+        url: https://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-encryption.html
     public: true
     tags:
       - cis:
@@ -2151,19 +2178,29 @@ controls:
       - aws
   - id: darkbit-aws-116
     title: AWS EBS Volume Default Encryption Should Be Enabled
-    description: TODO
-    remediation: TODO
-    validation: TODO
-    impact: 5
-    effort: 8
+    description: Although disabled by default, Elastic Block Store (EBS) Volumes can be set to automatically enabled on new volumes as they are created using the default key provided by AWS or a user-supplied KMS key in each desired region. Encrypting data at rest stored in EBS volumes requires the combination of IAM access and access to/possession of the decryption keys to be read, and this provides a stronger defense than protection with IAM alone for little to no additional cost.
+    remediation: |-
+      In each region, run the following command.
+
+      ```
+      aws --region <region> ec2 enable-ebs-encryption-by-default
+      ```
+    validation: |-
+      In each region, run the following command and ensure it returns `true`.
+
+      ```
+      aws --region <region> ec2 get-ebs-encryption-by-default
+      ```
+    impact: 4
+    effort: 5
     platform: AWS
     category: Storage
     resource: EC2
     nodes:
       - PLACEHOLDER
     refs:
-      - text: TODO
-        url: TODO
+      - text: EBS Volume Encryption By Default
+        url: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSEncryption.html#encryption-by-default
     public: true
     tags:
       - cis:
@@ -2203,19 +2240,51 @@ controls:
       - aws
   - id: darkbit-aws-117
     title: CloudTrail Logging Bucket Should Not Be Public
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: CloudTrail logs a record of every API call made in an AWS Account to a specified S3 bucket, and this bucket should not have a bucket policy or ACL that permits public access of any kind.
+    remediation: |-
+      Obtain the S3 Bucket names used for CloudTrail logging.
+
+      ```
+      aws cloudtrail describe-trails --query 'trailList[*].S3BucketName' --output text
+      ```
+
+      In the AWS Console, navigate to the S3 dashboard, click on the bucket name.  Under the `Permissions` tab, remove ACL grants to `https://acs.amazonaws.com/groups/global/AllUsers` or `https://acs.amazonaws.com/groups/global/AuthenticatedUsers` if they are present.  Modify the Bucket Policy to remove access granted to `"*"` or `{"AWS": "*"}`.
+    validation: |-
+      Obtain the S3 Bucket names used for CloudTrail logging.
+
+      ```
+      aws cloudtrail describe-trails --query 'trailList[*].S3BucketName' --output text
+      ```
+
+      Ensure no privileges are granted to `AllUsers` or `AuthenticatedUsers`.
+
+      ```
+      aws s3api get-bucket-acl --bucket <bucket_name> --query 'Grants[?Grantee.URI==`https://acs.amazonaws.com/groups/global/AllUsers`]'
+      ```
+
+      and
+
+      ```
+      aws s3api get-bucket-acl --bucket <bucket_name> --query 'Grants[?Grantee.URI==`https://acs.amazonaws.com/groups/global/AuthenticatedUsers`]'
+      ```
+
+      Finally, ensure the bucket policy does not `Allow` a `Principal` of `"*"` or `{"AWS": "*"}`
+
+      ```
+      aws s3api get-bucket-policy --bucket <bucket_name>  --output json | jq -r '.Policy' | sed -e 's/\\"/"/g' | jq
+      ```
     impact: 5
-    effort: 2
+    effort: 3
     platform: AWS
     category: Identity and Access Management
     resource: CloudTrail
     nodes:
       - PLACEHOLDER
     refs:
-      - text: TODO
-        url: TODO
+      - text: AWS Bucket Policies
+        url: https://docs.aws.amazon.com/AmazonS3/latest/dev/using-iam-policies.html
+      - text: AWS Bucket ACLs
+        url: https://docs.aws.amazon.com/AmazonS3/latest/dev/S3_ACLs_UsingACLs.html
     public: true
     tags:
       - cis:
