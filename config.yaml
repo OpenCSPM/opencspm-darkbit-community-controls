@@ -2109,8 +2109,9 @@ controls:
       or
 
       ```
-      aws s3api put-bucket-encryption --bucket <bucket name> --server-side- encryption-configuration '{"Rules": [{"ApplyServerSideEncryptionByDefault":
-{"SSEAlgorithm": "aws:kms","KMSMasterKeyID": "aws/s3"}}]}'
+      aws s3api put-bucket-encryption \
+        --bucket <bucket name> \
+        --server-side-encryption-configuration '{"Rules": [{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm": "aws:kms","KMSMasterKeyID": "aws/s3"}}]}'
       ```
     validation: |-
       For each bucket, run the following command and verify it displays `AES256` or `aws:kms` for the `SSEAlgorithm` field.
