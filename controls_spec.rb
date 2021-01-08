@@ -1902,7 +1902,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
     MATCH (gce:GCP_COMPUTE_INSTANCE)
     OPTIONAL MATCH (gce)-[itemvalue:HAS_METADATAITEM]->(item:GCP_COMPUTEMETADATAITEM)
-    WHERE item.name = 'enable-oslogin'
+    WHERE item.name = 'enable-oslogin' and gce.resource_data_labels_goog_gke_node IS NULL
     RETURN gce.name as instance_name, itemvalue.value as setting
   )
   instances = graphdb.query(q).mapped_results
