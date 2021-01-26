@@ -2723,7 +2723,12 @@ controls:
       For VPCs where the default security group is not assigned to any active instances, visit [https://console.aws.amazon.com/vpc/#securityGroups:](https://console.aws.amazon.com/vpc/#securityGroups:), find the `default` security group, select it, and remove all `ingress` and `egress` `allow` rules.
 
       For VPCs where the default security group is in use, VPC flow logging can be helpful in profiling actual network traffic used by live systems to identify the requirements for each new security group.
-    validation: TODO
+    validation: |-
+      Run the following command in each region and verify that both numbers representing the count of `ingress` and `egress` rules are `0`.
+
+      ```
+      aws ec2 describe-security-groups --region <aws_region> --output json | jq -r '.SecurityGroups[] | select(.GroupName=="default") | "\(.Description) \(.IpPermissions | length) \(.IpPermissionsEgress | length)"'
+      ```
     impact: 3
     effort: 9
     platform: AWS
@@ -2810,8 +2815,10 @@ controls:
       - aws
   - id: darkbit-aws-125
     title: EKS Nodegroups Should Run EKS Optimized AMIs
-    description: Unless a specific technical restriction requires a custom AMI, the recommendation is to leverage the operational expertise, configuration hardening, stability fixes, and security updates of EKS optimized AMIs maintained by AWS.  Many Kubernetes-specific settings for worker node security posture have already been implemented and tested, and this can reduce the amount of work necessary to validate your EKS cluster posture against industry-accepted security benchmarks like the CIS EKS Benchmark.
-    remediation: Create new EKS managed NodeGroups and select `Amazon Linux 2 (AL2_x86_64)` for non-GPU instances, `Amazon Linux 2 GPU Enabled (AL2_x86_64_GPU)` for GPU instances, or `Amazon Linux 2 (AL2_ARM_64)` for Arm instances for the `AMI type` setting.
+    description: |
+      Unless a specific technical restriction requires a custom AMI, the recommendation is to leverage the operational expertise, configuration hardening, stability fixes, and security updates of EKS optimized AMIs maintained by AWS.  Many Kubernetes-specific settings for worker node security posture have already been implemented and tested, and this can reduce the amount of work necessary to validate your EKS cluster posture against industry-accepted security benchmarks like the CIS EKS Benchmark.
+    remediation: |
+      Create new EKS managed NodeGroups and select `Amazon Linux 2 (AL2_x86_64)` for non-GPU instances, `Amazon Linux 2 GPU Enabled (AL2_x86_64_GPU)` for GPU instances, or `Amazon Linux 2 (AL2_ARM_64)` for Arm instances for the `AMI type` setting.
     validation: |-
       Run the following command to list node groups for each EKS cluster.
 
@@ -2864,9 +2871,24 @@ controls:
       - aws
   - id: darkbit-aws-126
     title: EKS Clusters Should Have The Latest CNI Plugin That Supports Network Policy
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      By default in Kubernetes, all Pods can communicate with each other
+      by IP and egress to any subnet (including the Internet) unless routing or firewalls
+      are added to prevent that traffic.  This presents ample opportunity for lateral
+      movement from the perspective of a compromised workload. One of the best ways
+      to reduce the scope of that movement is to deploy `NetworkPolicy` resources that
+      define firewall rules for pod-to-pod traffic.  In EKS, a CNI that supports Network
+      Policy must be installed to allow for the cluster to enforce firewall policies on Pods.
+    remediation: |
+      Install a CNI plugin such as `Calico` using a supported version appropriate for the EKS
+      cluster as a part of the steps taken just after installation and before workloads are
+      deployed.
+    validation: |-
+      Run the following command to validate the presence of a `DaemonSet` corresponding to a CNI plugin with `NetworkPolicy` support.  A common example might be `calico-node` in the `kube-system` namespace.
+
+      ```
+      kubectl get ds -A
+      ```
     impact: 8
     effort: 8
     platform: AWS
@@ -2875,8 +2897,12 @@ controls:
     nodes:
       - PLACEHOLDER
     refs:
-      - text: TODO
-        url: TODO
+      - text: AWS EKS Calico CNI Installation
+        url: https://docs.aws.amazon.com/eks/latest/userguide/calico.html
+      - text: Sample Kubernetes Network Policies
+        url: https://github.com/ahmetb/kubernetes-network-policy-recipes
+      - text: Sample Calico Network Policies
+        url: https://docs.projectcalico.org/security/calico-network-policy
     public: true
     tags:
       - cis:
@@ -2890,9 +2916,38 @@ controls:
       - aws
   - id: darkbit-aws-128
     title: EKS Clusters Should Have Read-Only Permissions to ECR Registries
-    description: TODO
-    remediation: TODO
-    validation: TODO
+    description: |
+      In production clusters, container images should not be built inside the cluster, so "push" or write access to ECR is not necessary. Therefore, the worker instance's IAM Role should have read-only access to ECR sufficient for reading or "pulling" container images to follow the principle of least privilege and prevent a malicious actor with access to the instance credentials from being able to insert a backdoor into container images hosted in ECR.
+    remediation: |
+      Review the IAM Policies attached to the worker node's Instance Role and ensure the only policies attached are the `AmazonEKSWorkerNodePolicy`, `AmazonEC2ContainerRegistryReadOnly`, and optionally `AmazonEKS_CNI_Policy`.  Note that changing the permissions attached to the instances may break applications running in Pods on those nodes if they rely on the credentials provided to the instance for AWS API access.
+    validation: |-
+      Review the IAM Policies attached to the worker node's Instance Role and ensure the only ECR permissions are as follows.
+
+      ```
+      {
+          "Version": "2012-10-17",
+          "Statement": [
+              {
+                  "Effect": "Allow",
+                  "Action": [
+                      "ecr:GetAuthorizationToken",
+                      "ecr:BatchCheckLayerAvailability",
+                      "ecr:GetDownloadUrlForLayer",
+                      "ecr:GetRepositoryPolicy",
+                      "ecr:DescribeRepositories",
+                      "ecr:ListImages",
+                      "ecr:DescribeImages",
+                      "ecr:BatchGetImage",
+                      "ecr:GetLifecyclePolicy",
+                      "ecr:GetLifecyclePolicyPreview",
+                      "ecr:ListTagsForResource",
+                      "ecr:DescribeImageScanFindings"
+                  ],
+                  "Resource": "*"
+              }
+          ]
+      }
+      ```
     impact: 8
     effort: 3
     platform: AWS
@@ -2901,8 +2956,8 @@ controls:
     nodes:
       - PLACEHOLDER
     refs:
-      - text: TODO
-        url: TODO
+      - text: AWS EKS Node Role
+        url: https://docs.aws.amazon.com/eks/latest/userguide/create-node-role.html
     public: true
     tags:
       - cis:
@@ -2915,20 +2970,32 @@ controls:
           - nist-csf-todo
       - aws
   - id: darkbit-aws-129
-    title: EKS Nodes Should Not Have Public IP Addresses
-    description: TODO
-    remediation: TODO
-    validation: TODO
-    impact: 8
-    effort: 8
+    title: EKS Worker Nodes Should Not Have Public IP Addresses
+    description: EKS worker nodes can be configured to only have private IP addresses assigned, and this forces direct network access to exposed services running on the nodes such as SSH to originate from systems within the internal network instead of any system on the Internet. Even if a security group or network access control list was modified to grant ingress access to a public system, the 1-to-1 NAT would not be in place to route that traffic inbound to the system.  Note that egress access must then be granted via Cloud NAT or your own NAT gateway, and the cluster has to be configured with a private master IP range and IP aliasing must be enabled.
+    remediation: |-
+      When defining the VPC and subnet topology for EKS clusters, most use cases require the "public and private" subnet approach where the worker nodes are provisioned in private subnets and load balancers/ingress resources are deployed in the public subnets.  To modify a subnet to avoid mapping a public IP to EC2 instances as they launch, run the following command on all desired subnets.
+
+      ```
+      aws ec2 modify-subnet-attribute --region <aws_region> --map-public-ip-on-launch=false --subnet-id <subnet_id>
+      ```
+    validation: |-
+      Run the following command in all regions where EKS workers are running to validate that a public IP will not be automatically mapped upon launch in those subnets.
+
+      ```
+      aws ec2 describe-subnets --region <aws_region> --output json | jq -r '.Subnets[] | "\(.VpcId) \(.SubnetId) \(.MapPublicIpOnLaunch)"'
+      ```
+    impact: 6
+    effort: 9
     platform: AWS
     category: Networking and Content Delivery
     resource: EKS
     nodes:
       - PLACEHOLDER
     refs:
-      - text: TODO
-        url: TODO
+      - text: EKS VPC Considerations
+        url: https://docs.aws.amazon.com/eks/latest/userguide/network_reqs.html
+      - text: EKS Private Clusters
+        url: https://docs.aws.amazon.com/eks/latest/userguide/private-clusters.html
     public: true
     tags:
       - cis:
@@ -2942,10 +3009,16 @@ controls:
       - aws
   - id: darkbit-aws-130
     title: EKS HTTPS Load Balancers Should Use TLS Certificates
-    description: TODO
-    remediation: TODO
-    validation: TODO
-    impact: 8
+    description: To ease the administrative overhead of managing TLS certificates and their expiration dates, using AWS Certificate Manager (ACM) in conjunction with all Network and Application Load Balancers exposed via EKS Services is strongly recommended.
+    remediation: |-
+      When creating a service of type `LoadBalancer`, ensure that the annotations in that service description includes `service.beta.kubernetes.io/aws-load-balancer-ssl-cert: <arn_of_acm_cert>`.  When using an ingress controller, this annotation is typically on the single load balancer shared by all ingress resources.
+    validation: |-
+      Run the following command in each EKS cluster to list all exposed Kubernetes services.  Review the `service.beta.kubernetes.io/aws-load-balancer-ssl-cert` annotation for a valid ACM certificate ARN.
+
+      ```
+      kubectl get services -A --output=json | jq -r '.items[] | select(.spec.type=="LoadBalancer") | "\(.metadata.namespace) \(.metadata.name) \(.metadata.annotations)"'
+      ```
+    impact: 5
     effort: 4
     platform: AWS
     category: Networking and Content Delivery
@@ -2953,8 +3026,14 @@ controls:
     nodes:
       - PLACEHOLDER
     refs:
-      - text: TODO
-        url: TODO
+      - text: Kubernetes Docs for AWS TLS LoadBalancers
+        url: https://kubernetes.io/docs/concepts/services-networking/service/#ssl-support-on-aws
+      - text: HTTPS Traffic on EKS with ACM
+        url: https://aws.amazon.com/premiumsupport/knowledge-center/terminate-https-traffic-eks-acm/
+      - text: EKS Network Load Balancing
+        url: https://docs.aws.amazon.com/eks/latest/userguide/load-balancing.html
+      - text: EKS Application Load Balancing
+        url: https://docs.aws.amazon.com/eks/latest/userguide/alb-ingress.html
     public: true
     tags:
       - cis:
@@ -2968,19 +3047,25 @@ controls:
       - aws
   - id: darkbit-aws-131
     title: EKS Clusters Should Manage RBAC Users With AWS IAM Authenticator
-    description: TODO
-    remediation: TODO
-    validation: TODO
-    impact: 8
-    effort: 7
+    description: Amazon EKS clusters can be integrated with native AWS IAM to map IAM users and/or Roles to RBAC groups inside the cluster.  Combined with a kubeconfig that leverages the current IAM identity's bearer token, this can allow for near seamless use of kubectl while taking advantage of all the account protections available for IAM users such as session duration and multi-factor authentication.
+    remediation: |-
+      By default, EKS clusters have this integration enabled in the control plane.  Administrators should leverage kubectl to modify the `aws-auth` `ConfigMap` in the `kube-system` `namespace` to include the IAM Roles and/or Users that should be mapped to a given RBAC `group`.  From there, standard RBAC `ClusterRoleBinding` and `RoleBinding` resources can be created that give permissions to those `group` names.  Note that `groups` named `system:*` should not be assigned to users as they can add to confusion when reviewing the Kubernetes audit logs shipped to CloudWatch.
+    validation: |-
+      To verify access granted to IAM identities, run the following command in the cluster.
+
+      ```
+      kubectl get configmap -n kube-system aws-auth -o yaml
+      ```
+    impact: 6
+    effort: 5
     platform: AWS
     category: Identity and Access Management
     resource: EKS
     nodes:
       - PLACEHOLDER
     refs:
-      - text: TODO
-        url: TODO
+      - text: Managing users or IAM Roles for EKS Clusters
+        url: https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html
     public: true
     tags:
       - cis:
@@ -2993,20 +3078,28 @@ controls:
           - nist-csf-todo
       - aws
   - id: darkbit-aws-132
-    title: Fargate Should Be Used For Running Untrusted Workloads
-    description: TODO
-    remediation: TODO
-    validation: TODO
-    impact: 8
-    effort: 8
+    title: Fargate Should Be Used For Running Untrusted EKS Workloads
+    description: |
+      In most enterprise use cases, workloads are being deployed from known specifications and leveraging container images that are granted a certain degree of implicit or explicit trust.  The assumptions are that the packages, libraries, binaries, and scripts in the container image are not malicious or expected to be malicious.  In cases where input or code may be supplied by an untrusted third party, additional protections and isolation methods are prudent to help eliminate likely classes of container escape.  AWS Fargate integrates with EKS in that its custom scheduler can place specifically designated workloads on dedicated Fargate nodes with microvm level isolation and other supporting restrictions.
+      There are some limitations with EKS workloads on Fargate in that container-based, malicious activity detection workloads like Falco, Aqua, and Prisma do not currently have introspection capabilities into these workloads.
+    remediation: |-
+      Determine if any workloads may be running code from untrusted sources such as Jupyter Notebooks or Apache Spark.  If those workloads meet the requirements for running in Fargate, create a Fargate pod execution role to be attached to the hidden Fargate node(s), and create a Fargate profile that combines the pod execution role, the subnets, the namespace, and the label selectors.
+    validation: |-
+      To validate if a `pod` is running on a Fargate node, look for node names beginning with `fargate-ip-` in the output of the following command.
+
+      ```
+      kubectl get pods -o wide
+      ```
+    impact: 5
+    effort: 9
     platform: AWS
     category: Security, Identity, and Compliance
     resource: Fargate
     nodes:
       - PLACEHOLDER
     refs:
-      - text: TODO
-        url: TODO
+      - text: EKS Fargate Getting Started
+        url: https://docs.aws.amazon.com/eks/latest/userguide/fargate-getting-started.html
     public: true
     tags:
       - cis:
