@@ -495,9 +495,22 @@ end
 
 control_id = 'darkbit-aws-122'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %(
+    MATCH (sg:AWS_SECURITY_GROUP)-[r]-(rule:AWS_SECURITY_GROUP_INGRESS_RULE)
+    RETURN sg.name AS security_group,
+           r.cidr_ip AS source_ip,
+           r.ip_protocol AS proto,
+           rule.name AS name
+  )
+  rules = graphdb.query(q).mapped_results
+  rules.each do |rule|
+    next unless ['tcp', 'udp', '-1'].include?(rule.proto)
+
+    describe rule.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      it 'should not allow access from 0.0.0.0/0' do
+        expect(rule.source_ip).not_to eq('0.0.0.0/0')
+        expect(rule.source_ip).not_to eq('::/0')
+      end
     end
   end
 end
@@ -605,10 +618,10 @@ end
 control_id = 'darkbit-gcp-14'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
-    MATCH (s:GCP_COMPUTE_SUBNETWORK) 
-    RETURN s.name as name, 
-           s.resource_data_logConfig_enable as flow_logging, 
-           s.resource_data_logConfig_flowSampling as flow_sampling, 
+    MATCH (s:GCP_COMPUTE_SUBNETWORK)
+    RETURN s.name as name,
+           s.resource_data_logConfig_enable as flow_logging,
+           s.resource_data_logConfig_flowSampling as flow_sampling,
            s.resource_data_logConfig_metadata as metadata
   )
   subnets = graphdb.query(q).mapped_results
@@ -746,14 +759,14 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   projects = graphdb.query(q).mapped_results
   if projects.length > 0
     configs = projects.group_by { |r| "#{r[:project_name]}[#{r[:display_name]}]" }.map do |np, configs|
-      log_types = configs.group_by{ |s| s[:log_type] }.map {|k,v| k }.sort
-      exempted_members = configs.group_by{ |s| s[:exempted_members] }.map {|k,v| k }.compact
-      [ np, log_types, exempted_members ]
+      log_types = configs.group_by { |s| s[:log_type] }.map { |k, _v| k }.sort
+      exempted_members = configs.group_by { |s| s[:exempted_members] }.map { |k, _v| k }.compact
+      [np, log_types, exempted_members]
     end
     configs.each do |config|
       describe config[0], control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should have audit logging configured' do
-          expect(config[1]).to eq(["1", "2", "3"])
+          expect(config[1]).to eq(%w[1 2 3])
           expect(config[2]).to eq([])
         end
       end
@@ -1218,8 +1231,8 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   sas = graphdb.query(q).mapped_results
   if sas.length > 0
     records = sas.group_by { |r| r[:name] }.map do |id, roles|
-      editor = (roles.select{|k,v| (k['role_name'] == 'roles/editor') }.length > 0) || false
-      [ id, editor ]
+      editor = (roles.select { |k, _v| (k['role_name'] == 'roles/editor') }.length > 0) || false
+      [id, editor]
     end
     records.each do |sa|
       describe sa[0], control_pack: control_pack, control_id: control_id, "#{control_id}": true do
@@ -1271,7 +1284,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   sas = graphdb.query(q).mapped_results
   if sas.length > 0
     sas.each do |sa|
-      sa_id = sa.sa_id.gsub(/^\/\//, '')
+      sa_id = sa.sa_id.gsub(%r{^//}, '')
       describe sa_id, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should not have user-managed keys' do
           expect(sa_id).to be_nil
@@ -2552,8 +2565,8 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   nodepools = graphdb.query(q).mapped_results
   if nodepools.length > 0
     pools = nodepools.group_by { |r| r[:nodepool_name] }.map do |np, perms|
-      writable = (perms.select{|k,v| (k['scope_name'].nil? && k['perm_name'] == 'storage.objects.create') }.length > 0) || false
-      [ np, writable ] 
+      writable = (perms.select { |k, _v| (k['scope_name'].nil? && k['perm_name'] == 'storage.objects.create') }.length > 0) || false
+      [np, writable]
     end
     pools.each do |nodepool|
       describe nodepool[0], control_pack: control_pack, control_id: control_id, "#{control_id}": true do
