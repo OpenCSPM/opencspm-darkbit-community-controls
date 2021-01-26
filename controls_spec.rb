@@ -436,7 +436,8 @@ opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": tr
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %(
     MATCH (b:AWS_S3_BUCKET)
-    RETURN b.name AS name, b.is_encrypted_at_rest AS is_encrypted
+    RETURN b.name AS name,
+           b.is_encrypted_at_rest AS is_encrypted
   )
   buckets = graphdb.query(q).mapped_results
   buckets.each do |bucket|
@@ -449,10 +450,21 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
 end
 
 control_id = 'darkbit-aws-116'
+opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %(
+    MATCH (v:AWS_EBS_VOLUME)
+    RETURN v.name AS name,
+           v.encrypted AS is_encrypted,
+           v.account AS account,
+           v.region AS region
+  )
+  volumes = graphdb.query(q).mapped_results
+  volumes.each do |volume|
+    describe "arn:aws:ec2:#{volume.region}:#{volume.account}:#{volume.name}", opts do
+      it 'should have encryption enabled' do
+        expect(volume.is_encrypted).to eq('true')
+      end
     end
   end
 end

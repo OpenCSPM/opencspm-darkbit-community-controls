@@ -2181,7 +2181,12 @@ controls:
       - aws
   - id: darkbit-aws-116
     title: AWS EBS Volume Default Encryption Should Be Enabled
-    description: Although disabled by default, Elastic Block Store (EBS) Volumes can be set to automatically enabled on new volumes as they are created using the default key provided by AWS or a user-supplied KMS key in each desired region. Encrypting data at rest stored in EBS volumes requires the combination of IAM access and access to/possession of the decryption keys to be read, and this provides a stronger defense than protection with IAM alone for little to no additional cost.
+    description: |
+      Although disabled by default, Elastic Block Store (EBS) Volumes can be set to automatically enabled on 
+      new volumes as they are created using the default key provided by AWS or a user-supplied KMS key in 
+      each desired region. Encrypting data at rest stored in EBS volumes requires the combination of IAM 
+      access and access to/possession of the decryption keys to be read, and this provides a stronger 
+      defense than protection with IAM alone for little to no additional cost.
     remediation: |-
       In each region, run the following command.
 
