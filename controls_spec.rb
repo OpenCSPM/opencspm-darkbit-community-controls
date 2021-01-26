@@ -1,6 +1,7 @@
 require 'yaml'
 require 'date'
 
+NARF ||= 'No affected resources found'.freeze
 config_file = YAML.load(File.read(File.expand_path(File.dirname(__FILE__) + '/config.yaml')))
 control_pack = config_file['id']
 titles = Hash[config_file['controls'].map { |control| [control['id'], control['title']] }]
@@ -494,6 +495,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
 end
 
 control_id = 'darkbit-aws-122'
+opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %(
     MATCH (sg:AWS_SECURITY_GROUP)-[r]-(rule:AWS_SECURITY_GROUP_INGRESS_RULE)
@@ -506,19 +508,37 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   rules.each do |rule|
     next unless ['tcp', 'udp', '-1'].include?(rule.proto)
 
-    describe rule.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe rule.name, opts do
       it 'should not allow access from 0.0.0.0/0' do
         expect(rule.source_ip).not_to eq('0.0.0.0/0')
         expect(rule.source_ip).not_to eq('::/0')
       end
     end
+  end.empty? && describe(NARF, opts) do
+    it 'should not allow access from 0.0.0.0/0' do
+      expect(true).to eq(true)
+    end
   end
 end
 
 control_id = 'darkbit-aws-123'
+opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
+  q = %(
+    MATCH (sg:AWS_SECURITY_GROUP)-[]-(rule:AWS_SECURITY_GROUP_INGRESS_RULE)
+    WHERE sg.group_name = 'default'
+    RETURN count(rule) AS ingress_rule_count,
+           sg.name AS name
+  )
+  security_groups = graphdb.query(q).mapped_results
+  security_groups.each do |security_group|
+    describe security_group.name, opts do
+      it 'default SG should not have any IP ingress rules' do
+        expect(security_group.ingress_rule_count).to eq(0)
+      end
+    end
+  end.empty? && describe(NARF, opts) do
+    it 'default SG should not have any IP ingress rules' do
       expect(true).to eq(true)
     end
   end
