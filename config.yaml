@@ -2103,7 +2103,9 @@ controls:
       Run either of the following commands for each non-server access logging bucket.
 
       ```
-       aws s3api put-bucket-encryption --bucket <bucket name> --server-side- encryption-configuration '{"Rules": [{"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}}]}'
+       aws s3api put-bucket-encryption \
+        --bucket <bucket name> \
+        --server-side-encryption-configuration '{"Rules": [{"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}}]}'
       ```
 
       or

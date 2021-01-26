@@ -432,10 +432,18 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
 end
 
 control_id = 'darkbit-aws-115'
+opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %(
+    MATCH (b:AWS_S3_BUCKET)
+    RETURN b.name AS name, b.is_encrypted_at_rest AS is_encrypted
+  )
+  buckets = graphdb.query(q).mapped_results
+  buckets.each do |bucket|
+    describe bucket.name, opts do
+      it 'should be encrypted at rest' do
+        expect(bucket.is_encrypted).to eq('true')
+      end
     end
   end
 end
@@ -514,10 +522,6 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
         expect(rule.source_ip).not_to eq('::/0')
       end
     end
-  end.empty? && describe(NARF, opts) do
-    it 'should not allow access from 0.0.0.0/0' do
-      expect(true).to eq(true)
-    end
   end
 end
 
@@ -536,10 +540,6 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
       it 'default SG should not have any IP ingress rules' do
         expect(security_group.ingress_rule_count).to eq(0)
       end
-    end
-  end.empty? && describe(NARF, opts) do
-    it 'default SG should not have any IP ingress rules' do
-      expect(true).to eq(true)
     end
   end
 end
