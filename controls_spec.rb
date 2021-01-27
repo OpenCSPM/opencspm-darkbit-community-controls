@@ -237,10 +237,10 @@ end
 control_id = 'darkbit-aws-35'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %(
-    MATCH (s3:AWS_S3_BUCKET)
-    RETURN s3.name AS name,
-           s3.logging_bucket_target AS bucket_target,
-           s3.logging_bucket_prefix AS bucket_prefix
+    MATCH (b:AWS_S3_BUCKET)
+    RETURN b.name AS name,
+           b.logging_bucket_target AS bucket_target,
+           b.logging_bucket_prefix AS bucket_prefix
   )
   buckets = graphdb.query(q).mapped_results
   buckets.each do |bucket|
@@ -254,10 +254,28 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
 end
 
 control_id = 'darkbit-aws-42'
+opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %(
+    MATCH (b:AWS_S3_BUCKET)
+    OPTIONAL MATCH (b:AWS_S3_BUCKET)-[hp:HAS_POLICY]-(p:AWS_S3_BUCKET_POLICY)-[hs:HAS_STATEMENT]-(s:AWS_S3_BUCKET_POLICY_STATEMENT)-[hc:HAS_CONDITION]-(pc:AWS_S3_BUCKET_POLICY_CONDITION)
+    WHERE pc.name = "aws:SecureTransport"
+    AND hc.operator = "Bool"
+    AND hc.value = "false"
+    AND hs.effect = "Deny"
+    RETURN b.name AS name,
+           hc.value AS boolean,
+           pc.name AS condition,
+           hs.effect AS effect
+  )
+  buckets = graphdb.query(q).mapped_results
+  buckets.each do |bucket|
+    describe bucket.name, opts do
+      it 'should have a policy to explicitly enforce HTTPS' do
+        expect(bucket.boolean).to eq('false')
+        expect(bucket.condition).to eq('aws:SecureTransport')
+        expect(bucket.effect).to eq('Deny')
+      end
     end
   end
 end

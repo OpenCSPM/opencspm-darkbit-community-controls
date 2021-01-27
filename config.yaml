@@ -1179,18 +1179,22 @@ controls:
     description:
       S3 buckets can be configured with a bucket policy that further restricts
       the conditions in which access can be granted, and all S3 buckets should have
-      a bucket policy enforcing the use SSL/TLS connections to prevent eavesdropping
+      a bucket policy enforcing the use of SSL/TLS connections to prevent eavesdropping
       of sensitive data when accessed via HTTP.
-    remediation:
-      'Configure S3 bucket policies for each bucket such that the "aws:SecureTransport"
-      setting is "false" in a "deny all" condition block.  Refer to: https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-ssl-requests-only.html
-      for a working example.'
-    validation:
-      'Run `for i in $(aws s3api list-buckets --query ''Buckets[*].Name''
-      --output text); do OUT="$(aws s3api get-bucket-policy --query Policy --bucket
-      $i --output text 2> /dev/null | grep ''aws:SecureTransport'')"; echo "$i: $OUT";
-      done` and verify that each bucket has a policy defined that includes `"aws:SecureTransport":"true"`
-      on the `"Allow"` Effect.'
+    remediation: |
+      Configure S3 bucket policies for each bucket such that the `aws:SecureTransport`
+      setting is `false` in a `deny all` condition block.  Refer to: https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-ssl-requests-only.html
+      for a working example.
+    validation: |-
+      Run the following command and verify that each bucket has a policy defined that includes `"aws:SecureTransport":"false"`
+      on the `"Deny"` Effect.
+      
+      ```
+      for i in $(aws s3api list-buckets --query 'Buckets[*].Name' --output text)
+        do OUT="$(aws s3api get-bucket-policy --query Policy --bucket $i --output text 2> /dev/null | grep 'aws:SecureTransport')"
+        echo "$i: $OUT"
+      done
+      ```
     impact: 2
     effort: 2
     platform: AWS
