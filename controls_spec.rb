@@ -158,10 +158,22 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
 end
 
 control_id = 'darkbit-aws-23'
+opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %(
+    MATCH (sg:AWS_SECURITY_GROUP)-[r]-(rule:AWS_SECURITY_GROUP_INGRESS_RULE)
+    WHERE r.cidr_ip = '0.0.0.0/0' AND r.to_port IN ['22','3389']
+    RETURN count(rule) AS ingress_rule_count,
+           sg.name AS name,
+           sg.region AS region,
+           sg.account AS account
+  )
+  security_groups = graphdb.query(q).mapped_results
+  security_groups.each do |security_group|
+    describe "arn:aws:ec2:#{security_group.region}:#{security_group.account}:#{security_group.name}", opts do
+      it 'SG should not have IP ingress rules for source 0.0.0.0/0 on tcp port 22 or 3389' do
+        expect(security_group.ingress_rule_count).to eq(0)
+      end
     end
   end
 end
@@ -579,7 +591,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   )
   security_groups = graphdb.query(q).mapped_results
   security_groups.each do |security_group|
-    describe security_group.name, opts do
+    describe "arn:aws:ec2:#{security_group.region}:#{security_group.account}:#{security_group.name}", opts do
       it 'default SG should not have any IP ingress rules' do
         expect(security_group.ingress_rule_count).to eq(0)
       end
