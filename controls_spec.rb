@@ -251,10 +251,21 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
 end
 
 control_id = 'darkbit-aws-43'
+opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %(
+    MATCH (v:AWS_EBS_VOLUME)
+    RETURN v.name AS name,
+           v.encrypted AS is_encrypted,
+           v.account AS account,
+           v.region AS region
+  )
+  volumes = graphdb.query(q).mapped_results
+  volumes.each do |volume|
+    describe "arn:aws:ec2:#{volume.region}:#{volume.account}:#{volume.name}", opts do
+      it 'should have encryption enabled' do
+        expect(volume.is_encrypted).to eq('true')
+      end
     end
   end
 end
@@ -473,17 +484,17 @@ control_id = 'darkbit-aws-116'
 opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %(
-    MATCH (v:AWS_EBS_VOLUME)
-    RETURN v.name AS name,
-           v.encrypted AS is_encrypted,
-           v.account AS account,
-           v.region AS region
+    MATCH (s:AWS_EBS_ENCRYPTION_SETTINGS)
+    RETURN s.name AS name,
+           s.ebs_encryption_by_default AS is_encrypted,
+           s.account AS account,
+           s.region AS region
   )
-  volumes = graphdb.query(q).mapped_results
-  volumes.each do |volume|
-    describe "arn:aws:ec2:#{volume.region}:#{volume.account}:#{volume.name}", opts do
-      it 'should have encryption enabled' do
-        expect(volume.is_encrypted).to eq('true')
+  regions = graphdb.query(q).mapped_results
+  regions.each do |region|
+    describe "arn:aws::#{region.region}:#{region.account}", opts do
+      it 'should have EBS encryption by default enabled' do
+        expect(region.is_encrypted).to eq('true')
       end
     end
   end
