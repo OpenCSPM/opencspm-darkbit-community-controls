@@ -2023,7 +2023,11 @@ controls:
       - aws
   - id: darkbit-aws-113
     title: AWS IAM SSL/TLS Certificates Should Not Be Expired
-    description: SSL/TLS Certificates can be handled by AWS Certificate Manager (ACM) or imported from an external provider and stored in IAM for use in regions where ACM is not supported.  Certificates stored in IAM should not be expired to avoid the risk of deploying it in an expired state.
+    description: |
+      SSL/TLS Certificates can be handled by AWS Certificate Manager (ACM) or imported from an 
+      external provider and stored in IAM for use in regions where ACM is not supported.  
+      Certificates stored in IAM should not be expired to avoid the risk of deploying it in 
+      an expired state.
     remediation: |-
       Identify expired certificates by running the following command and looking at the `Expiration` field.
 

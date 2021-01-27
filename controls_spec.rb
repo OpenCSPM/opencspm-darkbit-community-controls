@@ -269,10 +269,30 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
 end
 
 control_id = 'darkbit-aws-51'
+opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %(
+    MATCH (i:AWS_EC2_INSTANCE)
+    RETURN DISTINCT i.region AS region,
+                    i.account AS account
+  )
+  regions = graphdb.query(q).mapped_results
+
+  q = %(
+    MATCH (t:AWS_CLOUDTRAIL_TRAIL)
+    RETURN t.name AS name,
+           t.home_region AS region,
+           t.is_multi_region_trail AS is_multi_region,
+           t.account AS account,
+           t.is_organization_trail AS org_trail
+  )
+  trails = graphdb.query(q).mapped_results
+
+  regions.each do |region|
+    describe "arn:aws::#{region.region}:#{region.account}", opts do
+      it 'should have CloudTrail enabled' do
+        expect(trails.filter { |t| t.region == region.region && t.account == region.account && t.is_multi_region }.any?).to eq(true)
+      end
     end
   end
 end
