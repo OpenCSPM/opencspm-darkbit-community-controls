@@ -706,14 +706,14 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-control_id = 'darkbit-aws-121'
-RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
-    end
-  end
-end
+# control_id = 'darkbit-aws-121'
+# RSpec.describe "[#{control_id}] #{titles[control_id]}" do
+#   describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+#     it 'should not have a placeholder configuration' do
+#       expect(true).to eq(true)
+#     end
+#   end
+# end
 
 control_id = 'darkbit-aws-122'
 opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
