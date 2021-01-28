@@ -655,10 +655,34 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
 end
 
 control_id = 'darkbit-aws-120'
+opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  # only consider regions with running EC2 instances 'active'
+  q = %(
+      MATCH (i:AWS_EC2_INSTANCE)
+      RETURN DISTINCT i.region AS region,
+                      i.account AS account
+    )
+  regions = graphdb.query(q).mapped_results
+
+  q = %(
+    MATCH (t:AWS_CLOUDTRAIL_TRAIL)-[hes:HAS_EVENT_SELECTOR]-(es:AWS_CLOUDTRAIL_EVENT_SELECTOR)-[hdr:HAS_DATA_RESOURCE]-(dr:AWS_CLOUDTRAIL_DATA_RESOURCE)
+    RETURN t.name AS name,
+           t.home_region AS region,
+           t.account AS account,
+           hes.read_write_type AS read_write_type,
+           hdr.type AS data_resource_type,
+           dr.name AS data_resource
+  )
+  trails = graphdb.query(q).mapped_results
+
+  regions.each do |region|
+    s3_object_level_logging = trails.filter { |t| t.region == region.region && t.account == region.account && t.read_write_type == 'All' && t.data_resource_type == 'AWS::S3::Object' && t.data_resource.start_with?('arn:aws:s3') }.any?
+
+    describe "arn:aws::#{region.region}:#{region.account}", opts do
+      it 'should have S3 object level logging to CloudTrail enabled' do
+        expect(s3_object_level_logging).to be(true)
+      end
     end
   end
 end

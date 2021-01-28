@@ -2539,12 +2539,18 @@ controls:
           - aws-wa-security-SEC-8
       - aws
   - id: darkbit-aws-120
-    title: S3 Object Level Logging to CloudTrail For Write Events Should Be Enabled
-    description: By default, CloudTrail trails don't log data events for S3 object-level API operations such as `GetObject`, `DeleteObject`, and `PutObject`. Enabling object-level logging will help you meet certain compliance requirements, perform comprehensive security analysis, monitor specific patterns of user behavior, or take immediate actions on any object-level S3 API activity using Amazon CloudWatch Events.
+    title: S3 Object Level Logging to CloudTrail For Read & Write Events Should Be Enabled
+    description: |
+      By default, CloudTrail trails don't log data events for S3 object-level API 
+      operations such as `GetObject`, `DeleteObject`, and `PutObject`. Enabling 
+      object-level logging will help you meet certain compliance requirements, 
+      perform comprehensive security analysis, monitor specific patterns of user 
+      behavior, or take immediate actions on any object-level S3 API activity using 
+      Amazon CloudWatch Events.
     remediation: |-
       In the AWS Console, visit [https://console.aws.amazon.com/cloudtrail/#/trails](https://console.aws.amazon.com/cloudtrail/#/trails), select the desired trail, click `Edit` on the `Data events : S3` section, and ensure the `Data Events` checkbox is selected.  Then save changes.
     validation: |-
-      List the event selectors associated with each CloudTrail and ensure they are not empty and return a `Type` of `AWS::S3::Object` and `Values` of an array of `arn:aws:s3` or specific S3 bucket ARNs
+      List the event selectors associated with each CloudTrail and ensure they are not empty and return a`ReadWriteType` of `All`, a `Type` of `AWS::S3::Object` and `Values` of an array of `arn:aws:s3` or specific S3 bucket ARNs
 
       ```
       for region in $(aws ec2 describe-regions --query Regions[].RegionName --output text); do 
@@ -2636,104 +2642,105 @@ controls:
       - aws-wa-security:
           - aws-wa-security-SEC-4
       - aws
-  - id: darkbit-aws-121
-    title: S3 Object Level Logging to CloudTrail For Read Events Should Be Enabled
-    description: By default, CloudTrail trails don't log data events for S3 object-level API operations such as `GetObject`, `DeleteObject`, and `PutObject`. Enabling object-level logging will help you meet certain compliance requirements, perform comprehensive security analysis, monitor specific patterns of user behavior, or take immediate actions on any object-level S3 API activity using Amazon CloudWatch Events.
-    remediation: |-
-      In the AWS Console, visit [https://console.aws.amazon.com/cloudtrail/#/trails](https://console.aws.amazon.com/cloudtrail/#/trails), select the desired trail, click `Edit` on the `Data events : S3` section, and ensure the `Data Events` checkbox is selected.  Then save changes.
-    validation: |-
-      List the event selectors associated with each CloudTrail and ensure they are not empty and return a `Type` of `AWS::S3::Object` and `Values` of an array of `arn:aws:s3` or specific S3 bucket ARNs
+  # DUPE - redundant with aws-120
+  # - id: darkbit-aws-121
+  #   title: S3 Object Level Logging to CloudTrail For Read Events Should Be Enabled
+  #   description: By default, CloudTrail trails don't log data events for S3 object-level API operations such as `GetObject`, `DeleteObject`, and `PutObject`. Enabling object-level logging will help you meet certain compliance requirements, perform comprehensive security analysis, monitor specific patterns of user behavior, or take immediate actions on any object-level S3 API activity using Amazon CloudWatch Events.
+  #   remediation: |-
+  #     In the AWS Console, visit [https://console.aws.amazon.com/cloudtrail/#/trails](https://console.aws.amazon.com/cloudtrail/#/trails), select the desired trail, click `Edit` on the `Data events : S3` section, and ensure the `Data Events` checkbox is selected.  Then save changes.
+  #   validation: |-
+  #     List the event selectors associated with each CloudTrail and ensure they are not empty and return a `Type` of `AWS::S3::Object` and `Values` of an array of `arn:aws:s3` or specific S3 bucket ARNs
 
-      ```
-      for region in $(aws ec2 describe-regions --query Regions[].RegionName --output text); do 
-        for trail in $(aws cloudtrail list-trails --region $region --query Trails[*].Name --output text); do 
-          aws cloudtrail get-event-selectors --region $region --trail-name $trail --query EventSelectors[*].DataResources[]; 
-        done;
-      done
-      ```
-    impact: 3
-    effort: 6
-    platform: AWS
-    category: Security, Identity, and Compliance
-    resource: S3
-    nodes:
-      - PLACEHOLDER
-    refs:
-      - text: CloudTrail Data Event Logging
-        url: https://docs.aws.amazon.com/AmazonS3/latest/user-guide/enable-cloudtrail-events.html
-    public: true
-    tags:
-      - cis:
-          - aws-cis1.3
-          - aws-cis1.3-level2
-          - aws-cis1.3-3
-          - aws-cis1.3-3.11
-      - aws-cfg:
-          - aws-cfg-cloudtrail-s3-dataevents-enabled
-      - pci-dss-3.2.1:
-          - pci-dss-3.2.1-10.3.1
-          - pci-dss-3.2.1-10.3.2
-          - pci-dss-3.2.1-10.3.3
-          - pci-dss-3.2.1-10.3.4
-          - pci-dss-3.2.1-10.3.5
-          - pci-dss-3.2.1-10.3.6
-      - nist-csf:
-          - nist-csf-PR.DS-5
-          - nist-csf-DE.AE-3
-          - nist-csf-DE.AE-4
-          - nist-csf-DE.CM-1
-          - nist-csf-DE.CM-3
-          - nist-csf-DE.CM-6
-          - nist-csf-DE.CM-7
-      - nist-800-53-rev4:
-          - nist-800-53-rev4-AC-2(g)
-          - nist-800-53-rev4-AU-2(a)(d)
-          - nist-800-53-rev4-AU-3
-          - nist-800-53-rev4-AU-12(a)(c)
-      - nist-800-171:
-          - nist-800-171-3.1.12
-          - nist-800-171-3.13.1
-          - nist-800-171-3.14.6
-          - nist-800-171-3.14.7
-          - nist-800-171-3.3.1
-          - nist-800-171-3.3.2
-      - hipaa:
-          - hipaa-164.308(a)(1)(ii)(D)
-          - hipaa-164.308(a)(3)(ii)(A)
-          - hipaa-164.308(a)(6)(ii)
-          - hipaa-164.312(b)
-          - hipaa-164.312(e)(2)(i)
-      - fedramp-moderate:
-          - fedramp-moderate-AC-2(g)
-          - fedramp-moderate-AU-2(a)(d)
-          - fedramp-moderate-AU-3
-          - fedramp-moderate-AU-12(a)(c)
-      - fedramp-low:
-          - fedramp-low-AC-2
-      - cmmc-level5:
-          - cmmc-level5-AU.2.041
-          - cmmc-level5-AU.2.042
-          - cmmc-level5-SI.2.217
-          - cmmc-level5-AC.3.018
-          - cmmc-level5-AU.5.055
-          - cmmc-level5-SI.5.223
-      - cmmc-level4:
-          - cmmc-level4-AU.2.041
-          - cmmc-level4-AU.2.042
-          - cmmc-level4-SI.2.217
-          - cmmc-level4-AC.3.018
-      - cmmc-level3:
-          - cmmc-level3-AU.2.041
-          - cmmc-level3-AU.2.042
-          - cmmc-level3-SI.2.217
-          - cmmc-level3-AC.3.018
-      - cmmc-level2:
-          - cmmc-level2-AU.2.041
-          - cmmc-level2-AU.2.042
-          - cmmc-level2-SI.2.217
-      - aws-wa-security:
-          - aws-wa-security-SEC-4
-      - aws
+  #     ```
+  #     for region in $(aws ec2 describe-regions --query Regions[].RegionName --output text); do 
+  #       for trail in $(aws cloudtrail list-trails --region $region --query Trails[*].Name --output text); do 
+  #         aws cloudtrail get-event-selectors --region $region --trail-name $trail --query EventSelectors[*].DataResources[]; 
+  #       done;
+  #     done
+  #     ```
+  #   impact: 3
+  #   effort: 6
+  #   platform: AWS
+  #   category: Security, Identity, and Compliance
+  #   resource: S3
+  #   nodes:
+  #     - PLACEHOLDER
+  #   refs:
+  #     - text: CloudTrail Data Event Logging
+  #       url: https://docs.aws.amazon.com/AmazonS3/latest/user-guide/enable-cloudtrail-events.html
+  #   public: true
+  #   tags:
+  #     - cis:
+  #         - aws-cis1.3
+  #         - aws-cis1.3-level2
+  #         - aws-cis1.3-3
+  #         - aws-cis1.3-3.11
+  #     - aws-cfg:
+  #         - aws-cfg-cloudtrail-s3-dataevents-enabled
+  #     - pci-dss-3.2.1:
+  #         - pci-dss-3.2.1-10.3.1
+  #         - pci-dss-3.2.1-10.3.2
+  #         - pci-dss-3.2.1-10.3.3
+  #         - pci-dss-3.2.1-10.3.4
+  #         - pci-dss-3.2.1-10.3.5
+  #         - pci-dss-3.2.1-10.3.6
+  #     - nist-csf:
+  #         - nist-csf-PR.DS-5
+  #         - nist-csf-DE.AE-3
+  #         - nist-csf-DE.AE-4
+  #         - nist-csf-DE.CM-1
+  #         - nist-csf-DE.CM-3
+  #         - nist-csf-DE.CM-6
+  #         - nist-csf-DE.CM-7
+  #     - nist-800-53-rev4:
+  #         - nist-800-53-rev4-AC-2(g)
+  #         - nist-800-53-rev4-AU-2(a)(d)
+  #         - nist-800-53-rev4-AU-3
+  #         - nist-800-53-rev4-AU-12(a)(c)
+  #     - nist-800-171:
+  #         - nist-800-171-3.1.12
+  #         - nist-800-171-3.13.1
+  #         - nist-800-171-3.14.6
+  #         - nist-800-171-3.14.7
+  #         - nist-800-171-3.3.1
+  #         - nist-800-171-3.3.2
+  #     - hipaa:
+  #         - hipaa-164.308(a)(1)(ii)(D)
+  #         - hipaa-164.308(a)(3)(ii)(A)
+  #         - hipaa-164.308(a)(6)(ii)
+  #         - hipaa-164.312(b)
+  #         - hipaa-164.312(e)(2)(i)
+  #     - fedramp-moderate:
+  #         - fedramp-moderate-AC-2(g)
+  #         - fedramp-moderate-AU-2(a)(d)
+  #         - fedramp-moderate-AU-3
+  #         - fedramp-moderate-AU-12(a)(c)
+  #     - fedramp-low:
+  #         - fedramp-low-AC-2
+  #     - cmmc-level5:
+  #         - cmmc-level5-AU.2.041
+  #         - cmmc-level5-AU.2.042
+  #         - cmmc-level5-SI.2.217
+  #         - cmmc-level5-AC.3.018
+  #         - cmmc-level5-AU.5.055
+  #         - cmmc-level5-SI.5.223
+  #     - cmmc-level4:
+  #         - cmmc-level4-AU.2.041
+  #         - cmmc-level4-AU.2.042
+  #         - cmmc-level4-SI.2.217
+  #         - cmmc-level4-AC.3.018
+  #     - cmmc-level3:
+  #         - cmmc-level3-AU.2.041
+  #         - cmmc-level3-AU.2.042
+  #         - cmmc-level3-SI.2.217
+  #         - cmmc-level3-AC.3.018
+  #     - cmmc-level2:
+  #         - cmmc-level2-AU.2.041
+  #         - cmmc-level2-AU.2.042
+  #         - cmmc-level2-SI.2.217
+  #     - aws-wa-security:
+  #         - aws-wa-security-SEC-4
+  #     - aws
   - id: darkbit-aws-122
     title: Network ACLs Should Not Allow Access to Administrative Ports From All Hosts
     description: Network Access Control Lists (NACLs) provide stateless network traffic filtering of both ingress and egress packets as they traverse a subnet in a VPC, and they can complement the filtering of Security Group rules by filtering certain types of traffic "early".  The recommendation is to allow ingress access to `tcp/22` and `tcp/3389` from specific IPs/Ranges instead of `0.0.0.0/0` using NACLs so that a misconfiguration of a Security Group does not expose a system accidentally.
