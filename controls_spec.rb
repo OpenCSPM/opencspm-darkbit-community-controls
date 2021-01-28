@@ -312,6 +312,7 @@ end
 control_id = 'darkbit-aws-51'
 opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
+  # only consider regions with running EC2 instances 'active'
   q = %(
     MATCH (i:AWS_EC2_INSTANCE)
     RETURN DISTINCT i.region AS region,
@@ -323,16 +324,20 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
     MATCH (t:AWS_CLOUDTRAIL_TRAIL)
     RETURN t.name AS name,
            t.home_region AS region,
+           t.include_global_service_events AS include_global,
            t.is_multi_region_trail AS is_multi_region,
-           t.account AS account,
-           t.is_organization_trail AS org_trail
+           t.account AS account
   )
   trails = graphdb.query(q).mapped_results
 
   regions.each do |region|
+    multi_region_trails_enabled = trails.filter { |t| t.region == region.region && t.account == region.account && t.is_multi_region == 'true' }.all?
+    global_service_events_enabled = trails.filter { |t| t.region == region.region && t.account == region.account && t.include_global == 'true' }.any?
+
     describe "arn:aws::#{region.region}:#{region.account}", opts do
-      it 'should have CloudTrail enabled' do
-        expect(trails.filter { |t| t.region == region.region && t.account == region.account && t.is_multi_region }.any?).to eq(true)
+      it 'should have multi-region CloudTrail enabled with at least one organizational trail and ' do
+        expect(multi_region_trails_enabled).to eq(true)
+        expect(global_service_events_enabled).to eq(true)
       end
     end
   end
