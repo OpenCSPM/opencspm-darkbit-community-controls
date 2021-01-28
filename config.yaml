@@ -1396,9 +1396,25 @@ controls:
       to have log digests delivered to your S3 bucket to verify that your log files
       did not change after CloudTrail delivered them.
     validation: |-
-      Run `aws cloudtrail describe-trails --region us-east-1 --query 'trailList[*]' --output json --no-include-shadow-trails | jq -r '.[] | "(.TrailARN) (.IsOrganizationTrail)"'` in each region and ensure at least one is `true`.
+      Run the following command in each region and ensure **at least one** is `true`.
+      
+      ```
+      aws cloudtrail describe-trails \
+        --region <region> \
+        --query 'trailList[*]' \
+        --output json \
+        --no-include-shadow-trails | jq -r '.[] | "\(.TrailARN) \(.IncludeGlobalServiceEvents)"'
+      ```
 
-      Run `aws cloudtrail describe-trails --region us-east-1 --query 'trailList[*]' --output json --no-include-shadow-trails | jq -r '.[] | "(.TrailARN) (.IsMultiRegionTrail)"'` and ensure each one is `true`.
+      Run the following command in each region and ensure **each one** is `true`. 
+      
+      ```
+      aws cloudtrail describe-trails \
+        --region <region> \
+        --query 'trailList[*]' \
+        --output json \
+        --no-include-shadow-trails | jq -r '.[] | "\(.TrailARN) \(.IsMultiRegionTrail)"'
+      ```
     impact: 8
     effort: 2
     platform: AWS
