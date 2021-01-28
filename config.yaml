@@ -1409,7 +1409,7 @@ controls:
     refs:
       - text: AWS CloudTrail
         url: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-create-and-update-a-trail.html
-      - text: AWS CloudTrail Log File Valiation
+      - text: AWS CloudTrail Log File Validation
         url: https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-log-file-validation-intro.html
     public: true
     tags:
