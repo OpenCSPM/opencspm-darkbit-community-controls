@@ -491,10 +491,24 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
 end
 
 control_id = 'darkbit-aws-111'
+opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %(
+    MATCH (u:AWS_IAM_USER)
+    RETURN u.name AS name,
+           u.access_key_1_last_rotated AS key_1_last_rotated,
+           u.access_key_2_last_rotated AS key_2_last_rotated
+  )
+  users = graphdb.query(q).mapped_results
+  users.each do |user|
+    key_1_rotated = Time.parse(user.key_1_last_rotated) rescue Time.now.utc # rubocop:disable Style/RescueModifier
+    key_2_rotated = Time.parse(user.key_2_last_rotated) rescue Time.now.utc # rubocop:disable Style/RescueModifier
+
+    describe user.name, opts do
+      it 'should have not have old access keys' do
+        expect(key_1_rotated).to be > 90.days.ago
+        expect(key_2_rotated).to be > 90.days.ago
+      end
     end
   end
 end

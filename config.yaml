@@ -1963,7 +1963,12 @@ controls:
       - aws
   - id: darkbit-aws-111
     title: AWS Access Keys Should Be Rotated Every 90 Days
-    description: AWS Access Keys are used to make programmatic requests to AWS APIs, and they are commonly stored on developer and administrator workstation disks, CI/CD systems, and baked into applications.  Periodic rotation of all keys can reduce the time window available for leaked or stolen credentials to be valid, and it helps identify places where keys are "hardcoded" into applications and system configuration.
+    description: |
+      AWS Access Keys are used to make programmatic requests to AWS APIs, and they are 
+      commonly stored on developer and administrator workstation disks, CI/CD systems, 
+      and baked into applications.  Periodic rotation of all keys can reduce the time 
+      window available for leaked or stolen credentials to be valid, and it helps 
+      identify places where keys are "hardcoded" into applications and system configuration.
     remediation: |-
       Create a second access key.
 
@@ -1995,7 +2000,7 @@ controls:
     category: Identity and Access Management
     resource: IAM
     nodes:
-      - PLACEHOLDER
+      - AWS_IAM_USER
     refs:
       - text: Finding Unused AWS Credentials
         url: https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_finding-unused.html
