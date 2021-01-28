@@ -610,8 +610,8 @@ opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": tr
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %(
     MATCH (b:AWS_S3_BUCKET)
-      RETURN b.name AS name,
-             b.is_public AS is_public
+    RETURN b.name AS name,
+            b.is_public AS is_public
     )
   buckets = graphdb.query(q).mapped_results
 
