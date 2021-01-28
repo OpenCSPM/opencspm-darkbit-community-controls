@@ -123,6 +123,7 @@ end
 
 ## TODO: map relationship to account and check across accounts
 control_id = 'darkbit-aws-17'
+opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %(
     MATCH (p:AWS_IAM_MANAGED_POLICY)
@@ -131,7 +132,7 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   )
   policies = graphdb.query(q).mapped_results
   policies.each do |policy|
-    describe policy.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe policy.name, opts do
       it 'should have at least one policy attachment' do
         expect(policy.attachment_count.to_i).to be >= 1
       end
@@ -149,10 +150,18 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
 end
 
 control_id = 'darkbit-aws-20'
+opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %(
+    MATCH (u:AWS_IAM_USER)-[]-(p:AWS_IAM_POLICY)
+    RETURN u.name AS name
+  )
+  users = graphdb.query(q).mapped_results
+  users.each do |user|
+    describe user.name, opts do
+      it 'should not have inline or managed policies directly attached' do
+        expect(user).to be nil
+      end
     end
   end
 end

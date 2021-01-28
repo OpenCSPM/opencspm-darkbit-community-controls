@@ -594,18 +594,23 @@ controls:
       applicable groups, and then remove the inline and directly attached policies from
       the IAM user.
     validation:
-      Run `for i in $(aws iam list-users --query 'Users[*].UserName' --output
-      text); do POLS="$(aws iam list-user-policies --user-name $i --query 'PolicyNames[*]'
-      --output text)"; ATT="$(aws iam list-attached-user-policies --user-name $i --query
-      'AttachedPolicies[*].PolicyArn' --output text)";echo "$i $POLS $ATT"; done` and
-      ensure each user has no entries listed.
+      Run the following command and ensure each user has no entries listed.
+      
+      ```
+      for i in $(aws iam list-users --query 'Users[*].UserName' --output text)
+        do POLS="$(aws iam list-user-policies --user-name $i --query 'PolicyNames[*]' --output text)"
+        ATT="$(aws iam list-attached-user-policies --user-name $i --query 'AttachedPolicies[*].PolicyArn' --output text)"
+        echo "$i $POLS $ATT"
+      done
+      ```
     impact: 2
     effort: 5
     platform: AWS
     category: Identity and Access Management
     resource: IAM
     nodes:
-      - PLACEHOLDER
+      - AWS_IAM_USER
+      - AWS_IAM_POLICY
     refs:
       - text: IAM Best Practicies
         url: http://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#use-groups-for-permissions
