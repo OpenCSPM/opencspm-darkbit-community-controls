@@ -615,19 +615,41 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
 end
 
 control_id = 'darkbit-aws-118'
+opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %(
+    MATCH (t:AWS_CLOUDTRAIL_TRAIL)
+    RETURN t.name AS name,
+           t.cloud_watch_logs_log_group_arn AS cloudwatch_arn,
+           t.latest_delivery_attempt_succeeded AS last_delivery,
+           t.time_logging_stopped AS logging_stopped
+  )
+  trails = graphdb.query(q).mapped_results
+  trails.each do |trail|
+    describe trail.name, opts do
+      it 'should be integrated with CloudWatch Logs' do
+        expect(trail.cloudwatch_arn).to_not be(nil)
+        expect(trail.last_delivery).to_not be(nil) # 24hrs may be too short of an interval, so just check for not nil
+        expect(trail.logging_stopped).to eq('')
+      end
     end
   end
 end
 
 control_id = 'darkbit-aws-119'
+opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %(
+    MATCH (t:AWS_CLOUDTRAIL_TRAIL)
+    RETURN t.name AS name,
+           t.kms_key_id AS kms_key
+  )
+  trails = graphdb.query(q).mapped_results
+  trails.each do |trail|
+    describe trail.name, opts do
+      it 'should be encrypted at rest with a KMS key' do
+        expect(trail.kms_key).to_not be(nil)
+      end
     end
   end
 end
