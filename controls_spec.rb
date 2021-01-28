@@ -339,10 +339,35 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
 end
 
 control_id = 'darkbit-aws-58'
+opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  # only consider regions with running EC2 instances 'active'
+  q = %(
+    MATCH (i:AWS_EC2_INSTANCE)
+    RETURN DISTINCT i.region AS region,
+                    i.account AS account
+  )
+  regions = graphdb.query(q).mapped_results
+
+  q = %(
+    MATCH (r:AWS_CONFIG_CONFIGURATION_RECORDER)
+    RETURN r.name AS name,
+           r.all_supported AS all_supported,
+           r.last_status AS last_status,
+           r.recording AS is_on,
+           r.include_global_resource_types AS include_global,
+           r.account AS account,
+           r.region AS region
+  )
+  recorders = graphdb.query(q).mapped_results
+
+  regions.each do |region|
+    enabled_and_running = recorders.filter { |r| r.region == region.region && r.account == region.account && r.is_on == 'true' && r.include_global == 'true' && r.last_status == 'SUCCESS' }.any?
+
+    describe "arn:aws::#{region.region}:#{region.account}", opts do
+      it 'should have Config Service enabled and running for all resource types (including global)' do
+        expect(enabled_and_running).to eq(true)
+      end
     end
   end
 end
@@ -356,12 +381,12 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
            t.name AS logging_type
   )
   clusters_map = graphdb.query(q).mapped_results
-  clusters = clusters_map.map { |c| c.name }.uniq
+  clusters = clusters_map.map(&:name).uniq
 
   clusters.each do |cluster|
     describe cluster, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have full audit logging enabled' do
-        enabled = clusters_map.filter { |c| c.name == cluster }.map { |l| l.logging_enabled }.all?('true')
+        enabled = clusters_map.filter { |c| c.name == cluster }.map(&:logging_enabled).all?('true')
         expect(enabled).to eq(true)
       end
     end

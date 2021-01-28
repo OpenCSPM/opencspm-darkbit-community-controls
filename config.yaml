@@ -1521,14 +1521,15 @@ controls:
       account and ensure that it is delivering logs.
     validation:
       In each region, run `aws configservice get-status --region <region>`
-      and verify the `recorder` is `ON` and the `last status` is `SUCCESS`.
+      and verify the `recorder` is `ON` and the `last status` is `SUCCESS` 
+      and `include_global_resource_types is `true`.
     impact: 5
     effort: 2
     platform: AWS
     category: Management and Governance
     resource: Config
     nodes:
-      - PLACEHOLDER
+      - AWS_CONFIG_CONFIGURATION_RECORDER
     refs:
       - text: AWS Config
         url: https://aws.amazon.com/config
