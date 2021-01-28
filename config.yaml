@@ -2094,12 +2094,19 @@ controls:
       - aws
   - id: darkbit-aws-114
     title: AWS IAM Access Analyzer Should Be Enabled
-    description: AWS IAM Access Analyzer helps organizations identify the resources in the organization and accounts that are shared with an external entity.  For each instance, Access Analyzer generates a finding with information about the access and the external principal to allow administrators to determine if the access is unintended and a security risk.
+    description: |
+      AWS IAM Access Analyzer helps organizations identify the resources in the 
+      organization and accounts that are shared with an external entity.  For 
+      each instance, Access Analyzer generates a finding with information about 
+      the access and the external principal to allow administrators to determine 
+      if the access is unintended and a security risk.
     remediation: |-
       Enable Access Analyzer for the intended region(s).
 
       ```
-      aws accessanalyzer create-analyzer --analyzer-name <name> --type <ACCOUNT|ORGANIZATION>
+      aws accessanalyzer create-analyzer \
+        --analyzer-name <name> \
+        --type <ACCOUNT|ORGANIZATION>
       ```
     validation: |-
       Run the following command against each region and check for an `ACTIVE` status.
@@ -2113,7 +2120,7 @@ controls:
     category: Identity and Access Management
     resource: IAM
     nodes:
-      - PLACEHOLDER
+      - AWS_ACCESS_ANALYZER
     refs:
       - text: Using AWS IAM Access Analyzer
         url: https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html

@@ -528,10 +528,32 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
 end
 
 control_id = 'darkbit-aws-114'
+opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  # only consider regions with running EC2 instances 'active'
+  q = %(
+    MATCH (i:AWS_EC2_INSTANCE)
+    RETURN DISTINCT i.region AS region,
+                    i.account AS account
+  )
+  regions = graphdb.query(q).mapped_results
+
+  q = %(
+    MATCH (a:AWS_ACCESS_ANALYZER)
+    RETURN a.name AS name,
+           a.region AS region,
+           a.account AS account,
+           a.status AS status
+  )
+  analyzers = graphdb.query(q).mapped_results
+
+  regions.each do |region|
+    analyzer_enabled = analyzers.filter { |a| a.region == region.region && a.account == region.account && a.status == 'ACTIVE' }.any?
+
+    describe "arn:aws::#{region.region}:#{region.account}", opts do
+      it 'should have Access Analyzer enabled ' do
+        expect(analyzer_enabled).to eq(true)
+      end
     end
   end
 end
