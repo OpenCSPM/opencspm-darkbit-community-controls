@@ -141,10 +141,19 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
 end
 
 control_id = 'darkbit-aws-18'
+opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  describe 'Placeholder', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-    it 'should not have a placeholder configuration' do
-      expect(true).to eq(true)
+  q = %(
+    MATCH (p:AWS_IAM_POLICY)--(s:AWS_IAM_POLICY_STATEMENT)-[a:HAS_ACTION]-(r:AWS_IAM_POLICY_RESOURCE)
+    WHERE a.action = '*' AND a.effect = 'Allow' AND r.name = '*'
+    RETURN p.name AS name
+  )
+  policies = graphdb.query(q).mapped_results
+  policies.each do |policy|
+    describe policy.name, opts do
+      it 'manually created admin IAM policies should not exist' do
+        expect(policy.name).to eq('arn:aws:iam::aws:policy/AdministratorAccess')
+      end
     end
   end
 end
