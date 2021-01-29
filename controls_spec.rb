@@ -609,25 +609,17 @@ control_id = 'darkbit-aws-117'
 opts = { control_pack: control_pack, control_id: control_id, "#{control_id}": true }
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %(
-    MATCH (b:AWS_S3_BUCKET)
-    RETURN b.name AS name,
-            b.is_public AS is_public
-    )
-  buckets = graphdb.query(q).mapped_results
-
-  q = %(
     MATCH (t:AWS_CLOUDTRAIL_TRAIL)
+    OPTIONAL MATCH (t:AWS_CLOUDTRAIL_TRAIL)-[:LOGS_TO_BUCKET]-(b:AWS_S3_BUCKET)
     RETURN t.name AS name,
-           t.s3_bucket_name AS s3_bucket_name
+           b.is_public AS bucket_is_public
   )
   trails = graphdb.query(q).mapped_results
 
   trails.each do |trail|
-    trail_bucket = buckets.find { |b| b.name == "arn:aws:s3:::#{trail.s3_bucket_name}" }
-
     describe trail.name, opts do
-      it 'should have S3 object level logging to CloudTrail enabled' do
-        expect(trail_bucket&.is_public).to eq('false')
+      it 'should be logging to a non-public S3 bucket' do
+        expect(trail.bucket_is_public).to eq('false')
       end
     end
   end
