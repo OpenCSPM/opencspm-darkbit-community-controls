@@ -914,7 +914,7 @@ controls:
           - aws-wa-security-SEC-4
       - aws
   - id: darkbit-aws-31
-    title: EKS Cluster API Should Not Be Public
+    title: Amazon EKS Cluster API Should Not Be Public
     description: |-
       Amazon EKS creates an endpoint for the managed Kubernetes API server that you use to communicate with your cluster using kubectl, for example. By default, this API server endpoint is public to the internet, and access to the API server is secured using a combination of AWS Identity and Access Management (IAM), native Kubernetes Role Based Access Control (RBAC), and an access control list that allows any IP address (0.0.0.0/0) to connect.
 
@@ -2872,7 +2872,7 @@ controls:
           - aws-wa-security-SEC-5
       - aws
   - id: darkbit-aws-125
-    title: EKS Nodegroups Should Run EKS Optimized AMIs
+    title: Amazon EKS Nodegroups Should Run EKS Optimized AMIs
     description: |
       Unless a specific technical restriction requires a custom AMI, the recommendation is to leverage the operational expertise, configuration hardening, stability fixes, and security updates of EKS optimized AMIs maintained by AWS.  Many Kubernetes-specific settings for worker node security posture have already been implemented and tested, and this can reduce the amount of work necessary to validate your EKS cluster posture against industry-accepted security benchmarks like the CIS EKS Benchmark.
     remediation: |
@@ -2928,7 +2928,7 @@ controls:
           - nist-csf-todo
       - aws
   - id: darkbit-aws-126
-    title: EKS Clusters Should Have The Latest CNI Plugin That Supports Network Policy
+    title: Amazon EKS Clusters Should Have The Latest CNI Plugin That Supports Network Policy
     description: |
       By default in Kubernetes, all Pods can communicate with each other
       by IP and egress to any subnet (including the Internet) unless routing or firewalls
@@ -2973,7 +2973,7 @@ controls:
           - nist-csf-todo
       - aws
   - id: darkbit-aws-128
-    title: EKS Clusters Should Have Read-Only Permissions to ECR Registries
+    title: Amazon EKS Clusters Should Have Read-Only Permissions to ECR Registries
     description: |
       In production clusters, container images should not be built inside the cluster, so "push" or write access to ECR is not necessary. Therefore, the worker instance's IAM Role should have read-only access to ECR sufficient for reading or "pulling" container images to follow the principle of least privilege and prevent a malicious actor with access to the instance credentials from being able to insert a backdoor into container images hosted in ECR.
     remediation: |
@@ -3028,7 +3028,7 @@ controls:
           - nist-csf-todo
       - aws
   - id: darkbit-aws-129
-    title: EKS Worker Nodes Should Not Have Public IP Addresses
+    title: Amazon EKS Worker Nodes Should Not Have Public IP Addresses
     description: EKS worker nodes can be configured to only have private IP addresses assigned, and this forces direct network access to exposed services running on the nodes such as SSH to originate from systems within the internal network instead of any system on the Internet. Even if a security group or network access control list was modified to grant ingress access to a public system, the 1-to-1 NAT would not be in place to route that traffic inbound to the system.  Note that egress access must then be granted via Cloud NAT or your own NAT gateway, and the cluster has to be configured with a private master IP range and IP aliasing must be enabled.
     remediation: |-
       When defining the VPC and subnet topology for EKS clusters, most use cases require the "public and private" subnet approach where the worker nodes are provisioned in private subnets and load balancers/ingress resources are deployed in the public subnets.  To modify a subnet to avoid mapping a public IP to EC2 instances as they launch, run the following command on all desired subnets.
@@ -3066,7 +3066,7 @@ controls:
           - nist-csf-todo
       - aws
   - id: darkbit-aws-130
-    title: EKS HTTPS Load Balancers Should Use TLS Certificates
+    title: Amazon EKS HTTPS Load Balancers Should Use TLS Certificates
     description: To ease the administrative overhead of managing TLS certificates and their expiration dates, using AWS Certificate Manager (ACM) in conjunction with all Network and Application Load Balancers exposed via EKS Services is strongly recommended.
     remediation: |-
       When creating a service of type `LoadBalancer`, ensure that the annotations in that service description includes `service.beta.kubernetes.io/aws-load-balancer-ssl-cert: <arn_of_acm_cert>`.  When using an ingress controller, this annotation is typically on the single load balancer shared by all ingress resources.
@@ -3104,7 +3104,7 @@ controls:
           - nist-csf-todo
       - aws
   - id: darkbit-aws-131
-    title: EKS Clusters Should Manage RBAC Users With AWS IAM Authenticator
+    title: Amazon EKS Clusters Should Manage RBAC Users With AWS IAM Authenticator
     description: Amazon EKS clusters can be integrated with native AWS IAM to map IAM users and/or Roles to RBAC groups inside the cluster.  Combined with a kubeconfig that leverages the current IAM identity's bearer token, this can allow for near seamless use of kubectl while taking advantage of all the account protections available for IAM users such as session duration and multi-factor authentication.
     remediation: |-
       By default, EKS clusters have this integration enabled in the control plane.  Administrators should leverage kubectl to modify the `aws-auth` `ConfigMap` in the `kube-system` `namespace` to include the IAM Roles and/or Users that should be mapped to a given RBAC `group`.  From there, standard RBAC `ClusterRoleBinding` and `RoleBinding` resources can be created that give permissions to those `group` names.  Note that `groups` named `system:*` should not be assigned to users as they can add to confusion when reviewing the Kubernetes audit logs shipped to CloudWatch.
