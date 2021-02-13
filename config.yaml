@@ -4686,7 +4686,6 @@ controls:
         url: https://cloud.google.com/resource-manager/docs/organization-policy/restricting-service-accounts
       - text: Disable service account key creation
         url: https://console.cloud.google.com/iam-admin/orgpolicies/iam-disableServiceAccountKeyCreation
-      - text:
     public: true
     tags:
       - google cloud
