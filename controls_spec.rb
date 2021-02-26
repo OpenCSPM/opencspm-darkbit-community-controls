@@ -1,7 +1,8 @@
+# frozen_string_literal: true
+
 require 'yaml'
 require 'date'
 
-NARF ||= 'No affected resources found'.freeze
 config_file = YAML.load(File.read(File.expand_path(File.dirname(__FILE__) + '/config.yaml')))
 control_pack = config_file['id']
 titles = Hash[config_file['controls'].map { |control| [control['id'], control['title']] }]
@@ -113,7 +114,9 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   )
   users = graphdb.query(q).mapped_results
   users.each do |user|
-    describe user.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    hardware_token = (user.mfa_active == 'true') && (user.virtual_mfa_token == 'false')
+    describe "#{user.name} (hardware token: #{hardware_token})", control_pack: control_pack, control_id: control_id,
+                                                                 "#{control_id}": true do
       it 'should have a hardware MFA device' do
         expect(user.mfa_active).to eq('true')
         expect(user.virtual_mfa_token).to_not eq('true')
@@ -259,15 +262,13 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %(
     MATCH (b:AWS_S3_BUCKET)
     RETURN b.name AS name,
-           b.logging_bucket_target AS bucket_target,
-           b.logging_bucket_prefix AS bucket_prefix
+           b.logging_bucket AS logging_bucket
   )
   buckets = graphdb.query(q).mapped_results
   buckets.each do |bucket|
     describe bucket.name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
       it 'should have access control logging enabled' do
-        expect(bucket.bucket_target).to_not be nil
-        expect(bucket.bucket_prefix).to_not be nil
+        expect(bucket.logging_bucket.to_s).to_not eq('false')
       end
     end
   end

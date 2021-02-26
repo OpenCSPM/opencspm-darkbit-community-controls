@@ -1070,8 +1070,7 @@ controls:
 
       ```
       for i in $(aws s3api list-buckets --query 'Buckets[*].Name' --output text); do
-        echo $i
-        aws s3api get-bucket-logging --bucket $i
+        echo $i: $(aws s3api get-bucket-logging --bucket $i | grep TargetBucket)
       done
       ```
     impact: 8
