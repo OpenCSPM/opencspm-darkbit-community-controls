@@ -65,7 +65,8 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   )
   policies = graphdb.query(q).mapped_results
   policies.each do |policy|
-    describe "arn:aws:::#{policy.account}/account", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe "arn:aws:::#{policy.account}/account", control_pack: control_pack, control_id: control_id,
+                                                    "#{control_id}": true do
       it 'should have adequate IAM password policy' do
         expect(policy.minimum_password_length.to_i).to be >= 14
         expect(policy.require_symbols).to eq('true')
@@ -208,7 +209,8 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   )
   vpcs = graphdb.query(q).mapped_results
   vpcs.each do |vpc|
-    describe "arn:aws:ec2:#{vpc.region}:#{vpc.account}:#{vpc.name}", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+    describe "arn:aws:ec2:#{vpc.region}:#{vpc.account}:#{vpc.name}", control_pack: control_pack,
+                                                                     control_id: control_id, "#{control_id}": true do
       it 'should flow logging enabled' do
         expect(vpc.flow_log_status).to eq('ACTIVE')
         expect(vpc.flow_log_id).to_not be nil
@@ -349,8 +351,12 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   trails = graphdb.query(q).mapped_results
 
   regions.each do |region|
-    multi_region_trails_enabled = trails.filter { |t| t.region == region.region && t.account == region.account && t.is_multi_region == 'true' }.all?
-    global_service_events_enabled = trails.filter { |t| t.region == region.region && t.account == region.account && t.include_global == 'true' }.any?
+    multi_region_trails_enabled = trails.filter do |t|
+      t.region == region.region && t.account == region.account && t.is_multi_region == 'true'
+    end.all?
+    global_service_events_enabled = trails.filter do |t|
+      t.region == region.region && t.account == region.account && t.include_global == 'true'
+    end.any?
 
     describe "arn:aws::#{region.region}:#{region.account}", opts do
       it 'should have multi-region CloudTrail enabled with at least one organizational trail and ' do
@@ -385,7 +391,9 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   recorders = graphdb.query(q).mapped_results
 
   regions.each do |region|
-    enabled_and_running = recorders.filter { |r| r.region == region.region && r.account == region.account && r.is_on == 'true' && r.include_global == 'true' && r.last_status == 'SUCCESS' }.any?
+    enabled_and_running = recorders.filter do |r|
+      r.region == region.region && r.account == region.account && r.is_on == 'true' && r.include_global == 'true' && r.last_status == 'SUCCESS'
+    end.any?
 
     describe "arn:aws::#{region.region}:#{region.account}", opts do
       it 'should have Config Service enabled and running for all resource types (including global)' do
@@ -566,7 +574,9 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   analyzers = graphdb.query(q).mapped_results
 
   regions.each do |region|
-    analyzer_enabled = analyzers.filter { |a| a.region == region.region && a.account == region.account && a.status == 'ACTIVE' }.any?
+    analyzer_enabled = analyzers.filter do |a|
+      a.region == region.region && a.account == region.account && a.status == 'ACTIVE'
+    end.any?
 
     describe "arn:aws::#{region.region}:#{region.account}", opts do
       it 'should have Access Analyzer enabled ' do
@@ -697,7 +707,9 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   trails = graphdb.query(q).mapped_results
 
   regions.each do |region|
-    s3_object_level_logging = trails.filter { |t| t.region == region.region && t.account == region.account && t.read_write_type == 'All' && t.data_resource_type == 'AWS::S3::Object' && t.data_resource.start_with?('arn:aws:s3') }.any?
+    s3_object_level_logging = trails.filter do |t|
+      t.region == region.region && t.account == region.account && t.read_write_type == 'All' && t.data_resource_type == 'AWS::S3::Object' && t.data_resource.start_with?('arn:aws:s3')
+    end.any?
 
     describe "arn:aws::#{region.region}:#{region.account}", opts do
       it 'should have S3 object level logging to CloudTrail enabled' do
@@ -1551,7 +1563,8 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   identities = graphdb.query(q).mapped_results
   if identities.length > 0
     identities.each do |identity|
-      describe "#{identity.identity_name}: #{identity.role_name}->#{identity.resource_name}", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe "#{identity.identity_name}: #{identity.role_name}->#{identity.resource_name}",
+               control_pack: control_pack, control_id: control_id, "#{control_id}": true do
         it 'should not be bound to admin, editor, or owner roles' do
           expect(identity.resource_name).to be_nil
         end
@@ -1578,7 +1591,8 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   identities = graphdb.query(q).mapped_results
   if identities.length > 0
     identities.each do |identity|
-      describe "#{identity.identity_name} -> #{identity.resource_name}", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe "#{identity.identity_name} -> #{identity.resource_name}", control_pack: control_pack,
+                                                                         control_id: control_id, "#{control_id}": true do
         it 'should not have iam admin and serviceaccountuser to the same resource' do
           expect(identity.resource_name).to be_nil
         end
@@ -1605,7 +1619,8 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   if identities.length > 0
     identities.each do |identity|
       if identity.project_name.nil? && identity.project_role.nil? && identity.key_name.nil? && identity.key_role.nil?
-        describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        describe 'No affected resources found', control_pack: control_pack, control_id: control_id,
+                                                "#{control_id}": true do
           it 'should not have allUsers access to projects or cryptokeys' do
             expect(true).to eq(true)
           end
@@ -1667,7 +1682,8 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   identities = graphdb.query(q).mapped_results
   if identities.length > 0
     identities.each do |identity|
-      describe "#{identity.identity_name}: [#{identity.resource_name}]", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe "#{identity.identity_name}: [#{identity.resource_name}]", control_pack: control_pack,
+                                                                         control_id: control_id, "#{control_id}": true do
         it 'should not have kms admin and cryptokeyencrypeterdecrypter to the same resource' do
           expect(identity.resource_name).to be_nil
         end
@@ -1693,7 +1709,8 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   projects = graphdb.query(q).mapped_results
   if projects.length > 0
     projects.each do |project|
-      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id,
+                                                                   "#{control_id}": true do
         it 'should have a full logsink' do
           expect(project.sink_name).not_to be_nil
           expect(project.sink_filter).to be_nil
@@ -1753,7 +1770,8 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   projects = graphdb.query(q).mapped_results
   if projects.length > 0
     projects.each do |project|
-      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id,
+                                                                   "#{control_id}": true do
         it 'should have a logsink filter for ownership changes' do
           expect(project.sink_filter).not_to be_nil
         end
@@ -1782,7 +1800,8 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   projects = graphdb.query(q).mapped_results
   if projects.length > 0
     projects.each do |project|
-      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id,
+                                                                   "#{control_id}": true do
         it 'should have a logsink filter for audit changes' do
           expect(project.sink_filter).not_to be_nil
         end
@@ -1812,7 +1831,8 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   projects = graphdb.query(q).mapped_results
   if projects.length > 0
     projects.each do |project|
-      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id,
+                                                                   "#{control_id}": true do
         it 'should have a logsink filter for firewall rule changes' do
           expect(project.sink_filter).not_to be_nil
         end
@@ -1842,7 +1862,8 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   projects = graphdb.query(q).mapped_results
   if projects.length > 0
     projects.each do |project|
-      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id,
+                                                                   "#{control_id}": true do
         it 'should have a logsink filter for route changes' do
           expect(project.sink_filter).not_to be_nil
         end
@@ -1875,7 +1896,8 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   projects = graphdb.query(q).mapped_results
   if projects.length > 0
     projects.each do |project|
-      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id,
+                                                                   "#{control_id}": true do
         it 'should have a logsink filter for network changes' do
           expect(project.sink_filter).not_to be_nil
         end
@@ -1904,7 +1926,8 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   projects = graphdb.query(q).mapped_results
   if projects.length > 0
     projects.each do |project|
-      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id,
+                                                                   "#{control_id}": true do
         it 'should have a logsink filter for storage IAM changes' do
           expect(project.sink_filter).not_to be_nil
         end
@@ -1931,7 +1954,8 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   projects = graphdb.query(q).mapped_results
   if projects.length > 0
     projects.each do |project|
-      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id,
+                                                                   "#{control_id}": true do
         it 'should have a logsink filter for cloudsql instance changes' do
           expect(project.sink_filter).not_to be_nil
         end
@@ -2293,7 +2317,8 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   if identities.length > 0
     identities.each do |identity|
       if identity.project_name.nil? && identity.project_role.nil? && identity.bucket_name.nil? && identity.bucket_role.nil?
-        describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        describe 'No affected resources found', control_pack: control_pack, control_id: control_id,
+                                                "#{control_id}": true do
           it 'should not have all(Authenticated)Users access to projects or buckets' do
             expect(true).to eq(true)
           end
@@ -2653,7 +2678,8 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   if identities.length > 0
     identities.each do |identity|
       if identity.project_name.nil? && identity.project_role.nil? && identity.dataset_name.nil? && identity.dataset_role.nil?
-        describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+        describe 'No affected resources found', control_pack: control_pack, control_id: control_id,
+                                                "#{control_id}": true do
           it 'should not have all(Authenticated)Users access to projects or datasets' do
             expect(true).to eq(true)
           end
@@ -2712,7 +2738,8 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   projects = graphdb.query(q).mapped_results
   if projects.length > 0
     projects.each do |project|
-      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id,
+                                                                   "#{control_id}": true do
         it 'should have container vulnerability scanning enabled' do
           expect(project.svc_name).not_to be_nil
         end
@@ -2799,7 +2826,9 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   nodepools = graphdb.query(q).mapped_results
   if nodepools.length > 0
     pools = nodepools.group_by { |r| r[:nodepool_name] }.map do |np, perms|
-      writable = (perms.select { |k, _v| (k['scope_name'].nil? && k['perm_name'] == 'storage.objects.create') }.length > 0) || false
+      writable = (perms.select do |k, _v|
+                    (k['scope_name'].nil? && k['perm_name'] == 'storage.objects.create')
+                  end.length > 0) || false
       [np, writable]
     end
     pools.each do |nodepool|
@@ -3112,7 +3141,8 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   projects = graphdb.query(q).mapped_results
   if projects.length > 0
     projects.each do |project|
-      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+      describe "#{project.project_name}[#{project.display_name}]", control_pack: control_pack, control_id: control_id,
+                                                                   "#{control_id}": true do
         it 'should have a logsink filter for custom role changes' do
           expect(project.sink_filter).not_to be_nil
         end
