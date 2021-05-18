@@ -1206,6 +1206,7 @@ control_id = 'darkbit-gcp-41'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   q = %s(
     MATCH (c:GCP_CONTAINER_NODEPOOL)-[r:HAS_SERVICEACCOUNT]->(gi:GCP_IDENTITY)
+    WHERE gi.resource_data_email IS NOT NULL
     RETURN c.name as name, gi.resource_data_email as sa_name
   )
   gkenodepools = graphdb.query(q).mapped_results
@@ -2246,30 +2247,30 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-control_id = 'darkbit-gcp-91'
-RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  q = %s(
-    MATCH (instance:GCP_COMPUTE_INSTANCE)-[:HAS_DISK]->(disk:GCP_COMPUTE_DISK)
-    WHERE instance.resource_data_labels_goog_gke_node IS NULL
-    RETURN instance.name as instance_name, disk.resource_data_diskEncryptionKey_kmsKeyName as key_name
-  )
-  gcenodes = graphdb.query(q).mapped_results
-  if gcenodes.length > 0
-    gcenodes.each do |node|
-      describe node.instance_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-        it 'should have CMEK configured for its disks' do
-          expect(node.key_name).not_to be_nil
-        end
-      end
-    end
-  else
-    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-      it 'should have CMEK configured for its disks' do
-        expect(true).to eq(true)
-      end
-    end
-  end
-end
+#control_id = 'darkbit-gcp-91'
+#RSpec.describe "[#{control_id}] #{titles[control_id]}" do
+#  q = %s(
+#    MATCH (instance:GCP_COMPUTE_INSTANCE)-[:HAS_DISK]->(disk:GCP_COMPUTE_DISK)
+#    WHERE instance.resource_data_labels_goog_gke_node IS NULL
+#    RETURN instance.name as instance_name, disk.resource_data_diskEncryptionKey_kmsKeyName as key_name
+#  )
+#  gcenodes = graphdb.query(q).mapped_results
+#  if gcenodes.length > 0
+#    gcenodes.each do |node|
+#      describe node.instance_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+#        it 'should have CMEK configured for its disks' do
+#          expect(node.key_name).not_to be_nil
+#        end
+#      end
+#    end
+#  else
+#    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+#      it 'should have CMEK configured for its disks' do
+#        expect(true).to eq(true)
+#      end
+#    end
+#  end
+#end
 
 control_id = 'darkbit-gcp-92'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
@@ -3053,30 +3054,30 @@ RSpec.describe "[#{control_id}] #{titles[control_id]}" do
   end
 end
 
-control_id = 'darkbit-gcp-124'
-RSpec.describe "[#{control_id}] #{titles[control_id]}" do
-  q = %s(
-    MATCH (np:GCP_CONTAINER_NODEPOOL)
-    WHERE NOT np.name ENDS WITH '/default-pool'
-    RETURN np.name as nodepool_name, np.resource_data_config_sandboxConfig_sandboxType as sandbox_type
-  )
-  nps = graphdb.query(q).mapped_results
-  if nps.length > 0
-    nps.each do |np|
-      describe np.nodepool_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-        it 'should have gVisor enabled' do
-          expect(np.sandbox_type).to eq('GVISOR')
-        end
-      end
-    end
-  else
-    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
-      it 'should have gVisor enabled' do
-        expect(true).to eq(true)
-      end
-    end
-  end
-end
+#control_id = 'darkbit-gcp-124'
+#RSpec.describe "[#{control_id}] #{titles[control_id]}" do
+#  q = %s(
+#    MATCH (np:GCP_CONTAINER_NODEPOOL)
+#    WHERE NOT np.name ENDS WITH '/default-pool'
+#    RETURN np.name as nodepool_name, np.resource_data_config_sandboxConfig_sandboxType as sandbox_type
+#  )
+#  nps = graphdb.query(q).mapped_results
+#  if nps.length > 0
+#    nps.each do |np|
+#      describe np.nodepool_name, control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+#        it 'should have gVisor enabled' do
+#          expect(np.sandbox_type).to eq('GVISOR')
+#        end
+#      end
+#    end
+#  else
+#    describe 'No affected resources found', control_pack: control_pack, control_id: control_id, "#{control_id}": true do
+#      it 'should have gVisor enabled' do
+#        expect(true).to eq(true)
+#      end
+#    end
+#  end
+#end
 
 control_id = 'darkbit-gcp-125'
 RSpec.describe "[#{control_id}] #{titles[control_id]}" do
